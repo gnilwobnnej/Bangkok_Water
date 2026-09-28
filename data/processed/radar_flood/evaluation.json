@@ -1,0 +1,329 @@
+{
+  "label_rule": {
+    "flooded_pct_at_least": 50,
+    "dry_pct_below": 10
+  },
+  "baseline": "seasonal",
+  "results": [
+    {
+      "date": "2026-08-20",
+      "scope": "Greater Bangkok",
+      "n_cells": 761320,
+      "flooded_share": 0.0027045132138916617,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8242443710278369,
+          "pr_auc": 0.008064205645302388
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8469331985390393,
+          "pr_auc": 0.01075562220364338
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5664548853684924,
+          "pr_auc": 0.0029819271393648223
+        }
+      }
+    },
+    {
+      "date": "2026-08-20",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 349113,
+      "flooded_share": 0.001374912993787112,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8844480233033973,
+          "pr_auc": 0.007953878855724697
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8483613738037803,
+          "pr_auc": 0.005666533070373323
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5848451487667548,
+          "pr_auc": 0.001724379162233425
+        }
+      }
+    },
+    {
+      "date": "2026-08-22",
+      "scope": "Greater Bangkok",
+      "n_cells": 844111,
+      "flooded_share": 0.0014559696532801965,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8189543711827916,
+          "pr_auc": 0.004623621622735397
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.7912963474426343,
+          "pr_auc": 0.00376561742047109
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5490747122600821,
+          "pr_auc": 0.001560427383268832
+        }
+      }
+    },
+    {
+      "date": "2026-08-22",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 352176,
+      "flooded_share": 0.0010960428876470856,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8925864825738742,
+          "pr_auc": 0.0075861098743301185
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8281713676921302,
+          "pr_auc": 0.0038300129438375795
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5445414878194377,
+          "pr_auc": 0.001249283705739939
+        }
+      }
+    },
+    {
+      "date": "2026-08-26",
+      "scope": "Greater Bangkok",
+      "n_cells": 842394,
+      "flooded_share": 0.0017165364425672548,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8303814233039285,
+          "pr_auc": 0.005941133201515019
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.7717967404776555,
+          "pr_auc": 0.0039644762925693695
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5014863338287039,
+          "pr_auc": 0.0016218537880333206
+        }
+      }
+    },
+    {
+      "date": "2026-08-26",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 351845,
+      "flooded_share": 0.0011908652957978655,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8834289702750391,
+          "pr_auc": 0.006829921978916505
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8379732051670775,
+          "pr_auc": 0.004065979875117596
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5296238284367678,
+          "pr_auc": 0.0012884650425772134
+        }
+      }
+    },
+    {
+      "date": "2026-09-03",
+      "scope": "Greater Bangkok",
+      "n_cells": 842256,
+      "flooded_share": 0.0017453125890465606,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.822833716364948,
+          "pr_auc": 0.005370391339213855
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8074857837510029,
+          "pr_auc": 0.004769918164633034
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5426847575942504,
+          "pr_auc": 0.0018367016949130022
+        }
+      }
+    },
+    {
+      "date": "2026-09-03",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 351972,
+      "flooded_share": 0.001133612901026218,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8918021011290703,
+          "pr_auc": 0.006643657022600292
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8698901571809452,
+          "pr_auc": 0.005319451111771364
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.579247216664137,
+          "pr_auc": 0.0013515082413634557
+        }
+      }
+    },
+    {
+      "date": "2026-09-07",
+      "scope": "Greater Bangkok",
+      "n_cells": 838653,
+      "flooded_share": 0.002563634781011932,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8263565506889159,
+          "pr_auc": 0.008268291961075582
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.7909159126995722,
+          "pr_auc": 0.006643328029185585
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.524779316739686,
+          "pr_auc": 0.002599014599835101
+        }
+      }
+    },
+    {
+      "date": "2026-09-07",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 351518,
+      "flooded_share": 0.001493522380077265,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8977135129407682,
+          "pr_auc": 0.008870698602372662
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8309447712496777,
+          "pr_auc": 0.004686401375260352
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5282726219068539,
+          "pr_auc": 0.0015828606254249672
+        }
+      }
+    },
+    {
+      "date": "2026-09-15",
+      "scope": "Greater Bangkok",
+      "n_cells": 837856,
+      "flooded_share": 0.003511343237978841,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.843069235614471,
+          "pr_auc": 0.01255995053434734
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.7708940705742495,
+          "pr_auc": 0.007899583076605255
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.49363895292165766,
+          "pr_auc": 0.0032194010510236803
+        }
+      }
+    },
+    {
+      "date": "2026-09-15",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 350626,
+      "flooded_share": 0.0028377815678244057,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.908895552179355,
+          "pr_auc": 0.01781296141675081
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8552811981861307,
+          "pr_auc": 0.011557229973953217
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5292262931217548,
+          "pr_auc": 0.002804901294435858
+        }
+      }
+    },
+    {
+      "date": "2026-09-19",
+      "scope": "Greater Bangkok",
+      "n_cells": 837201,
+      "flooded_share": 0.004452933047141607,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.8461936243004986,
+          "pr_auc": 0.01822624447035027
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.7444688339976709,
+          "pr_auc": 0.00893269283327685
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.46725241215452123,
+          "pr_auc": 0.0039012396247257975
+        }
+      }
+    },
+    {
+      "date": "2026-09-19",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 350709,
+      "flooded_share": 0.0030395570116535362,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.9077944896450504,
+          "pr_auc": 0.019017961366984894
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8345927708229695,
+          "pr_auc": 0.010428042151352651
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.5158579896764064,
+          "pr_auc": 0.0029688538026008205
+        }
+      }
+    },
+    {
+      "date": "2026-09-27",
+      "scope": "Greater Bangkok",
+      "n_cells": 822164,
+      "flooded_share": 0.023126772760665756,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.9081526796105591,
+          "pr_auc": 0.1535727876890712
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.6950117404161631,
+          "pr_auc": 0.03567158807101395
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.3859611671831686,
+          "pr_auc": 0.017010366570968
+        }
+      }
+    },
+    {
+      "date": "2026-09-27",
+      "scope": "Bangkok (50 districts)",
+      "n_cells": 345774,
+      "flooded_share": 0.01874924083360808,
+      "methods": {
+        "ML model (trained on 2011)": {
+          "roc_auc": 0.9395989316813794,
+          "pr_auc": 0.16176745456857772
+        },
+        "Bathtub simulation": {
+          "roc_auc": 0.8320049808086412,
+          "pr_auc": 0.06367638026083258
+        },
+        "Risk index (default weights)": {
+          "roc_auc": 0.4715434209573587,
+          "pr_auc": 0.016370939600378488
+        }
+      }
+    }
+  ]
+}

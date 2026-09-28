@@ -1,4 +1,4 @@
-data/
+data/raw/
 __pycache__/
 *.pyc
 .streamlit/secrets.toml

@@ -1,0 +1,402 @@
+{
+  "25": {
+    "district_id": 25,
+    "district": "Lat Krabang",
+    "buildings": 76013,
+    "dropped_small": 13843,
+    "seconds": 59.6,
+    "tall_share": 0.0003815136884480286
+  },
+  "30": {
+    "district_id": 30,
+    "district": "Pathum Wan",
+    "buildings": 9786,
+    "dropped_small": 0,
+    "seconds": 12.0,
+    "tall_share": 0.06907827508685878
+  },
+  "1": {
+    "district_id": 1,
+    "district": "Bang Bon",
+    "buildings": 54610,
+    "dropped_small": 0,
+    "seconds": 56.1,
+    "tall_share": 0.00020142830983336385
+  },
+  "2": {
+    "district_id": 2,
+    "district": "Bang Kapi",
+    "buildings": 54500,
+    "dropped_small": 0,
+    "seconds": 38.3,
+    "tall_share": 0.006990825688073394
+  },
+  "3": {
+    "district_id": 3,
+    "district": "Bang Khae",
+    "buildings": 75116,
+    "dropped_small": 13789,
+    "seconds": 50.6,
+    "tall_share": 0.0009318920070291283
+  },
+  "4": {
+    "district_id": 4,
+    "district": "Bang Khen",
+    "buildings": 72958,
+    "dropped_small": 0,
+    "seconds": 46.8,
+    "tall_share": 0.0014391841881630527
+  },
+  "5": {
+    "district_id": 5,
+    "district": "Bang Kho Laem",
+    "buildings": 23741,
+    "dropped_small": 0,
+    "seconds": 21.5,
+    "tall_share": 0.004296364938292405
+  },
+  "6": {
+    "district_id": 6,
+    "district": "Bang Khun Thian",
+    "buildings": 79981,
+    "dropped_small": 15493,
+    "seconds": 72.6,
+    "tall_share": 0.0008376989535014566
+  },
+  "7": {
+    "district_id": 7,
+    "district": "Bang Na",
+    "buildings": 34592,
+    "dropped_small": 0,
+    "seconds": 37.2,
+    "tall_share": 0.007024745605920444
+  },
+  "8": {
+    "district_id": 8,
+    "district": "Bang Phlat",
+    "buildings": 31660,
+    "dropped_small": 0,
+    "seconds": 38.5,
+    "tall_share": 0.003474415666456096
+  },
+  "9": {
+    "district_id": 9,
+    "district": "Bang Rak",
+    "buildings": 9588,
+    "dropped_small": 0,
+    "seconds": 13.3,
+    "tall_share": 0.03890279516061744
+  },
+  "10": {
+    "district_id": 10,
+    "district": "Bang Sue",
+    "buildings": 35740,
+    "dropped_small": 0,
+    "seconds": 19.4,
+    "tall_share": 0.003945159485170677
+  },
+  "11": {
+    "district_id": 11,
+    "district": "Bangkok Noi",
+    "buildings": 34728,
+    "dropped_small": 0,
+    "seconds": 25.7,
+    "tall_share": 0.00322506334945865
+  },
+  "12": {
+    "district_id": 12,
+    "district": "Bangkok Yai",
+    "buildings": 21042,
+    "dropped_small": 0,
+    "seconds": 15.4,
+    "tall_share": 0.0012831479897348161
+  },
+  "13": {
+    "district_id": 13,
+    "district": "Bueng Kum",
+    "buildings": 50282,
+    "dropped_small": 0,
+    "seconds": 37.0,
+    "tall_share": 0.0005966349787200191
+  },
+  "14": {
+    "district_id": 14,
+    "district": "Chatuchak",
+    "buildings": 63626,
+    "dropped_small": 0,
+    "seconds": 50.6,
+    "tall_share": 0.010608870587495678
+  },
+  "15": {
+    "district_id": 15,
+    "district": "Chom Thong",
+    "buildings": 55809,
+    "dropped_small": 0,
+    "seconds": 45.5,
+    "tall_share": 0.0006450572488308337
+  },
+  "16": {
+    "district_id": 16,
+    "district": "Din Daeng",
+    "buildings": 23572,
+    "dropped_small": 0,
+    "seconds": 21.6,
+    "tall_share": 0.013066349906668929
+  },
+  "18": {
+    "district_id": 18,
+    "district": "Dusit",
+    "buildings": 20075,
+    "dropped_small": 0,
+    "seconds": 21.3,
+    "tall_share": 0.005130759651307597
+  },
+  "19": {
+    "district_id": 19,
+    "district": "Huai Khwang",
+    "buildings": 29599,
+    "dropped_small": 0,
+    "seconds": 20.2,
+    "tall_share": 0.018919558093178825
+  },
+  "20": {
+    "district_id": 20,
+    "district": "Khan Na Yao",
+    "buildings": 39895,
+    "dropped_small": 0,
+    "seconds": 30.4,
+    "tall_share": 0.0010527635041985212
+  },
+  "21": {
+    "district_id": 21,
+    "district": "Khlong Sam Wa",
+    "buildings": 81449,
+    "dropped_small": 14612,
+    "seconds": 74.0,
+    "tall_share": 2.4555243158295377e-05
+  },
+  "22": {
+    "district_id": 22,
+    "district": "Khlong San",
+    "buildings": 17902,
+    "dropped_small": 0,
+    "seconds": 16.5,
+    "tall_share": 0.006256284214054296
+  },
+  "23": {
+    "district_id": 23,
+    "district": "Khlong Toei",
+    "buildings": 22387,
+    "dropped_small": 0,
+    "seconds": 17.0,
+    "tall_share": 0.026265243221512486
+  },
+  "24": {
+    "district_id": 24,
+    "district": "Lak Si",
+    "buildings": 41445,
+    "dropped_small": 0,
+    "seconds": 61.3,
+    "tall_share": 0.005211726384364821
+  },
+  "26": {
+    "district_id": 26,
+    "district": "Lat Phrao",
+    "buildings": 49190,
+    "dropped_small": 0,
+    "seconds": 30.0,
+    "tall_share": 0.0002236226875381175
+  },
+  "27": {
+    "district_id": 27,
+    "district": "Min Buri",
+    "buildings": 66404,
+    "dropped_small": 0,
+    "seconds": 40.4,
+    "tall_share": 0.0006776700198783206
+  },
+  "28": {
+    "district_id": 28,
+    "district": "Nong Chok",
+    "buildings": 87532,
+    "dropped_small": 17203,
+    "seconds": 56.9,
+    "tall_share": 0.000102819540282411
+  },
+  "29": {
+    "district_id": 29,
+    "district": "Nong Khaem",
+    "buildings": 59605,
+    "dropped_small": 0,
+    "seconds": 45.1,
+    "tall_share": 0.00013421692811005787
+  },
+  "31": {
+    "district_id": 31,
+    "district": "Phasi Charoen",
+    "buildings": 46409,
+    "dropped_small": 0,
+    "seconds": 33.5,
+    "tall_share": 0.0017022560279256178
+  },
+  "32": {
+    "district_id": 32,
+    "district": "Phaya Thai",
+    "buildings": 21120,
+    "dropped_small": 0,
+    "seconds": 16.0,
+    "tall_share": 0.01875
+  },
+  "33": {
+    "district_id": 33,
+    "district": "Phra Khanong",
+    "buildings": 31968,
+    "dropped_small": 0,
+    "seconds": 31.4,
+    "tall_share": 0.004222972972972973
+  },
+  "34": {
+    "district_id": 34,
+    "district": "Phra Nakhon",
+    "buildings": 11612,
+    "dropped_small": 0,
+    "seconds": 11.9,
+    "tall_share": 0.003961419221495005
+  },
+  "35": {
+    "district_id": 35,
+    "district": "Pom Prap Sattru Phai",
+    "buildings": 7727,
+    "dropped_small": 0,
+    "seconds": 7.9,
+    "tall_share": 0.011129804581338165
+  },
+  "36": {
+    "district_id": 36,
+    "district": "Prawet",
+    "buildings": 73132,
+    "dropped_small": 11861,
+    "seconds": 47.5,
+    "tall_share": 0.001353716567302959
+  },
+  "37": {
+    "district_id": 37,
+    "district": "Rat Burana",
+    "buildings": 27200,
+    "dropped_small": 0,
+    "seconds": 19.0,
+    "tall_share": 0.0011029411764705882
+  },
+  "38": {
+    "district_id": 38,
+    "district": "Ratchathewi",
+    "buildings": 13029,
+    "dropped_small": 0,
+    "seconds": 12.9,
+    "tall_share": 0.05602885869982347
+  },
+  "39": {
+    "district_id": 39,
+    "district": "Sai Mai",
+    "buildings": 77690,
+    "dropped_small": 0,
+    "seconds": 51.4,
+    "tall_share": 0.00028317672802162443
+  },
+  "40": {
+    "district_id": 40,
+    "district": "Samphanthawong",
+    "buildings": 4976,
+    "dropped_small": 0,
+    "seconds": 7.6,
+    "tall_share": 0.009445337620578777
+  },
+  "41": {
+    "district_id": 41,
+    "district": "Saphan Sung",
+    "buildings": 51212,
+    "dropped_small": 0,
+    "seconds": 41.4,
+    "tall_share": 0.00023432008123096148
+  },
+  "42": {
+    "district_id": 42,
+    "district": "Sathon",
+    "buildings": 18396,
+    "dropped_small": 0,
+    "seconds": 15.1,
+    "tall_share": 0.013970428353989997
+  },
+  "43": {
+    "district_id": 43,
+    "district": "Suan Luang",
+    "buildings": 53794,
+    "dropped_small": 0,
+    "seconds": 33.4,
+    "tall_share": 0.004182622597315686
+  },
+  "44": {
+    "district_id": 44,
+    "district": "Taling Chan",
+    "buildings": 63303,
+    "dropped_small": 0,
+    "seconds": 35.1,
+    "tall_share": 0.00034753487196499374
+  },
+  "45": {
+    "district_id": 45,
+    "district": "Thawi Watthana",
+    "buildings": 59676,
+    "dropped_small": 0,
+    "seconds": 38.9,
+    "tall_share": 1.675715530531537e-05
+  },
+  "46": {
+    "district_id": 46,
+    "district": "Thon Buri",
+    "buildings": 25770,
+    "dropped_small": 0,
+    "seconds": 27.7,
+    "tall_share": 0.0033760186263096623
+  },
+  "47": {
+    "district_id": 47,
+    "district": "Thung Khru",
+    "buildings": 51929,
+    "dropped_small": 0,
+    "seconds": 35.7,
+    "tall_share": 0.0005777118758304608
+  },
+  "48": {
+    "district_id": 48,
+    "district": "Vadhana",
+    "buildings": 30641,
+    "dropped_small": 0,
+    "seconds": 21.4,
+    "tall_share": 0.03482262328252994
+  },
+  "49": {
+    "district_id": 49,
+    "district": "Wang Thonglang",
+    "buildings": 43387,
+    "dropped_small": 0,
+    "seconds": 30.4,
+    "tall_share": 0.003779934081637357
+  },
+  "50": {
+    "district_id": 50,
+    "district": "Yan Nawa",
+    "buildings": 23898,
+    "dropped_small": 0,
+    "seconds": 21.6,
+    "tall_share": 0.009833458866850782
+  },
+  "17": {
+    "district_id": 17,
+    "district": "Don Mueang",
+    "buildings": 56565,
+    "dropped_small": 0,
+    "seconds": 24.6,
+    "tall_share": 0.0022452046318394768
+  }
+}

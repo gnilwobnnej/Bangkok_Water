@@ -11,6 +11,11 @@ python scripts/prepare_data.py   # one-time download (~60 MB) → data/processed
 streamlit run app.py
 ```
 
+## Deploying (Streamlit Community Cloud)
+`data/processed/` (~235 MB) is committed on purpose so the hosted app has its data; `data/raw/` stays local.
+To refresh (e.g. new radar passes), re-run the prepare scripts locally, then commit and push `data/processed/`.
+`shap` is only needed for `train_model.py`: `pip install shap` before training.
+
 ## Features
 - **Water-level slider (0–3 m)** with live flooded area, people affected, and districts at risk
 - **"Bathtub + connectivity" flood model**: low ground floods only if linked to a river/canal (toggleable)

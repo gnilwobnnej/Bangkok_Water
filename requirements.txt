@@ -14,7 +14,7 @@ requests>=2.31
 # Machine-learning model (scripts/prepare_ml_data.py, scripts/train_model.py)
 lightgbm>=4.0
 scikit-learn>=1.3
-shap>=0.44            # training only; the app reads precomputed SHAP values
+# shap>=0.44          # training only (train_model.py); the app reads precomputed SHAP values
 # earthengine-api     # optional: only for prepare_ml_data.py --gee-project
 # 3D buildings tab
 pydeck>=0.8

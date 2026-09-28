@@ -1,0 +1,300 @@
+{
+  "generated": "2026-09-27T23:54:29Z",
+  "method": {
+    "water_db": -18.0,
+    "change_db": -3.0,
+    "permanent_pct": 50,
+    "baseline": "seasonal",
+    "speckle_radius_m": 30,
+    "scale_m": 20
+  },
+  "passes": [
+    {
+      "date": "2026-08-20",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-07-30",
+      "baseline_to": "2025-09-11",
+      "baseline_scenes": 12,
+      "flooded_km2": 17.337491989135742,
+      "flooded_km2_bangkok": 3.9720988273620605,
+      "coverage_pct": 83.97654428671692,
+      "coverage_pct_bangkok": 97.49951355069624
+    },
+    {
+      "date": "2026-08-22",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-01",
+      "baseline_to": "2025-09-13",
+      "baseline_scenes": 6,
+      "flooded_km2": 9.998226165771484,
+      "flooded_km2_bangkok": 2.8070647716522217,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-08-26",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-05",
+      "baseline_to": "2025-09-17",
+      "baseline_scenes": 14,
+      "flooded_km2": 12.872146606445312,
+      "flooded_km2_bangkok": 3.310523271560669,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-09-03",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-13",
+      "baseline_to": "2025-09-25",
+      "baseline_scenes": 6,
+      "flooded_km2": 13.051506996154785,
+      "flooded_km2_bangkok": 3.073350191116333,
+      "coverage_pct": 99.99989349930402,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-09-07",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-17",
+      "baseline_to": "2025-09-29",
+      "baseline_scenes": 14,
+      "flooded_km2": 19.88634490966797,
+      "flooded_km2_bangkok": 4.089834690093994,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-09-15",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-25",
+      "baseline_to": "2025-10-07",
+      "baseline_scenes": 6,
+      "flooded_km2": 23.2800350189209,
+      "flooded_km2_bangkok": 6.709183692932129,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-09-19",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-08-29",
+      "baseline_to": "2025-10-11",
+      "baseline_scenes": 14,
+      "flooded_km2": 26.702342987060547,
+      "flooded_km2_bangkok": 6.830069541931152,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-09-27",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline": "seasonal",
+      "baseline_from": "2025-09-06",
+      "baseline_to": "2025-10-19",
+      "baseline_scenes": 6,
+      "flooded_km2": 99.03146362304688,
+      "flooded_km2_bangkok": 32.12267303466797,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    }
+  ],
+  "rainfall": [
+    {
+      "date": "2026-08-15",
+      "mm": 7.6
+    },
+    {
+      "date": "2026-08-16",
+      "mm": 1.5
+    },
+    {
+      "date": "2026-08-17",
+      "mm": 10.3
+    },
+    {
+      "date": "2026-08-18",
+      "mm": 7.5
+    },
+    {
+      "date": "2026-08-19",
+      "mm": 3.3
+    },
+    {
+      "date": "2026-08-20",
+      "mm": 12.2
+    },
+    {
+      "date": "2026-08-21",
+      "mm": 5.1
+    },
+    {
+      "date": "2026-08-22",
+      "mm": 7.5
+    },
+    {
+      "date": "2026-08-23",
+      "mm": 20.3
+    },
+    {
+      "date": "2026-08-24",
+      "mm": 0.8
+    },
+    {
+      "date": "2026-08-25",
+      "mm": 15.1
+    },
+    {
+      "date": "2026-08-26",
+      "mm": 4.2
+    },
+    {
+      "date": "2026-08-27",
+      "mm": 9.4
+    },
+    {
+      "date": "2026-08-28",
+      "mm": 16.4
+    },
+    {
+      "date": "2026-08-29",
+      "mm": 24.8
+    },
+    {
+      "date": "2026-08-30",
+      "mm": 11.6
+    },
+    {
+      "date": "2026-08-31",
+      "mm": 11.5
+    },
+    {
+      "date": "2026-09-01",
+      "mm": 5.5
+    },
+    {
+      "date": "2026-09-02",
+      "mm": 6.6
+    },
+    {
+      "date": "2026-09-03",
+      "mm": 7.6
+    },
+    {
+      "date": "2026-09-04",
+      "mm": 0.3
+    },
+    {
+      "date": "2026-09-05",
+      "mm": 1.4
+    },
+    {
+      "date": "2026-09-06",
+      "mm": 16.3
+    },
+    {
+      "date": "2026-09-07",
+      "mm": 3.5
+    },
+    {
+      "date": "2026-09-08",
+      "mm": 14.6
+    },
+    {
+      "date": "2026-09-09",
+      "mm": 4.7
+    },
+    {
+      "date": "2026-09-10",
+      "mm": 13.1
+    },
+    {
+      "date": "2026-09-11",
+      "mm": 5.1
+    },
+    {
+      "date": "2026-09-12",
+      "mm": 13.5
+    },
+    {
+      "date": "2026-09-13",
+      "mm": 1.1
+    },
+    {
+      "date": "2026-09-14",
+      "mm": 4.9
+    },
+    {
+      "date": "2026-09-15",
+      "mm": 21.1
+    },
+    {
+      "date": "2026-09-16",
+      "mm": 13.3
+    },
+    {
+      "date": "2026-09-17",
+      "mm": 6.0
+    },
+    {
+      "date": "2026-09-18",
+      "mm": 23.3
+    },
+    {
+      "date": "2026-09-19",
+      "mm": 16.2
+    },
+    {
+      "date": "2026-09-20",
+      "mm": 11.1
+    },
+    {
+      "date": "2026-09-21",
+      "mm": 13.6
+    },
+    {
+      "date": "2026-09-22",
+      "mm": 7.0
+    },
+    {
+      "date": "2026-09-23",
+      "mm": 4.4
+    },
+    {
+      "date": "2026-09-24",
+      "mm": 17.9
+    },
+    {
+      "date": "2026-09-25",
+      "mm": 122.3
+    },
+    {
+      "date": "2026-09-26",
+      "mm": 43.5
+    },
+    {
+      "date": "2026-09-27",
+      "mm": 41.2
+    },
+    {
+      "date": "2026-09-28",
+      "mm": 32.0
+    }
+  ],
+  "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E"
+}

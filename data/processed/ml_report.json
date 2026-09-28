@@ -1,0 +1,514 @@
+{
+  "event": {
+    "id": "DFO_3850",
+    "source": "Global Flood Database (MODIS, 250 m)",
+    "began": "2011-08-05",
+    "ended": "2012-01-09"
+  },
+  "n_training_cells": 846343,
+  "flooded_share": 0.21075497759182743,
+  "excluded_features": [
+    "Population density (log)",
+    "Built-up land (%)"
+  ],
+  "cv": {
+    "block_m": 4000,
+    "folds": 5,
+    "summary": [
+      {
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6679124387185524,
+        "roc_auc_std": 0.01887021064751789,
+        "pr_auc": 0.28777418207570477,
+        "pr_auc_std": 0.029731691114671624
+      },
+      {
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.8669936152875077,
+        "roc_auc_std": 0.016204960700643055,
+        "pr_auc": 0.6691716493446267,
+        "pr_auc_std": 0.0451693997485137
+      },
+      {
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4477512061075478,
+        "roc_auc_std": 0.026475513715604207,
+        "pr_auc": 0.18138023860712277,
+        "pr_auc_std": 0.0247517991248537
+      }
+    ],
+    "folds_detail": [
+      {
+        "fold": 1,
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.8459781883288223,
+        "pr_auc": 0.6050959484398868
+      },
+      {
+        "fold": 1,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.42376625092153086,
+        "pr_auc": 0.1650567705268321
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6532961939830529,
+        "pr_auc": 0.2745972484453996
+      },
+      {
+        "fold": 2,
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.8535021285514165,
+        "pr_auc": 0.6435101611541425
+      },
+      {
+        "fold": 2,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.46828601776375456,
+        "pr_auc": 0.18603587201658212
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6856150728934887,
+        "pr_auc": 0.30914713923387144
+      },
+      {
+        "fold": 3,
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.8818568098700406,
+        "pr_auc": 0.7186867818323865
+      },
+      {
+        "fold": 3,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4236454796161718,
+        "pr_auc": 0.19987882169179982
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6442535039588047,
+        "pr_auc": 0.302049172773842
+      },
+      {
+        "fold": 4,
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.8742775409247724,
+        "pr_auc": 0.6975360408365577
+      },
+      {
+        "fold": 4,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.48209738976745686,
+        "pr_auc": 0.20793942502224705
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6861347534710556,
+        "pr_auc": 0.31153303414362377
+      },
+      {
+        "fold": 5,
+        "method": "ML model (LightGBM)",
+        "roc_auc": 0.879353408762487,
+        "pr_auc": 0.6810293144601596
+      },
+      {
+        "fold": 5,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.44096089246882464,
+        "pr_auc": 0.14799030377815267
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6702626692863605,
+        "pr_auc": 0.24154431578178698
+      }
+    ]
+  },
+  "features": [
+    {
+      "feature": "elevation",
+      "label": "Ground elevation",
+      "mean_abs_shap": 0.8403659463290672,
+      "direction": -0.7732846998435695,
+      "gain": 1195195.2759552002
+    },
+    {
+      "feature": "hand",
+      "label": "Height above nearest waterway",
+      "mean_abs_shap": 0.22879352545046858,
+      "direction": -0.7536131603265489,
+      "gain": 265233.5067129135
+    },
+    {
+      "feature": "relative_elevation",
+      "label": "Elevation vs. surroundings (1 km)",
+      "mean_abs_shap": 0.4379160814662229,
+      "direction": 0.8176490875798769,
+      "gain": 459609.4590559006
+    },
+    {
+      "feature": "slope",
+      "label": "Slope",
+      "mean_abs_shap": 0.10665235675339693,
+      "direction": 0.3310484509467777,
+      "gain": 275390.7491607666
+    },
+    {
+      "feature": "dist_waterway_m",
+      "label": "Distance to any river/canal",
+      "mean_abs_shap": 0.23318327577735226,
+      "direction": 0.8979915900665923,
+      "gain": 287398.50869083405
+    },
+    {
+      "feature": "dist_main_river_m",
+      "label": "Distance to Chao Phraya",
+      "mean_abs_shap": 0.4075529935970819,
+      "direction": -0.529432785164322,
+      "gain": 828443.0983982086
+    },
+    {
+      "feature": "cropland",
+      "label": "Cropland (%)",
+      "mean_abs_shap": 0.7616154399003574,
+      "direction": 0.9672110159782227,
+      "gain": 2176689.063606262
+    },
+    {
+      "feature": "water",
+      "label": "Open water (%)",
+      "mean_abs_shap": 0.18102424658217814,
+      "direction": 0.9447774350132089,
+      "gain": 587871.5674057007
+    },
+    {
+      "feature": "tree",
+      "label": "Tree cover (%)",
+      "mean_abs_shap": 0.07655806836909682,
+      "direction": -0.1940617054570738,
+      "gain": 144509.39866828918
+    },
+    {
+      "feature": "grassland",
+      "label": "Grassland (%)",
+      "mean_abs_shap": 0.13559780094783158,
+      "direction": 0.6596018820356664,
+      "gain": 218650.82008171082
+    },
+    {
+      "feature": "wetland",
+      "label": "Wetland (%)",
+      "mean_abs_shap": 0.015726532047019664,
+      "direction": -0.1604941760549734,
+      "gain": 25389.182105064392
+    }
+  ],
+  "districts": [
+    {
+      "district_id": 1,
+      "ml_score": 0.24890861509947615,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 99.79734008866372
+    },
+    {
+      "district_id": 2,
+      "ml_score": 0.202983209555337,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 99.30599369085174
+    },
+    {
+      "district_id": 3,
+      "ml_score": 0.18456469506544632,
+      "observed_2011_pct": 1.6086760054225033,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 4,
+      "ml_score": 0.16084295814598176,
+      "observed_2011_pct": 3.6067297581493163,
+      "observed_known_pct": 99.53945991207871
+    },
+    {
+      "district_id": 5,
+      "ml_score": 0.12086494192942299,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 81.28422100547536
+    },
+    {
+      "district_id": 6,
+      "ml_score": 0.5288487245173124,
+      "observed_2011_pct": 14.495037025366315,
+      "observed_known_pct": 66.58157913140779
+    },
+    {
+      "district_id": 7,
+      "ml_score": 0.283095077712678,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 96.43096140977025
+    },
+    {
+      "district_id": 8,
+      "ml_score": 0.056611731946042625,
+      "observed_2011_pct": 0.4767580452920143,
+      "observed_known_pct": 89.19206236711553
+    },
+    {
+      "district_id": 9,
+      "ml_score": 0.038435602342237335,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 90.9957627118644
+    },
+    {
+      "district_id": 10,
+      "ml_score": 0.06260799344337165,
+      "observed_2011_pct": 0.4153686396677051,
+      "observed_known_pct": 95.40951122853369
+    },
+    {
+      "district_id": 11,
+      "ml_score": 0.036076955156298794,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 94.38122332859174
+    },
+    {
+      "district_id": 12,
+      "ml_score": 0.03539787426676868,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 97.24517906336088
+    },
+    {
+      "district_id": 13,
+      "ml_score": 0.10856833580385616,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 99.40773644271701
+    },
+    {
+      "district_id": 14,
+      "ml_score": 0.078499456228308,
+      "observed_2011_pct": 0.42266543389248445,
+      "observed_known_pct": 99.42219304005253
+    },
+    {
+      "district_id": 15,
+      "ml_score": 0.061538927149653755,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 16,
+      "ml_score": 0.025710734809461757,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 17,
+      "ml_score": 0.2721454501782599,
+      "observed_2011_pct": 21.403385049365305,
+      "observed_known_pct": 98.97626803164262
+    },
+    {
+      "district_id": 18,
+      "ml_score": 0.0705354990056792,
+      "observed_2011_pct": 1.1725293132328307,
+      "observed_known_pct": 90.62618595825427
+    },
+    {
+      "district_id": 19,
+      "ml_score": 0.13570392003555104,
+      "observed_2011_pct": 0.6330783434450014,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 20,
+      "ml_score": 0.16881608066264567,
+      "observed_2011_pct": 0.27201632097925876,
+      "observed_known_pct": 99.39168638053397
+    },
+    {
+      "district_id": 21,
+      "ml_score": 0.4184031513130554,
+      "observed_2011_pct": 22.725384295803906,
+      "observed_known_pct": 99.81903864278982
+    },
+    {
+      "district_id": 22,
+      "ml_score": 0.032179559815459356,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 88.75651526433359
+    },
+    {
+      "district_id": 23,
+      "ml_score": 0.16351096099812673,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 84.49232778321907
+    },
+    {
+      "district_id": 24,
+      "ml_score": 0.08558385490003957,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 98.71309613928842
+    },
+    {
+      "district_id": 25,
+      "ml_score": 0.4056825061746381,
+      "observed_2011_pct": 13.460444890449908,
+      "observed_known_pct": 99.86637715049274
+    },
+    {
+      "district_id": 26,
+      "ml_score": 0.10231756256834068,
+      "observed_2011_pct": 0.24296416278598906,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 27,
+      "ml_score": 0.27968157247036673,
+      "observed_2011_pct": 4.020603805980827,
+      "observed_known_pct": 99.59387246170289
+    },
+    {
+      "district_id": 28,
+      "ml_score": 0.5025518008706512,
+      "observed_2011_pct": 31.265202396079143,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 29,
+      "ml_score": 0.2419145968179245,
+      "observed_2011_pct": 1.6022620169651272,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 30,
+      "ml_score": 0.11111977760785495,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 88.4302009777295
+    },
+    {
+      "district_id": 31,
+      "ml_score": 0.05011446268766541,
+      "observed_2011_pct": 0.47318611987381703,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 32,
+      "ml_score": 0.025551226000438663,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 96.9809568044589
+    },
+    {
+      "district_id": 33,
+      "ml_score": 0.2078089681872643,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 96.61237785016287
+    },
+    {
+      "district_id": 34,
+      "ml_score": 0.0387746869929477,
+      "observed_2011_pct": 1.2232415902140672,
+      "observed_known_pct": 80.08163265306122
+    },
+    {
+      "district_id": 35,
+      "ml_score": 0.019981382427949924,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 36,
+      "ml_score": 0.31547885901744116,
+      "observed_2011_pct": 1.1704462326261886,
+      "observed_known_pct": 98.59753165571405
+    },
+    {
+      "district_id": 37,
+      "ml_score": 0.13891881801695985,
+      "observed_2011_pct": 0.44709388971684055,
+      "observed_known_pct": 90.70631970260223
+    },
+    {
+      "district_id": 38,
+      "ml_score": 0.046715348389636195,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 39,
+      "ml_score": 0.23574230060008744,
+      "observed_2011_pct": 3.266430539157812,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 40,
+      "ml_score": 0.03451949959268102,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 64.07185628742515
+    },
+    {
+      "district_id": 41,
+      "ml_score": 0.2567629846723383,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 97.32818532818533
+    },
+    {
+      "district_id": 42,
+      "ml_score": 0.04510774557859518,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 94.18465227817745
+    },
+    {
+      "district_id": 43,
+      "ml_score": 0.2234868163898857,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 44,
+      "ml_score": 0.1120201220683947,
+      "observed_2011_pct": 0.18252616208323194,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 45,
+      "ml_score": 0.28881746201445896,
+      "observed_2011_pct": 4.982480129903427,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 46,
+      "ml_score": 0.05399052857834984,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 89.25531914893617
+    },
+    {
+      "district_id": 47,
+      "ml_score": 0.2541599522438115,
+      "observed_2011_pct": 0.3411572052401747,
+      "observed_known_pct": 99.38966499389664
+    },
+    {
+      "district_id": 48,
+      "ml_score": 0.05197217697273886,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 99.6103896103896
+    },
+    {
+      "district_id": 49,
+      "ml_score": 0.07164575466495464,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 100.0
+    },
+    {
+      "district_id": 50,
+      "ml_score": 0.15591331655350782,
+      "observed_2011_pct": 0.0,
+      "observed_known_pct": 83.85525400139178
+    }
+  ]
+}
