@@ -1,0 +1,21 @@
+streamlit>=1.30
+streamlit-folium>=0.15
+folium>=0.15
+geopandas>=0.14
+rasterio>=1.3
+shapely>=2.0
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+plotly>=5.18
+matplotlib>=3.7
+pillow>=10.0
+requests>=2.31
+# Machine-learning model (scripts/prepare_ml_data.py, scripts/train_model.py)
+lightgbm>=4.0
+scikit-learn>=1.3
+shap>=0.44            # training only; the app reads precomputed SHAP values
+# earthengine-api     # optional: only for prepare_ml_data.py --gee-project
+# 3D buildings tab
+pydeck>=0.8
+pyarrow>=12
