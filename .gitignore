@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 *.part
 recommendations.txt
+phase2_setup.txt

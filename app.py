@@ -8,6 +8,7 @@ import numpy as np
 import streamlit as st
 from streamlit_folium import st_folium
 
+from src import config as C
 from src.data_loader import load_study_area, missing_files
 from src.buildings import (
     available_districts, district_counts, impact_modes, load_building_grid, load_buildings, load_facilities,
@@ -58,23 +59,29 @@ def get_district_elevation():
     return district_mean(get_area(), get_area().dem, "elevation")
 
 
-@st.cache_resource
-def get_ml():
+def file_version(*paths) -> tuple:
+    """Modification times of data files. Passed to cached loaders so that new data (e.g. a pushed update)
+    is a cache miss even when the Streamlit process isn't restarted."""
+    return tuple(p.stat().st_mtime if p.exists() else None for p in paths)
+
+
+@st.cache_resource(max_entries=1)
+def get_ml(version: tuple):
     return load_ml()
 
 
-@st.cache_resource
-def get_radar():
+@st.cache_resource(max_entries=1)
+def get_radar(version: tuple):
     return load_summary()
 
 
-@st.cache_resource
-def get_radar_eval():
+@st.cache_resource(max_entries=1)
+def get_radar_eval(version: tuple):
     return load_evaluation()
 
 
-@st.cache_resource
-def get_radar_pass(date: str):
+@st.cache_resource(max_entries=32)
+def get_radar_pass(date: str, version: tuple):
     return load_pass(date)
 
 
@@ -101,8 +108,9 @@ def get_curve(connected: bool):
 
 area = get_area()
 factors = get_factors()
-ml = get_ml()
-radar = get_radar()
+ml = get_ml(file_version(C.ML_PROB_FILE, C.ML_REPORT_FILE))
+radar_version = file_version(C.RADAR_SUMMARY_FILE)
+radar = get_radar(radar_version)
 
 # ---------------- sidebar ----------------
 with st.sidebar:
@@ -167,7 +175,7 @@ table = (
 )
 if ml is not None:
     table = table.merge(ml.districts[["district_id", "ml_score", "observed_2011_pct"]], on="district_id")
-radar_pass = get_radar_pass(radar_date) if radar_date else None
+radar_pass = get_radar_pass(radar_date, radar_version) if radar_date else None
 if radar_pass is not None:
     table = table.merge(district_flooded_pct(area, radar_pass), on="district_id")
 bkk = area.district_ids > 0
@@ -381,7 +389,7 @@ with tab_now:
                     "flooded_now_km2": st.column_config.NumberColumn("km²", format="%.1f"),
                 },
             )
-        ev = get_radar_eval()
+        ev = get_radar_eval(file_version(C.RADAR_EVAL_FILE))
         with c2:
             st.subheader("Did the models see it coming?")
             if ev is None:
