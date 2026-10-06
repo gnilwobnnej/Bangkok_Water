@@ -2,6 +2,7 @@
 
     python scripts/fetch_current_flood.py --gee-project YOUR_CLOUD_PROJECT_ID
     python scripts/fetch_current_flood.py --gee-project ID --since 2026-08-01 --baseline dry
+    python scripts/fetch_current_flood.py --weather-only    # refresh rain + river flow only, no Earth Engine
 
 Radar sees through cloud. Open water reflects the signal away from the satellite, so it looks dark.
 For every recent pass, a cell is marked flooded when it is now dark AND clearly darker than a baseline
@@ -14,7 +15,8 @@ Permanent water (rivers, ponds) is removed with the JRC Global Surface Water occ
 
 Outputs (data/processed/radar_flood/):
     YYYY-MM-DD.tif   3 bands on the analysis grid: % of cell flooded, % permanent water, % with radar data
-    summary.json     dates, orbits, thresholds and flooded area per pass
+    summary.json     dates, orbits, thresholds and flooded area per pass, plus daily rainfall and
+                     Chao Phraya discharge (with the 30-year normal for each date) for context
 """
 import argparse
 import datetime as dt
@@ -23,6 +25,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import rasterio
 import requests
 from rasterio.warp import Resampling, reproject
@@ -46,6 +49,12 @@ BANDS = ["flood_pct", "permanent_pct", "valid_pct"]
 # Daily rainfall for context (Open-Meteo weather-model estimate, free, no key); east Bangkok
 RAIN_LAT, RAIN_LON = 13.80, 100.75
 OPEN_METEO = "https://api.open-meteo.com/v1/forecast"
+# Daily Chao Phraya discharge (GloFAS via the Open-Meteo Flood API, free, no key). This ~5 km cell sits on the
+# main channel at Nonthaburi; nearby cells snap to small side streams carrying only a few m³/s.
+RIVER_LAT, RIVER_LON = 13.825, 100.475
+OPEN_METEO_FLOOD = "https://flood-api.open-meteo.com/v1/flood"
+RIVER_NORMAL_YEARS = (1996, 2025)  # the "normal" for each calendar day is the median over these years
+WEATHER_LEAD_DAYS = 7  # weather starts this long before the first pass, so it has its run-up rain
 
 
 def s1_collection(ee, region):
@@ -106,6 +115,54 @@ def fetch_rainfall(since: str) -> list:
     except Exception as e:  # rainfall is context only; never block the flood maps
         print(f"  rainfall unavailable: {e}")
         return []
+
+
+def fetch_river_discharge(since: str) -> list:
+    """Daily discharge (m³/s) since `since`, with the median for the same calendar day over RIVER_NORMAL_YEARS."""
+    point = {"latitude": RIVER_LAT, "longitude": RIVER_LON, "daily": "river_discharge",
+             "cell_selection": "nearest"}
+    try:
+        r = requests.get(OPEN_METEO_FLOOD, timeout=60, params={
+            **point, "start_date": since, "end_date": str(dt.date.today())})
+        r.raise_for_status()
+        recent = pd.DataFrame(r.json()["daily"]).dropna()
+        y0, y1 = RIVER_NORMAL_YEARS
+        r = requests.get(OPEN_METEO_FLOOD, timeout=180, params={
+            **point, "start_date": f"{y0}-01-01", "end_date": f"{y1}-12-31"})
+        r.raise_for_status()
+        hist = pd.DataFrame(r.json()["daily"]).dropna()
+        # Median per calendar day, smoothed over a week so one odd year doesn't make the normal jagged
+        normal = hist.groupby(hist["time"].str[5:])["river_discharge"].median()
+        normal = normal.rolling(7, center=True, min_periods=1).mean()
+        return [{"date": t, "m3s": q, "normal_m3s": round(float(normal.get(t[5:], np.nan)), 1)}
+                for t, q in zip(recent["time"], recent["river_discharge"])]
+    except Exception as e:  # river flow is context only; never block the flood maps
+        print(f"  river discharge unavailable: {e}")
+        return []
+
+
+def fetch_weather(since: str) -> dict:
+    """Rainfall and river discharge from WEATHER_LEAD_DAYS before `since`, as summary.json fields."""
+    start = str(dt.date.fromisoformat(since) - dt.timedelta(days=WEATHER_LEAD_DAYS))
+    rain, river = fetch_rainfall(start), fetch_river_discharge(start)
+    print(f"  weather: {len(rain)} days of rainfall, {len(river)} days of river discharge")
+    return {
+        "rainfall": rain,
+        "rainfall_source": f"Open-Meteo weather-model estimate at {RAIN_LAT}N {RAIN_LON}E",
+        "river": river,
+        "river_source": (f"GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi "
+                         f"({RIVER_LAT}N {RIVER_LON}E); normal = {RIVER_NORMAL_YEARS[0]}-{RIVER_NORMAL_YEARS[1]} "
+                         f"median for the date"),
+    }
+
+
+def update_weather_only():
+    """Refresh the weather in an existing summary.json without touching Earth Engine."""
+    summary = json.loads(C.RADAR_SUMMARY_FILE.read_text())
+    first_pass = min(p["date"] for p in summary["passes"])
+    summary.update(fetch_weather(first_pass))
+    C.RADAR_SUMMARY_FILE.write_text(json.dumps(summary, indent=2))
+    print(f"Updated weather in {C.RADAR_SUMMARY_FILE}")
 
 
 def download(url: str, dest: Path):
@@ -180,18 +237,24 @@ def main(project: str, since: str, until: str, mode: str, refresh: bool):
         "method": {"water_db": WATER_DB, "change_db": CHANGE_DB, "permanent_pct": PERMANENT_PCT,
                    "baseline": mode, "speckle_radius_m": SPECKLE_RADIUS_M, "scale_m": DOWNLOAD_SCALE_M},
         "passes": summary,
-        "rainfall": fetch_rainfall(since),
-        "rainfall_source": f"Open-Meteo weather-model estimate at {RAIN_LAT}N {RAIN_LON}E",
+        **fetch_weather(since),
     }, indent=2))
     print(f"Wrote {len(summary)} dates to {C.RADAR_DIR}")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--gee-project", required=True, help="Google Cloud project id registered for Earth Engine")
+    ap.add_argument("--gee-project", help="Google Cloud project id registered for Earth Engine")
     ap.add_argument("--since", default=str(dt.date.today() - dt.timedelta(days=45)))
     ap.add_argument("--until", default=str(dt.date.today() + dt.timedelta(days=1)))
     ap.add_argument("--baseline", choices=["seasonal", "dry"], default="seasonal")
     ap.add_argument("--refresh", action="store_true", help="re-download dates already fetched")
+    ap.add_argument("--weather-only", action="store_true",
+                    help="only refresh rainfall and river discharge in the existing summary.json")
     args = ap.parse_args()
-    main(args.gee_project, args.since, args.until, args.baseline, args.refresh)
+    if args.weather_only:
+        update_weather_only()
+    elif not args.gee_project:
+        ap.error("--gee-project is required (unless --weather-only)")
+    else:
+        main(args.gee_project, args.since, args.until, args.baseline, args.refresh)

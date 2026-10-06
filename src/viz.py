@@ -9,6 +9,7 @@ import folium
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from matplotlib import colormaps
 from matplotlib.colors import LightSource, LinearSegmentedColormap
 from PIL import Image
@@ -308,14 +309,18 @@ def feature_importance_chart(features: pd.DataFrame, n: int = 10) -> go.Figure:
     return fig
 
 
-def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, selected: str | None = None) -> go.Figure:
-    """Daily rainfall (bars) and radar-detected flooded area per pass (lines)."""
-    fig = go.Figure()
+def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.DataFrame | None = None,
+                         selected: str | None = None) -> go.Figure:
+    """Daily rainfall (bars) and radar-detected flooded area per pass (lines); below, river discharge vs normal."""
+    has_river = river is not None and len(river) > 0
+    fig = make_subplots(rows=2 if has_river else 1, cols=1, shared_xaxes=True, vertical_spacing=0.08,
+                        row_heights=[0.65, 0.35] if has_river else None,
+                        specs=[[{"secondary_y": True}]] + ([[{}]] if has_river else []))
     if len(rain):
         fig.add_trace(go.Bar(
             x=rain["date"], y=rain["mm"], name="Daily rainfall (mm)", marker_color="rgba(43,123,214,0.35)",
-            yaxis="y2", hovertemplate="%{x}<br>%{y:.0f} mm rain<extra></extra>",
-        ))
+            hovertemplate="%{x}<br>%{y:.0f} mm rain<extra></extra>",
+        ), row=1, col=1, secondary_y=True)
     for col, name, color in [("flooded_km2", "Flooded, greater Bangkok (km²)", "#de4968"),
                              ("flooded_km2_bangkok", "Flooded, Bangkok 50 districts (km²)", "#8c2981")]:
         fig.add_trace(go.Scatter(
@@ -323,14 +328,29 @@ def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, selected: str
             line=dict(color=color, width=3),
             customdata=np.stack([passes["direction"].str.title(), passes["orbit"]], axis=-1),
             hovertemplate="%{x}<br>%{y:.1f} km²<br>%{customdata[0]} pass, orbit %{customdata[1]}<extra></extra>",
-        ))
+        ), row=1, col=1, secondary_y=False)
+    if has_river:
+        # Normal first, then actual filled down to it: the shaded gap shows how far above/below normal the river is
+        fig.add_trace(go.Scatter(
+            x=river["date"], y=river["normal_m3s"], name="River flow, normal for the date", mode="lines",
+            line=dict(color="#8a94a3", width=2, dash="dash"),
+            hovertemplate="%{x}<br>normal %{y:,.0f} m³/s<extra></extra>",
+        ), row=2, col=1)
+        fig.add_trace(go.Scatter(
+            x=river["date"], y=river["m3s"], name="Chao Phraya flow (m³/s)", mode="lines",
+            line=dict(color="#1f9e89", width=3), fill="tonexty", fillcolor="rgba(31,158,137,0.18)",
+            customdata=river["m3s"] / river["normal_m3s"] * 100,
+            hovertemplate="%{x}<br>%{y:,.0f} m³/s (%{customdata:.0f}% of normal)<extra></extra>",
+        ), row=2, col=1)
+        fig.update_yaxes(title_text="River (m³/s)", rangemode="tozero", row=2, col=1)
     if selected:
         fig.add_vline(x=selected, line_dash="dash", line_color="gray")
+    fig.update_yaxes(title_text="Flooded area (km²)", rangemode="tozero", row=1, col=1, secondary_y=False)
+    fig.update_yaxes(title_text="Rainfall (mm/day)", rangemode="tozero", showgrid=False,
+                     row=1, col=1, secondary_y=True)
     fig.update_layout(
-        yaxis=dict(title="Flooded area (km²)", rangemode="tozero"),
-        yaxis2=dict(title="Rainfall (mm/day)", overlaying="y", side="right", rangemode="tozero", showgrid=False),
-        legend=dict(orientation="h", y=1.15), height=400, margin=dict(l=10, r=10, t=40, b=10),
-        barmode="overlay",
+        legend=dict(orientation="h", y=1.12 if has_river else 1.15), height=560 if has_river else 400,
+        margin=dict(l=10, r=10, t=40, b=10), barmode="overlay",
     )
     return fig
 

@@ -14,13 +14,31 @@ def radar_available() -> bool:
 
 
 def load_summary():
-    """(passes DataFrame, rainfall DataFrame, full summary dict), or None if not fetched yet."""
+    """(passes, rainfall, river discharge DataFrames, full summary dict), or None if not fetched yet.
+
+    passes gets each pass date's weather from pass_weather().
+    """
     if not radar_available():
         return None
     summary = json.loads(C.RADAR_SUMMARY_FILE.read_text())
-    passes = pd.DataFrame(summary["passes"])
     rain = pd.DataFrame(summary.get("rainfall", []), columns=["date", "mm"])
-    return passes, rain, summary
+    river = pd.DataFrame(summary.get("river", []), columns=["date", "m3s", "normal_m3s"])
+    passes = pass_weather(pd.DataFrame(summary["passes"]), rain, river)
+    return passes, rain, river, summary
+
+
+def pass_weather(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.DataFrame) -> pd.DataFrame:
+    """Add rain on the pass date, rain over that day and the 2 before, and river discharge (NaN where missing)."""
+    out = passes.copy()
+    daily = rain.set_index(pd.to_datetime(rain["date"]))["mm"].astype(float)
+    dates = pd.to_datetime(out["date"])
+    out["rain_day_mm"] = daily.reindex(dates).to_numpy()
+    out["rain_3day_mm"] = [daily.loc[d - pd.Timedelta(days=2):d].sum(min_count=3) for d in dates]
+    flow = river.set_index("date")
+    out["discharge_m3s"] = flow["m3s"].reindex(out["date"]).to_numpy(dtype=float)
+    normal = flow["normal_m3s"].reindex(out["date"]).to_numpy(dtype=float)
+    out["discharge_pct_normal"] = out["discharge_m3s"] / normal * 100
+    return out
 
 
 def load_evaluation():

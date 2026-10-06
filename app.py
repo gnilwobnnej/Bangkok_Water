@@ -140,12 +140,17 @@ with st.sidebar:
                                help="Satellite-mapped flood extent, Aug 2011 – Jan 2012 (MODIS, 250 m).")
     show_radar, radar_date = False, None
     if radar is not None:
-        radar_passes = radar[0]
+        radar_passes = radar[0].set_index("date")
         show_radar = st.checkbox("Radar flood (Sentinel-1)", value=False,
                                  help="Unusual water seen by satellite radar on the chosen date.")
+
+        def pass_label(d):
+            p = radar_passes.loc[d]
+            rain = "" if np.isnan(p["rain_day_mm"]) else f", {p['rain_day_mm']:.0f} mm rain"
+            return f"{d} ({p['flooded_km2']:.0f} km² flooded{rain})"
+
         radar_date = st.selectbox(
-            "Radar pass date", radar_passes["date"].tolist()[::-1],
-            format_func=lambda d: f"{d} ({radar_passes.set_index('date').loc[d, 'flooded_km2']:.0f} km² flooded)",
+            "Radar pass date", radar_passes.index.tolist()[::-1], format_func=pass_label,
             help="Sentinel-1 passes over Bangkok every few days. Also sets 'Flooded now' in tooltips and tables.",
         )
     show_waterways = st.checkbox("Rivers & canals", value=False)
@@ -316,7 +321,7 @@ with tab_now:
             "2. `python scripts/evaluate_current.py`\n\nThen reload this page."
         )
     else:
-        passes, rain, summary = radar
+        passes, rain, river, summary = radar
         sel = passes.set_index("date").loc[radar_date]
         baseline_text = ("the same weeks last year, so normal seasonal water such as planted rice paddies "
                          "is mostly excluded" if summary["method"]["baseline"] == "seasonal"
@@ -328,9 +333,39 @@ with tab_now:
             f"(**{sel['flooded_km2_bangkok']:.0f} km²** inside Bangkok's 50 districts). "
             f"Each pass is compared with {baseline_text}."
         )
-        st.plotly_chart(flood_timeline_chart(passes, rain, radar_date), use_container_width=True)
-        st.caption(f"Rainfall: {summary.get('rainfall_source', 'Open-Meteo')}. "
-                   "Tick **Radar flood (Sentinel-1)** in the sidebar to see the selected pass on the map.")
+        weather = []
+        if not np.isnan(sel["rain_day_mm"]):
+            three_day = "" if np.isnan(sel["rain_3day_mm"]) else f" ({sel['rain_3day_mm']:.0f} mm over 3 days)"
+            weather.append(f"**{sel['rain_day_mm']:.0f} mm** of rain fell that day{three_day}")
+        if not np.isnan(sel["discharge_m3s"]):
+            weather.append(f"the Chao Phraya at Nonthaburi was flowing at **{sel['discharge_m3s']:,.0f} m³/s** "
+                           f"(**{sel['discharge_pct_normal']:.0f}%** of normal for the date)")
+        if weather:
+            st.markdown(f"On {radar_date}, " + "; ".join(weather) + ".")
+        st.plotly_chart(flood_timeline_chart(passes, rain, river, radar_date), use_container_width=True)
+        sources = f"Rainfall: {summary.get('rainfall_source', 'Open-Meteo')}."
+        if len(river):
+            sources += f" River flow: {summary['river_source']}."
+        st.caption(sources + " Tick **Radar flood (Sentinel-1)** in the sidebar to see the selected pass on the map.")
+
+        st.subheader("Every radar pass")
+        pass_cols = ["date", "direction", "flooded_km2", "flooded_km2_bangkok", "rain_day_mm", "rain_3day_mm"]
+        if len(river):
+            pass_cols += ["discharge_m3s", "discharge_pct_normal"]
+        st.dataframe(
+            passes[pass_cols].iloc[::-1].assign(direction=passes["direction"].str.title()),
+            hide_index=True, use_container_width=True,
+            column_config={
+                "date": "Date",
+                "direction": "Orbit",
+                "flooded_km2": st.column_config.NumberColumn("Flooded, greater Bangkok (km²)", format="%.1f"),
+                "flooded_km2_bangkok": st.column_config.NumberColumn("Flooded, Bangkok (km²)", format="%.1f"),
+                "rain_day_mm": st.column_config.NumberColumn("Rain that day (mm)", format="%.0f"),
+                "rain_3day_mm": st.column_config.NumberColumn("Rain, 3 days (mm)", format="%.0f"),
+                "discharge_m3s": st.column_config.NumberColumn("River flow (m³/s)", format="%.0f"),
+                "discharge_pct_normal": st.column_config.NumberColumn("River vs normal", format="%.0f%%"),
+            },
+        )
 
         c1, c2 = st.columns(2)
         with c1:
@@ -375,7 +410,11 @@ with tab_now:
   water is in farmland, which is also where the ML model expects flooding, so part of the match comes from that.
 - Each pass is a **snapshot** taken every few days, not a live feed. Passes from the two orbits view the ground
   from different angles, so compare dates from the same orbit for the cleanest trend.
-- Rainfall figures are weather-model estimates, not rain-gauge readings.
+- Rainfall figures are weather-model estimates, not rain-gauge readings. Pass dates are in UTC: descending
+  passes happen around 06:10 Bangkok time the *next* morning (so all of "that day's" rain fell before them),
+  ascending passes around 18:30 the same day (so the evening's rain came after them).
+- River flow comes from the GloFAS river model, not a gauge, and reads high on the Chao Phraya. Compare it with
+  its own normal (the dashed line) rather than trusting the exact m³/s.
 """)
 with tab_ml:
     if ml is None:

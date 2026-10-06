@@ -4,3 +4,4 @@ __pycache__/
 .streamlit/secrets.toml
 .venv/
 *.part
+recommendations.txt

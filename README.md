@@ -14,6 +14,8 @@ streamlit run app.py
 ## Deploying (Streamlit Community Cloud)
 `data/processed/` (~235 MB) is committed on purpose so the hosted app has its data; `data/raw/` stays local.
 To refresh (e.g. new radar passes), re-run the prepare scripts locally, then commit and push `data/processed/`.
+For just the latest rain and river flow, run `python scripts/fetch_current_flood.py --weather-only` and commit
+`data/processed/radar_flood/summary.json`.
 `shap` is only needed for `train_model.py`: `pip install shap` before training.
 
 ## Features
@@ -65,7 +67,9 @@ python scripts/evaluate_current.py      # scores every method against each radar
 Each pass is compared with the same weeks last year from the same orbit (`--baseline dry` compares with
 January-March instead), with permanent water removed (JRC Global Surface Water). The app gains a
 "Radar flood" layer with a date picker, a "Flooded now" column and a **Current flood** tab with rainfall
-(Open-Meteo, no key). Re-run both commands to pick up new passes.
+(Open-Meteo, no key) and Chao Phraya river flow vs its 1996-2025 normal (GloFAS via the Open-Meteo Flood API,
+no key), plus a table of every pass with its rain and river flow. Re-run both commands to pick up new passes;
+`python scripts/fetch_current_flood.py --weather-only` refreshes just the rain and river data.
 
 **27 Sep 2026 pass** (after ~200 mm of rain on 25-27 Sep): 99 km² of unusual water across greater Bangkok,
 32 km² inside the city, mostly eastern farmland (Nong Chok 8.3%, Lat Krabang 5.9%). Tested against it, the
@@ -85,23 +89,42 @@ lighter column mode for large districts / online use) and a whole-city view of ~
 view a building counts as affected when floodwater was detected within ~65 m (radar can't see water between
 buildings).
 
-## Data (all free, no API keys)
+## Data (all free, no API keys; layers marked * need a free Google Earth Engine account)
 | Layer | Source |
 |---|---|
 | Elevation | Copernicus GLO-30 DEM (AWS open data) |
 | Population | WorldPop 2020 constrained, 100 m |
 | Rivers & canals | OpenStreetMap (Overpass API) |
 | Districts | geoBoundaries THA ADM2 |
+| 2011 flood (ML labels) | Global Flood Database event DFO_3850, MODIS 250 m (website download or Earth Engine*) |
+| Land cover (ML features) | ESA WorldCover 2021, 10 m (AWS open data) |
+| Current flood | Sentinel-1 radar* (10 m, mapped at 20 m); permanent water from JRC Global Surface Water* |
+| Rainfall | Open-Meteo weather-model estimate, daily |
+| River flow | GloFAS via the Open-Meteo Flood API, Chao Phraya at Nonthaburi, daily; normal = 1996-2025 median |
+| Buildings | Google Open Buildings v3 footprints + 2.5D Temporal heights* |
+| Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
 
 ## Project layout
 ```
-app.py                  Streamlit UI
-scripts/prepare_data.py Download + align all data onto a ~65 m grid
-src/config.py           Study area, grid, file paths
-src/data_loader.py      Load processed data
-src/risk.py             Risk index
-src/simulate.py         Flood simulation + impact stats
-src/viz.py              Map layers, animation frames, charts
+app.py                          Streamlit UI
+scripts/prepare_data.py         Download + align all data onto a ~65 m grid
+scripts/prepare_ml_data.py      2011 flood labels + land cover for the ML model
+scripts/train_model.py          Train + evaluate the LightGBM flood model
+scripts/fetch_current_flood.py  Sentinel-1 radar flood maps, rainfall and river flow
+scripts/evaluate_current.py     Score every method against the radar maps
+scripts/prepare_buildings.py    Building footprints, heights and facilities per district
+scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
+scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF
+src/config.py                   Study area, grid, file paths
+src/data_loader.py              Load processed data
+src/risk.py                     Risk index
+src/simulate.py                 Flood simulation + impact stats
+src/features.py                 ML features
+src/ml.py                       Load the ML model outputs
+src/current_flood.py            Load radar passes, rainfall and river flow
+src/buildings.py                Load buildings, flood impact per building
+src/viz.py                      Map layers, animation frames, charts
+src/viz3d.py                    3D building maps (pydeck)
 ```
 
 ## Limitations
