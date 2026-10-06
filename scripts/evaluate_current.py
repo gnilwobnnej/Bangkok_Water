@@ -20,22 +20,10 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from src import config as C  # noqa: E402
+from src.current_flood import DRY_PCT, FLOODED_PCT, load_pass, radar_labels  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
 from src.risk import compute_factors, risk_index  # noqa: E402
 from train_model import bathtub_onset  # noqa: E402
-
-FLOODED_PCT, DRY_PCT = 50, 10
-
-
-def radar_labels(path: Path) -> np.ndarray:
-    """1 flooded, 0 dry, -1 unknown."""
-    with rasterio.open(path) as src:
-        flood, permanent, valid = src.read(1), src.read(2), src.read(3)
-    labels = np.full(flood.shape, -1, dtype="int8")
-    usable = (valid >= 50) & (permanent < 50)
-    labels[usable & (flood < DRY_PCT)] = 0
-    labels[usable & (flood >= FLOODED_PCT)] = 1
-    return labels
 
 
 def score(y, s) -> dict:
@@ -56,7 +44,7 @@ def main():
 
     results = []
     for p in summary["passes"]:
-        labels = radar_labels(C.RADAR_DIR / f"{p['date']}.tif")
+        labels = radar_labels(load_pass(p["date"]))
         for scope, mask in [("Greater Bangkok", np.ones_like(bkk)), ("Bangkok (50 districts)", bkk)]:
             known = (labels >= 0) & mask
             y = labels[known]

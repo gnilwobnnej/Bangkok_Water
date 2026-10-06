@@ -125,7 +125,18 @@ src/current_flood.py            Load radar passes, rainfall and river flow
 src/buildings.py                Load buildings, flood impact per building
 src/viz.py                      Map layers, animation frames, charts
 src/viz3d.py                    3D building maps (pydeck)
+tests/                          pytest suite (synthetic study area + app smoke test)
 ```
+
+## Tests
+```bash
+pip install -r requirements-dev.txt
+pytest                      # ~30 s
+```
+Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
+pocket and high ground. They cover the flood simulation, risk index, radar labels and per-pass weather.
+`tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
+`data/processed/` is missing. GitHub Actions runs everything on every push (`.github/workflows/ci.yml`).
 
 ## Limitations
 Exploratory model, not a forecast: ignores flood walls, pumps, drainage tunnels and water gates;

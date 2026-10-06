@@ -8,6 +8,9 @@ import rasterio
 from src import config as C
 from src.data_loader import StudyArea
 
+# A cell counts as flooded when at least this % of it is flooded on a pass, and as dry when under DRY_PCT
+FLOODED_PCT, DRY_PCT = 50, 10
+
 
 def radar_available() -> bool:
     return C.RADAR_SUMMARY_FILE.exists()
@@ -56,6 +59,15 @@ def load_pass(date: str) -> dict:
     """% flooded, % permanent water and % with radar data per cell for one pass date."""
     with rasterio.open(C.RADAR_DIR / f"{date}.tif") as src:
         return {"flood_pct": src.read(1), "permanent_pct": src.read(2), "valid_pct": src.read(3)}
+
+
+def radar_labels(radar: dict) -> np.ndarray:
+    """1 flooded, 0 dry, -1 unknown (radar didn't see it, permanent water, or partly flooded)."""
+    labels = np.full(radar["flood_pct"].shape, -1, dtype="int8")
+    usable = (radar["valid_pct"] >= 50) & (radar["permanent_pct"] < 50)
+    labels[usable & (radar["flood_pct"] < DRY_PCT)] = 0
+    labels[usable & (radar["flood_pct"] >= FLOODED_PCT)] = 1
+    return labels
 
 
 def district_flooded_pct(area: StudyArea, radar: dict) -> pd.DataFrame:
