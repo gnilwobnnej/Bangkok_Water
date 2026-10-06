@@ -341,15 +341,19 @@
   <figure><img src="screenshots/23_radar_flood.png" alt="Radar flood 27 Sep 2026"><figcaption><span class="pill">27 Sep 2026</span> Red = unusual water seen by radar. It is concentrated in the eastern farmland: Nong Chok, Lat Krabang, Min Buri, and beyond the city boundary.</figcaption></figure>
   <h3>The story in three numbers</h3>
   <ul>
-    <li><b>About 200 mm of rain in three days</b> (about 122 mm on 25 Sep alone, weather-model estimate).</li>
+    <li><b>About 200 mm of rain in three days</b> (about 122 mm on 25 Sep alone, weather-model estimate), on top of a <b>Chao Phraya already running about 15% above normal</b>. By the 27 Sep pass the river was at about 130% of normal for the date (GloFAS river model).</li>
     <li><b>99 km² of unusual water</b> across greater Bangkok on 27 Sep, up from 27 km² on 19 Sep. <b>32 km²</b> of it is inside the city's 50 districts.</li>
     <li><b>Most flooded districts:</b> Nong Chok 8.3% of its area, Lat Krabang 5.9%, Min Buri 2.8%, Khlong Sam Wa 2.0%. Nong Chok was also the most flooded district in 2011.</li>
   </ul>
   <div class="say">Two days of extreme rain, and the water went exactly where the terrain says it would: the low farmland in the east. Nong Chok tops the list this week, just as it did in 2011.</div>
+  <div class="say">And the river was already running high before the rain started, so the water had less room to drain away.</div>
+</section>
+
+<section class="page">
+  <figure><img src="screenshots/24_tab_current.png" alt="Current flood tab" style="max-height:215mm;width:auto;margin:0 auto"><figcaption>The <b>Current flood</b> tab: daily rainfall (bars) and radar-detected flooded area per pass (lines); below it, Chao Phraya river flow against its normal for the date (the shaded gap is how far above normal it is); and a table of every pass with its rain and river flow. Further down the tab: the most flooded districts and how each method scored against this flood. The sidebar date picker also shows each pass's rainfall.</figcaption></figure>
 </section>
 
 <section>
-  <figure><img src="screenshots/24_tab_current.png" alt="Current flood tab" style="max-height:98mm;width:auto;margin:0 auto"><figcaption>The <b>Current flood</b> tab: daily rainfall (bars) and radar-detected flooded area per pass (lines), the most flooded districts, and how each method scored against this flood.</figcaption></figure>
   <h3>Did the models see it coming?</h3>
   <p>None of the three methods has ever seen this flood, which makes this the fairest test in the project.</p>
   <table>
@@ -364,7 +368,7 @@
     <li>It has beaten the bathtub on every radar pass since late August except the first. The hand-weighted index is below random again.</li>
   </ul>
   <div class="say">I trained this model on 2011, fifteen years ago. This week, on a flood it had never seen, it pointed at the right places far better than chance. That's the difference between a map that looks convincing and a model that's been tested.</div>
-  <div class="note"><b>Be honest about the limits:</b> radar misses water between buildings, so flooding in the dense city is under-counted. Flooded fields and runways can look like floodwater. Most of this flood is in farmland, which is also where the ML model expects flooding, so part of the match comes from that shared pattern. Each pass is a snapshot every few days, and the rainfall figures are weather-model estimates.</div>
+  <div class="note"><b>Be honest about the limits:</b> radar misses water between buildings, so flooding in the dense city is under-counted. Flooded fields and runways can look like floodwater. Most of this flood is in farmland, which is also where the ML model expects flooding, so part of the match comes from that shared pattern. Each pass is a snapshot every few days, and the rainfall figures are weather-model estimates. River flow is also a model estimate (GloFAS) that reads high on the Chao Phraya, so compare it with its normal rather than quoting the exact m³/s. Pass dates are in UTC: a descending pass dated 19 Sep was taken at about 06:10 on 20 Sep, Bangkok time.</div>
 </section>
 
 <!-- ============================ BUILDINGS 3D ============================ -->
@@ -438,7 +442,7 @@
   <h2 style="margin-top:24px">10. Anticipated questions</h2>
   <table class="qa">
     <tr><th style="width:32%">Question</th><th>Suggested answer</th></tr>
-    <tr><td>Is this a forecast of the current flood?</td><td>No. It's a “what-if” tool: it shows where water <i>would</i> go at a given height. It doesn't use today's rainfall or river gauges. Adding live data is a planned next step.</td></tr>
+    <tr><td>Is this a forecast of the current flood?</td><td>No. It's a “what-if” tool: it shows where water <i>would</i> go at a given height. The <i>Current flood</i> tab shows recent rainfall and modelled river flow for context, but they don't set the water level. Driving the simulation from live river gauges is a planned next step.</td></tr>
     <tr><td>Why doesn't central Bangkok flood more?</td><td>Two reasons. The elevation data includes buildings, which makes the dense core look higher than the ground really is. In reality, the centre is also protected by flood walls, dikes and pumps, which this model doesn't include. Treat the centre's result with caution.</td></tr>
     <tr><td>Why does the flooded area jump at 0.5, 1.0, 1.5 m?</td><td>That's a quirk of the elevation dataset, not a real threshold. Copernicus rounds many flat areas to 0.5 m heights, so big patches switch to flooded together. Look at the overall trend.</td></tr>
     <tr><td>Why are the headline numbers bigger than the table totals?</td><td>The headline cards cover the whole map area (greater Bangkok, about 18 M people). The table and district counts cover only Bangkok's 50 districts (about 10.9 M).</td></tr>
@@ -452,6 +456,7 @@
     <tr><td>Why leave population out of the ML model?</td><td>With it, the model learned “dense city = dry”, mostly because of flood defences and the satellite missing urban floodwater. That's a dangerous message for a flood tool, and removing it cost little accuracy (0.89 → 0.87).</td></tr>
     <tr><td>Is the radar map the official flood extent?</td><td>No. It's our own analysis of public satellite images, useful for patterns across the city. For official figures, refer people to the Bangkok Metropolitan Administration or Thailand's disaster agencies.</td></tr>
     <tr><td>Why does the radar show almost no flooding in the city centre?</td><td>Partly because the centre is better drained and protected, and partly because radar can't see water between tall buildings well. Treat “no flooding” in the dense core as “not detected”, not “dry”.</td></tr>
+    <tr><td>Is the river flow a gauge reading?</td><td>No. It comes from GloFAS, a global river model, and it reads high on the Chao Phraya. It's useful for comparing with the river's normal for the date, not for exact figures. For official river levels, refer people to the Royal Irrigation Department.</td></tr>
     <tr><td>Isn't this just rice paddies?</td><td>We compare against the same weeks last year, so paddies flooded on the usual schedule mostly cancel out. The jump came right after about 200 mm of rain, which points to real flooding, but some field-management changes can still slip through.</td></tr>
     <tr><td>Are these real buildings?</td><td>Yes. They're Google's AI-mapped footprints from satellite imagery, with heights from the same project. They're good at city scale, but individual buildings can be wrong, merged or missing.</td></tr>
     <tr><td>Does “affected” mean the building floods inside?</td><td>No. It means the building stands in a ~65 m area that floods in that scenario. Raised ground floors, walls and pumps can keep water out, so treat it as “in the flood zone”.</td></tr>
@@ -477,7 +482,7 @@
   <h3>Next steps</h3>
   <ol>
     <li><b>More floods for the model:</b> use this month's radar flood maps as a second training event, so the model learns from both a river flood (2011) and a rain flood (2026).</li>
-    <li><b>Go live:</b> add rainfall and river-gauge feeds to set the water level from real conditions.</li>
+    <li><b>Go live:</b> rainfall and modelled river flow are now shown next to each radar pass; the next step is using real river-gauge levels to set the simulated water level.</li>
     <li><b>Add defences:</b> include the known flood walls and dikes as barriers in the connectivity step.</li>
     <li><b>Add vulnerability:</b> hospitals, schools and income data to go beyond exposure.</li>
     <li><b>Share it:</b> deploy on Streamlit Community Cloud so anyone can open a link.</li>
@@ -495,6 +500,7 @@
     <tr><td>Land cover</td><td>ESA WorldCover 2021 (AWS open data)</td><td>10 m</td></tr>
     <tr><td>Current flood</td><td>Sentinel-1 radar (Copernicus, via Google Earth Engine); permanent water from JRC Global Surface Water</td><td>10 m, mapped at 20 m</td></tr>
     <tr><td>Rainfall</td><td>Open-Meteo weather-model estimates (no key)</td><td>Daily</td></tr>
+    <tr><td>River flow</td><td>GloFAS via the Open-Meteo Flood API (no key), Chao Phraya at Nonthaburi; normal = 1996–2025 median for the date</td><td>Daily, ~5 km</td></tr>
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
     <tr><td>Basemap</td><td>Esri World Gray Canvas tiles</td><td>Online tiles</td></tr>
@@ -504,7 +510,8 @@
 python scripts/train_model.py                                  # about 2 min; prints scores vs existing methods</pre>
   <h3>Updating the current flood</h3>
   <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes (last 45 days)
-python scripts/evaluate_current.py                                 # re-score the models against them</pre>
+python scripts/evaluate_current.py                                 # re-score the models against them
+python scripts/fetch_current_flood.py --weather-only               # just refresh rain + river flow (no Earth Engine)</pre>
   <h3>Rebuilding the building data</h3>
   <pre>python scripts/prepare_buildings.py --gee-project YOUR_PROJECT   # all 50 districts, about 45 min</pre>
   <h3>Regenerating the screenshots and this PDF</h3>

@@ -195,8 +195,22 @@ def main():
             [("Current flood", "24_tab_current")] if has_radar else []):
             pg.get_by_role("tab").filter(has_text=label).click()
             pg.wait_for_timeout(2500)
-            tabs.screenshot(path=OUT / f"{name}.png")
-            trim_bottom(OUT / f"{name}.png")
+            if name == "24_tab_current":
+                # Taller than the window: show the tab down to the end of the "Every radar pass" table
+                pg.set_viewport_size({"width": 1600, "height": 2100})
+                app.settle(2500)
+                tabs.evaluate("e => e.scrollIntoView({block: 'start'})")
+                pg.wait_for_timeout(1500)
+                top = tabs.bounding_box()
+                table = pg.locator('[data-testid="stDataFrame"]:visible').first.bounding_box()
+                pg.screenshot(path=OUT / f"{name}.png", clip={
+                    "x": top["x"], "y": top["y"], "width": top["width"],
+                    "height": table["y"] + table["height"] - top["y"] + 10})
+                pg.set_viewport_size({"width": 1600, "height": 1100})
+                app.settle(2500)
+            else:
+                tabs.screenshot(path=OUT / f"{name}.png")
+                trim_bottom(OUT / f"{name}.png")
             print("saved", name)
 
         # 11. Buildings 3D (only once scripts/prepare_buildings.py has run); WebGL needs extra render time
