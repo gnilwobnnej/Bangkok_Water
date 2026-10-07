@@ -20,9 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.9"  # the version these scripts run on locally
           cache: pip
@@ -34,7 +34,7 @@ jobs:
       # Raw downloads aren't committed (data/raw is gitignored); keeping them between runs means passes already
       # fetched are reprocessed from disk instead of downloaded again.
       - name: Restore downloaded radar scenes
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/raw/radar
           key: radar-raw-${{ github.run_id }}
@@ -45,7 +45,9 @@ jobs:
         continue-on-error: true
         env:
           GEE_SERVICE_ACCOUNT_KEY: ${{ secrets.GEE_SERVICE_ACCOUNT_KEY }}
-        run: python scripts/fetch_current_flood.py
+        run: |
+          set -o pipefail
+          python scripts/fetch_current_flood.py 2>&1 | tee "$RUNNER_TEMP/radar.log"
 
       - name: Radar failed - update rainfall and river flow only
         if: steps.radar.outcome == 'failure'
@@ -69,9 +71,12 @@ jobs:
           git pull --rebase
           git push
 
-      # Fail the run (GitHub emails you) if the radar step failed, after the weather has still been saved
+      # Fail the run (GitHub emails you) if the radar step failed, after the weather has still been saved.
+      # The error's last line goes into the run's Annotations, so it's visible without opening the logs.
       - name: Report a radar failure
         if: steps.radar.outcome == 'failure'
         run: |
-          echo "::error::The radar fetch failed (see the 'Fetch new radar passes' step). Rain and river flow were still updated."
+          reason=$(grep -v '^[[:space:]]*$' "$RUNNER_TEMP/radar.log" | tail -n 1 | cut -c1-500)
+          echo "::error title=Radar fetch failed::${reason:-no output}"
+          echo "Rain and river flow were still updated. Full output: the 'Fetch new radar passes' step."
           exit 1
