@@ -89,7 +89,7 @@
     <li><b>Live demo script</b> — step by step, with what to click and what to say</li>
     <li><b>The risk index and its weights</b> — how it works and every reason to change the weights</li>
     <li><b>The machine-learning model</b> — what the 2011 flood teaches us</li>
-    <li><b>The current flood</b> — what satellite radar sees this week, and which model saw it coming</li>
+    <li><b>The current flood</b> — what satellite radar sees this week, which model saw it coming, and whether that's luck</li>
     <li><b>Buildings in 3D</b> — 2.1 million buildings, and which ones the water reaches</li>
     <li><b>Key numbers cheat sheet</b></li>
     <li><b>Anticipated questions</b></li>
@@ -365,10 +365,26 @@
   </table>
   <ul>
     <li><b>A model trained on a flood from 15 years ago predicted this week's flood well.</b> It finds flooded cells about 7 times better than random (PR-AUC 0.154 vs 0.023).</li>
-    <li>It has beaten the bathtub on every radar pass since late August except the first. The hand-weighted index is below random again.</li>
+    <li>It has beaten the bathtub on 7 of the 8 radar passes since late August (all 8 inside the city). The hand-weighted index is below random again.</li>
   </ul>
   <div class="say">I trained this model on 2011, fifteen years ago. This week, on a flood it had never seen, it pointed at the right places far better than chance. That's the difference between a map that looks convincing and a model that's been tested.</div>
   <div class="note"><b>Be honest about the limits:</b> radar misses water between buildings, so flooding in the dense city is under-counted. Flooded fields and runways can look like floodwater. Most of this flood is in farmland, which is also where the ML model expects flooding, so part of the match comes from that shared pattern. Each pass is a snapshot every few days, and the rainfall figures are weather-model estimates. River flow is also a model estimate (GloFAS) that reads high on the Chao Phraya, so compare it with its normal rather than quoting the exact m³/s. Pass dates are in UTC: a descending pass dated 19 Sep was taken at about 06:10 on 20 Sep, Bangkok time.</div>
+</section>
+
+<section class="page">
+  <h3>The Validation tab: is the difference real, or luck?</h3>
+  <p>The <b>Validation</b> tab collects every test in one place: the 2011 flood and every radar pass, for all three methods, with a <b>95% interval</b> on each score. Neighbouring cells flood together, so the intervals come from re-scoring on the map's 4 km blocks resampled 200 times (a <i>spatial block bootstrap</i>). The difference from the bathtub gets its own interval: when it stays above zero, the ML model's lead isn't luck.</p>
+  <figure><img src="screenshots/28_tab_validation.png" alt="Validation tab" style="max-height:150mm;width:auto;margin:0 auto"><figcaption>The <b>Validation</b> tab: how often the ML model beats the bathtub, scores over time with shaded 95% intervals, each method's difference from the bathtub, and every result in a table that can be downloaded as CSV. Switch between ROC-AUC and PR-AUC, and between greater Bangkok and the 50 districts.</figcaption></figure>
+  <table>
+    <tr><th>ML model vs bathtub, 8 radar passes (20 Aug – 27 Sep)</th><th class="num">Greater Bangkok</th><th class="num">Bangkok (50)</th></tr>
+    <tr><td>Higher ROC-AUC</td><td class="num">7 of 8</td><td class="num">8 of 8</td></tr>
+    <tr><td>Clearly higher (95% interval above zero)</td><td class="num">5</td><td class="num">5</td></tr>
+    <tr><td>Clearly lower</td><td class="num">0</td><td class="num">0</td></tr>
+    <tr><td>27 Sep ROC-AUC, ML (95% interval)</td><td class="num">0.91 (0.89–0.92)</td><td class="num">0.94 (0.93–0.95)</td></tr>
+    <tr><td>27 Sep ROC-AUC, bathtub (95% interval)</td><td class="num">0.70 (0.65–0.73)</td><td class="num">0.83 (0.79–0.87)</td></tr>
+  </table>
+  <div class="say">Every score here has an error bar. On the 27 September flood the model's lower bound is still well above the bathtub's upper bound, so the gap isn't luck. On the quieter early passes the bars overlap, and I'd call those a draw.</div>
+  <div class="note"><b>Be honest about the limits:</b> passes a few days apart see the same flood, so “7 of 8” is a trend, not 8 independent trials. On quiet passes under 0.5% of cells flooded, so PR-AUC is low for every method; compare it with the random-guess line. Most detected flooding is farmland on the city's edge, so the scores mostly describe the rural fringe.</div>
 </section>
 
 <!-- ============================ BUILDINGS 3D ============================ -->
@@ -432,6 +448,7 @@
     <li><b>Current flood (radar, 27 Sep 2026):</b> 99 km² of unusual water across greater Bangkok, 32 km² inside the city, after about 200 mm of rain on 25–27 Sep.</li>
     <li><b>Most flooded now:</b> Nong Chok 8.3%, Lat Krabang 5.9%, Min Buri 2.8%, Khlong Sam Wa 2.0%.</li>
     <li><b>Models vs this week's flood:</b> ML 0.91 (0.94 in Bangkok), bathtub 0.70, risk index 0.39 ROC-AUC.</li>
+    <li><b>Across all 8 radar passes:</b> ML beats the bathtub on 7 (8 inside the city); 5 of those are clear of the 95% interval, and it is never clearly worse.</li>
     <li><b>Buildings:</b> 2,116,261 mapped. Affected at 1.0 / 1.5 / 2.0 m: 36,711 / 139,517 / 353,200. Critical facilities affected: 17 / 58 / 148 of 1,390.</li>
   </ul>
   <figure><img src="screenshots/18_tab_table.png" alt="District table"><figcaption>District table (1.5 m, balanced weights). Every column can be sorted live, which is useful for audience questions about a specific district.</figcaption></figure>
@@ -451,6 +468,7 @@
     <tr><td>Where does the data come from, and how current is it?</td><td>Copernicus GLO-30 elevation (satellite radar), WorldPop 2020 population estimates, OpenStreetMap rivers and canals, and geoBoundaries districts. All are free and open.</td></tr>
     <tr><td>Why stop at 3 m?</td><td>By 3 m most of the low-lying region is under water, and the bathtub assumption becomes unrealistic for a flood that big.</td></tr>
     <tr><td>Is the machine-learning model better than the risk index?</td><td>Against the real 2011 flood, yes, by far: 0.87 vs 0.45 ROC-AUC, tested on areas it never saw. But it has only seen one flood. It's the best evidence we have, not a guarantee.</td></tr>
+    <tr><td>How do you know the ML model's lead isn't luck?</td><td>Open the <i>Validation</i> tab. Each score has a 95% interval from resampling 4 km blocks of the map. On 5 of the 8 radar passes the ML model's lead over the bathtub stays above zero across that interval, and it is never clearly behind.</td></tr>
     <tr><td>Why did the hand-weighted index do worse than random?</td><td>It rates dense, canal-rich inner districts highest. In 2011 those were protected by walls and pumps and stayed dry, while farmland on the edge flooded. Hand-set weights can be confidently wrong, which is why testing matters.</td></tr>
     <tr><td>Why does being farther from canals <i>raise</i> the ML flood chance?</td><td>Canals are densest in the protected city, and the fields that flooded in 2011 are farther apart. The model is picking up “protected city vs open farmland”, not canals keeping places dry. That's a correlation, not a cause.</td></tr>
     <tr><td>Why leave population out of the ML model?</td><td>With it, the model learned “dense city = dry”, mostly because of flood defences and the satellite missing urban floodwater. That's a dangerous message for a flood tool, and removing it cost little accuracy (0.89 → 0.87).</td></tr>
@@ -510,7 +528,7 @@
 python scripts/train_model.py                                  # about 2 min; prints scores vs existing methods</pre>
   <h3>Updating the current flood</h3>
   <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes, added to the archive (also runs daily on GitHub)
-python scripts/evaluate_current.py                                 # re-score the models against them
+python scripts/evaluate_current.py                                 # re-score the models, with 95% intervals (~3 min)
 python scripts/fetch_current_flood.py --weather-only               # just refresh rain + river flow (no Earth Engine)</pre>
   <h3>Rebuilding the building data</h3>
   <pre>python scripts/prepare_buildings.py --gee-project YOUR_PROJECT   # all 50 districts, about 45 min</pre>

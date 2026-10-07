@@ -87,9 +87,17 @@ def load_evaluation():
     if not C.RADAR_EVAL_FILE.exists():
         return None
     ev = json.loads(C.RADAR_EVAL_FILE.read_text())
-    rows = [{"date": r["date"], "scope": r["scope"], "flooded_share": r["flooded_share"],
-             "method": m, **scores}
-            for r in ev["results"] for m, scores in r["methods"].items()]
+    rows = []
+    for r in ev["results"]:
+        for m, sc in r["methods"].items():
+            row = {"date": r["date"], "scope": r["scope"], "flooded_share": r["flooded_share"],
+                   "n_cells": r["n_cells"], "method": m, "roc_auc": sc["roc_auc"], "pr_auc": sc["pr_auc"]}
+            # 95% intervals (missing in files written before the bootstrap was added)
+            for key in ("roc_auc", "pr_auc"):
+                for suffix, ci_key in (("", f"{key}_ci"), ("_diff", f"{key}_diff_ci")):
+                    lo, hi = sc.get(ci_key) or (np.nan, np.nan)
+                    row[f"{key}{suffix}_lo"], row[f"{key}{suffix}_hi"] = lo, hi
+            rows.append(row)
     return pd.DataFrame(rows)
 
 

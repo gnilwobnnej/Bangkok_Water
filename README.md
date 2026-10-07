@@ -90,7 +90,7 @@ using the same free Earth Engine project as the ML model:
 
 ```bash
 python scripts/fetch_current_flood.py --gee-project YOUR_CLOUD_PROJECT_ID   # default: last 45 days
-python scripts/evaluate_current.py      # scores every method against each radar pass
+python scripts/evaluate_current.py      # scores every method against each radar pass (~few min)
 ```
 Each pass is compared with the same weeks last year from the same orbit (`--baseline dry` compares with
 January-March instead), with permanent water removed (JRC Global Surface Water). The app gains a
@@ -104,6 +104,20 @@ river data.
 **27 Sep 2026 pass** (after ~200 mm of rain on 25-27 Sep): 99 km² of unusual water across greater Bangkok,
 32 km² inside the city, mostly eastern farmland (Nong Chok 8.3%, Lat Krabang 5.9%). Tested against it, the
 2011-trained ML model scores ROC-AUC 0.91 (0.94 within Bangkok), the bathtub 0.70 and the risk index 0.39.
+
+## Validation
+The **Validation** tab gathers every test of the three methods (ML model, bathtub simulation, risk index) on
+floods they never saw: the 2011 flood (spatial cross-validation) and every radar pass. It shows:
+- how often the ML model beats the bathtub, and on how many passes the difference is clear of noise;
+- ROC-AUC or PR-AUC over time with shaded 95% intervals, and each method's difference from the bathtub;
+- a table of every method x event with the random-guess baseline, cells tested and flooded share, as a CSV
+  download;
+- how the labels, scores and intervals work, and the known biases.
+
+The intervals come from a **spatial block bootstrap** in `evaluate_current.py` (`src/validation.py`): 4 km blocks
+are resampled 200 times and every method is re-scored on each resample, so neighbouring cells, which flood
+together, aren't counted as independent evidence. Each method's difference from the bathtub uses the same
+resamples and gets its own interval. For 2011 the range shown is the spread over the 5 cross-validation folds.
 
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
@@ -152,6 +166,7 @@ src/simulate.py                 Flood simulation + impact stats
 src/features.py                 ML features
 src/ml.py                       Load the ML model outputs
 src/current_flood.py            Load radar passes, rainfall and river flow
+src/validation.py               Block-bootstrap intervals and the Validation tab's tables
 src/buildings.py                Load buildings, flood impact per building
 src/viz.py                      Map layers, animation frames, charts
 src/viz3d.py                    3D building maps (pydeck)
@@ -164,7 +179,8 @@ pip install -r requirements-dev.txt
 pytest                      # ~30 s
 ```
 Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
-pocket and high ground. They cover the flood simulation, risk index, radar labels and per-pass weather.
+pocket and high ground. They cover the flood simulation, risk index, radar labels, per-pass weather, the alert rules and the
+bootstrap scores (checked against scikit-learn).
 `tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
 `data/processed/` is missing. GitHub Actions (`.github/workflows/ci.yml`) runs everything on every push, on
 Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).

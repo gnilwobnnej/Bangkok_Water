@@ -20,6 +20,20 @@ def test_app_runs_without_errors():
     assert not at.exception, [e.message for e in at.exception]
     tab_labels = [t.label for t in at.tabs]
     assert "Current flood" in tab_labels
+    assert "Validation" in tab_labels
+
+
+@pytest.mark.skipif(not C.RADAR_EVAL_FILE.exists(), reason="no radar evaluation")
+def test_validation_tab_controls():
+    """Switching the Validation tab to PR-AUC and to the 50 districts redraws without errors."""
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file(str(APP), default_timeout=600).run()
+    at.radio(key="valid_metric").set_value("pr_auc")
+    at.radio(key="valid_scope").set_value("Bangkok (50 districts)")
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+    assert any(m.label.startswith("ML beats the bathtub (PR-AUC)") for m in at.metric)
 
 
 @pytest.mark.skipif(not C.RADAR_SUMMARY_FILE.exists(), reason="no radar summary")

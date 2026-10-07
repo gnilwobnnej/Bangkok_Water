@@ -7,6 +7,9 @@ been trained (scripts/train_model.py). A cell counts as flooded when at least ha
 radar map, and as dry when under 10% is flooded, it isn't permanent water and radar saw it. Cells in
 between are left out.
 
+Each score gets a 95% interval from a spatial block bootstrap (4 km blocks, resampled 200 times; see
+src/validation.py), plus an interval for its difference from the bathtub simulation. Takes a few minutes.
+
 Output: data/processed/radar_flood/evaluation.json
 """
 import json
@@ -23,7 +26,8 @@ from src import config as C  # noqa: E402
 from src.current_flood import DRY_PCT, FLOODED_PCT, load_pass, radar_labels  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
 from src.risk import compute_factors, risk_index  # noqa: E402
-from train_model import bathtub_onset  # noqa: E402
+from src.validation import N_BOOT, block_bootstrap  # noqa: E402
+from train_model import BLOCK_M, bathtub_onset, spatial_blocks  # noqa: E402
 
 
 def score(y, s) -> dict:
@@ -34,6 +38,7 @@ def main():
     summary = json.loads(C.RADAR_SUMMARY_FILE.read_text())
     area = load_study_area()
     bkk = area.district_ids > 0
+    blocks = spatial_blocks().reshape(bkk.shape)
     methods = {
         "Bathtub simulation": -bathtub_onset(area),
         "Risk index (default weights)": risk_index(compute_factors(area), 0.5, 0.3, 0.2),
@@ -54,11 +59,16 @@ def main():
                    "flooded_share": float(y.mean()), "methods": {}}
             for name, s in methods.items():
                 rec["methods"][name] = score(y, s[known])
+            ci = block_bootstrap(y, {n: s[known] for n, s in methods.items()}, blocks[known])
+            for name in methods:
+                rec["methods"][name].update(ci[name])
             results.append(rec)
+            print(f"  {p['date']} {scope}: done")
 
     C.RADAR_EVAL_FILE.write_text(json.dumps({
         "label_rule": {"flooded_pct_at_least": FLOODED_PCT, "dry_pct_below": DRY_PCT},
         "baseline": summary["method"]["baseline"],
+        "bootstrap": {"block_m": BLOCK_M, "resamples": N_BOOT, "interval_pct": 95},
         "results": results,
     }, indent=2))
 
@@ -67,7 +77,8 @@ def main():
         print(f"\n{latest}, {rec['scope']}: {rec['n_cells']:,} cells, {rec['flooded_share']:.1%} flooded "
               f"(PR-AUC of a random guess = {rec['flooded_share']:.3f})")
         for name, m in rec["methods"].items():
-            print(f"  {name:30s} ROC-AUC {m['roc_auc']:.3f}   PR-AUC {m['pr_auc']:.3f}")
+            lo, hi = m["roc_auc_ci"]
+            print(f"  {name:30s} ROC-AUC {m['roc_auc']:.3f} ({lo:.3f}-{hi:.3f})   PR-AUC {m['pr_auc']:.3f}")
     print("\nROC-AUC over time (greater Bangkok):")
     for rec in [r for r in results if r["scope"] == "Greater Bangkok"]:
         print(f"  {rec['date']}  " + "  ".join(f"{n.split(' (')[0]}: {m['roc_auc']:.2f}" for n, m in rec["methods"].items()))

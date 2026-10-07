@@ -355,21 +355,80 @@ def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.Dat
     return fig
 
 
-def score_over_time_chart(ev: pd.DataFrame, scope: str) -> go.Figure:
-    """ROC-AUC of each method against each radar pass."""
-    colors = {"ML model (trained on 2011)": "#2b7bd6", "Bathtub simulation": "#f28e2b",
-              "Risk index (default weights)": "#8a94a3"}
+METHOD_COLORS = {"ML model (trained on 2011)": "#2b7bd6", "Bathtub simulation": "#f28e2b",
+                 "Risk index (default weights)": "#8a94a3"}
+
+
+def _rgba(hex_color: str, alpha: float) -> str:
+    h = hex_color.lstrip("#")
+    return f"rgba({int(h[0:2], 16)}, {int(h[2:4], 16)}, {int(h[4:6], 16)}, {alpha})"
+
+
+def score_over_time_chart(ev: pd.DataFrame, scope: str, metric: str = "roc_auc",
+                          intervals: bool = False) -> go.Figure:
+    """Score of each method against each radar pass; optionally with shaded 95% intervals.
+    For PR-AUC the random-guess line differs per pass (= the flooded share), so it's drawn as a line."""
+    name = {"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}[metric]
+    ev = ev[ev["scope"] == scope].sort_values("date")
     fig = go.Figure()
-    for method, grp in ev[ev["scope"] == scope].groupby("method", sort=False):
+    for method, grp in ev.groupby("method", sort=False):
+        color = METHOD_COLORS.get(method, "#555555")
+        lo, hi = f"{metric}_lo", f"{metric}_hi"
+        if intervals and lo in grp and grp[lo].notna().any():
+            fig.add_trace(go.Scatter(
+                x=list(grp["date"]) + list(grp["date"][::-1]), y=list(grp[hi]) + list(grp[lo][::-1]),
+                mode="lines", fill="toself", fillcolor=_rgba(color, 0.15), line=dict(width=0), hoverinfo="skip",
+                showlegend=False, legendgroup=method,
+            ))
         fig.add_trace(go.Scatter(
-            x=grp["date"], y=grp["roc_auc"], name=method, mode="lines+markers",
-            line=dict(color=colors.get(method), width=3),
-            hovertemplate="%{x}<br>ROC-AUC %{y:.2f}<extra>" + method + "</extra>",
+            x=grp["date"], y=grp[metric], name=method, mode="lines+markers", legendgroup=method,
+            line=dict(color=color, width=3),
+            customdata=grp[[lo, hi]] if intervals and lo in grp else None,
+            hovertemplate=("%{x}<br>" + name + " %{y:.3f}"
+                           + (" (95%: %{customdata[0]:.3f}–%{customdata[1]:.3f})" if intervals and lo in grp else "")
+                           + "<extra>" + method + "</extra>"),
         ))
-    fig.add_hline(y=0.5, line_dash="dot", line_color="gray", annotation_text="random",
+    if metric == "roc_auc":
+        fig.add_hline(y=0.5, line_dash="dot", line_color="gray", annotation_text="random",
+                      annotation_position="bottom right")
+        yaxis = dict(title="ROC-AUC (1.0 = perfect)", range=[0.3, 1.0])
+    else:
+        base = ev.drop_duplicates("date")
+        fig.add_trace(go.Scatter(x=base["date"], y=base["flooded_share"], name="Random guess", mode="lines",
+                                 line=dict(color="gray", dash="dot"),
+                                 hovertemplate="%{x}<br>random guess %{y:.4f}<extra></extra>"))
+        yaxis = dict(title="PR-AUC (log scale; 1.0 = perfect)", type="log")
+    fig.update_layout(
+        yaxis=yaxis, height=360,
+        legend=dict(orientation="h", y=1.15), margin=dict(l=10, r=10, t=40, b=10),
+    )
+    return fig
+
+
+def difference_chart(ev: pd.DataFrame, scope: str, reference: str = "Bathtub simulation",
+                     metric: str = "roc_auc") -> go.Figure:
+    """Each method's score minus the reference's, per radar pass, with 95% interval bars.
+    A bar that doesn't cross zero is a difference the bootstrap says isn't just noise."""
+    name = {"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}[metric]
+    ev = ev[ev["scope"] == scope].sort_values("date")
+    ref = ev[ev["method"] == reference].set_index("date")[metric]
+    fig = go.Figure()
+    for method, grp in ev[ev["method"] != reference].groupby("method", sort=False):
+        grp = grp.set_index("date")
+        diff = grp[metric] - ref.reindex(grp.index)
+        lo, hi = grp.get(f"{metric}_diff_lo"), grp.get(f"{metric}_diff_hi")
+        bars = None
+        if lo is not None and lo.notna().any():
+            bars = dict(type="data", symmetric=False, array=hi - diff, arrayminus=diff - lo, visible=True)
+        fig.add_trace(go.Scatter(
+            x=grp.index, y=diff, name=method, mode="markers", error_y=bars,
+            marker=dict(color=METHOD_COLORS.get(method, "#555555"), size=10),
+            hovertemplate="%{x}<br>" + name + " difference %{y:+.3f}<extra>" + method + "</extra>",
+        ))
+    fig.add_hline(y=0, line_color="gray", annotation_text=f"same as {reference.lower()}",
                   annotation_position="bottom right")
     fig.update_layout(
-        yaxis=dict(title="ROC-AUC (1.0 = perfect)", range=[0.3, 1.0]), height=360,
-        legend=dict(orientation="h", y=1.15), margin=dict(l=10, r=10, t=40, b=10),
+        yaxis=dict(title=f"{name} minus {reference.lower()}", zeroline=False), height=320,
+        legend=dict(orientation="h", y=1.18), margin=dict(l=10, r=10, t=40, b=10),
     )
     return fig

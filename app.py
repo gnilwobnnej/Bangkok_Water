@@ -5,6 +5,7 @@
 import time
 
 import numpy as np
+import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 
@@ -15,14 +16,15 @@ from src.buildings import (
     values_at,
 )
 from src.current_flood import (
-    conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
+    DRY_PCT, FLOODED_PCT, conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
 )
 from src.viz3d import city_deck, district_deck, district_view, footprint_coords
 from src.ml import load_ml
 from src.risk import compute_factors, district_mean, district_risk, risk_index
 from src.simulate import level_curve, simulate
+from src.validation import CI, REFERENCE, validation_table, wins
 from src.viz import (
-    basemap_rgb, build_map, elevation_histogram, feature_importance_chart, flood_frame,
+    basemap_rgb, build_map, difference_chart, elevation_histogram, feature_importance_chart, flood_frame,
     flood_timeline_chart, fmt_people, level_curve_chart, model_comparison_chart, score_over_time_chart,
     top_districts_chart,
 )
@@ -236,9 +238,9 @@ st_folium(fmap, height=620, use_container_width=True, returned_objects=[])
 st.caption("Hover a district for details. Toggle layers in the sidebar or the map's layer control.")
 
 # ---------------- analysis tabs ----------------
-tab_top, tab_elev, tab_curve, tab_now, tab_3d, tab_ml, tab_table, tab_method = st.tabs([
+tab_top, tab_elev, tab_curve, tab_now, tab_3d, tab_ml, tab_valid, tab_table, tab_method = st.tabs([
     "Most affected districts", "Elevation profile", "Flood curve", "Current flood",
-    "Buildings 3D", "ML model", "District table", "Method & limitations",
+    "Buildings 3D", "ML model", "Validation", "District table", "Method & limitations",
 ])
 with tab_3d:
     prepared = available_districts()
@@ -418,6 +420,7 @@ with tab_now:
         if ev is not None:
             st.subheader("How well each method matched every radar pass")
             st.plotly_chart(score_over_time_chart(ev, scope), use_container_width=True)
+            st.caption("The **Validation** tab has every score with its 95% interval, the 2011 results and a download.")
         st.markdown("""
 **Read with care**
 - Radar misses much of the water **between buildings**, so flooding in the dense city is under-counted.
@@ -496,6 +499,113 @@ with tab_ml:
 - Some coastal "flooding" in the 2011 map is likely shrimp and fish ponds, which MODIS can't tell apart from floodwater.
 - Areas protected by flood walls stayed dry in 2011, so the model implicitly learns those defences.
   That's useful, but defences built since 2011 aren't included.
+""")
+with tab_valid:
+    ev_all = get_radar_eval(file_version(C.RADAR_EVAL_FILE))
+    vt = validation_table(ev_all, ml.report if ml is not None else None)
+    if vt.empty:
+        st.info("Nothing to validate yet. Train the ML model (`python scripts/train_model.py`) and/or fetch and "
+                "score radar passes (`python scripts/fetch_current_flood.py`, then "
+                "`python scripts/evaluate_current.py`).")
+    else:
+        radar_rows = vt[vt["event"].str.startswith("Radar")]
+        st.markdown(
+            "How well does each method say **where** Bangkok floods? Every score here is on floods the method "
+            "never saw: the **2011 flood** (the ML model is tested on 4 km blocks held out of its training) and "
+            + (f"**{radar_rows['date'].nunique()} Sentinel-1 radar passes** from {radar_rows['date'].min()} "
+               f"to {radar_rows['date'].max()}." if not radar_rows.empty else "no radar passes yet.")
+            + " The bathtub simulation and the risk index have no training data, so every flood is new to them."
+        )
+        v1, v2 = st.columns(2)
+        vscope = v1.radio("Area", ["Greater Bangkok", "Bangkok (50 districts)"], horizontal=True,
+                          key="valid_scope")
+        vmetric = v2.radio("Score", ["roc_auc", "pr_auc"], horizontal=True, key="valid_metric",
+                           format_func={"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}.get)
+        metric_name = {"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}[vmetric]
+        ml_name = "ML model (trained on 2011)"
+
+        if ev_all is not None and ml_name in set(ev_all["method"]):
+            w = wins(ev_all, ml_name, vscope, vmetric)
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric(f"ML beats the bathtub ({metric_name})", f"{w['better']} of {w['passes']} passes")
+            if w["has_intervals"]:
+                m2.metric("Clearly better", w["clearly_better"],
+                          help=f"Passes where the {CI}% interval of the difference is entirely above zero.")
+                m3.metric("Clearly worse", w["clearly_worse"],
+                          help=f"Passes where the {CI}% interval of the difference is entirely below zero.")
+            cv11 = vt[vt["event"].str.startswith("2011")].set_index("method")
+            if {ml_name, REFERENCE} <= set(cv11.index):
+                gap = cv11.loc[ml_name, vmetric] - cv11.loc[REFERENCE, vmetric]
+                m4.metric(f"2011 flood: ML minus bathtub ({metric_name})", f"{gap:+.2f}",
+                          help="Mean over the 5 spatial cross-validation folds.")
+
+        if ev_all is not None and not ev_all.empty:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.subheader(f"{metric_name} on every radar pass")
+                st.plotly_chart(score_over_time_chart(ev_all, vscope, vmetric, intervals=True),
+                                use_container_width=True)
+                st.caption(f"Shading = {CI}% interval. "
+                           + ("ROC-AUC 0.5 = random, 1.0 = perfect." if vmetric == "roc_auc" else
+                              "The dotted line is a random guess, which scores the share of cells flooded. "
+                              "Flooding is rare on most passes, so PR-AUC is low for every method; compare "
+                              "it with that line."))
+            with c2:
+                st.subheader("Difference from the bathtub simulation")
+                st.plotly_chart(difference_chart(ev_all, vscope, REFERENCE, vmetric), use_container_width=True)
+                st.caption(f"Above zero = better than the bathtub. A bar that doesn't cross zero is a difference "
+                           f"the {CI}% interval says isn't just chance.")
+
+        st.subheader("All results")
+
+        def with_interval(v, lo, hi):
+            return f"{v:.3f}" if pd.isna(lo) else f"{v:.3f} ({lo:.3f}–{hi:.3f})"
+
+        shown = vt[(vt["scope"] == vscope) | vt["event"].str.startswith("2011")]
+        st.dataframe(
+            pd.DataFrame({
+                "Flood event": shown["event"], "Area": shown["scope"], "Method": shown["method"],
+                "ROC-AUC": [with_interval(*r) for r in shown[["roc_auc", "roc_auc_lo", "roc_auc_hi"]].values],
+                "PR-AUC": [with_interval(*r) for r in shown[["pr_auc", "pr_auc_lo", "pr_auc_hi"]].values],
+                "Random PR-AUC": shown["random_pr_auc"], "Cells tested": shown["n_cells"],
+                "Flooded": shown["flooded_share"] * 100, "Range shown": shown["interval"],
+            }),
+            hide_index=True, use_container_width=True, height=320,
+            column_config={
+                "Random PR-AUC": st.column_config.NumberColumn(format="%.4f"),
+                "Cells tested": st.column_config.NumberColumn(format="%d"),
+                "Flooded": st.column_config.NumberColumn("Flooded (%)", format="%.2f%%"),
+            },
+        )
+        st.download_button("Download all results (CSV)", vt.to_csv(index=False).encode(),
+                           "bangkok_flood_validation.csv", "text/csv")
+
+        with st.expander("How the scores are worked out"):
+            st.markdown(f"""
+**Labels.** A ~65 m grid cell counts as *flooded* when at least {FLOODED_PCT}% of it is flooded on the radar map,
+and as *dry* when under {DRY_PCT}% is, radar saw it, and it isn't permanent water (JRC Global Surface Water).
+Cells in between are left out. The 2011 labels come from the Global Flood Database's MODIS map (250 m).
+
+**Scores.** Each method gives every cell a score: the ML model's flood probability, how low a water level
+floods it in the bathtub simulation, or the risk index (default weights).
+- **ROC-AUC:** the chance that a flooded cell scores higher than a dry one. 0.5 = random, 1.0 = perfect.
+- **PR-AUC (average precision):** how much of the top-scored land actually flooded. A random guess scores the
+  share of cells flooded, so compare with that column.
+
+**Intervals.** Neighbouring cells flood together, so they aren't independent tests. The radar intervals come
+from a *spatial block bootstrap*: the map is cut into 4 km blocks, which are resampled 200 times, and every
+method is re-scored on each resample. The {CI}% interval is the middle {CI}% of those scores. The difference
+from the bathtub uses the same resamples, so it has its own interval. The 2011 range is the lowest to highest
+score over the 5 cross-validation folds.
+
+**Known biases.**
+- Radar and MODIS both miss much of the water between buildings, so the dense city looks drier than it was.
+- Most detected flooding is in the eastern and western farmland, so the scores mostly reflect the rural fringe.
+  The "Bangkok (50 districts)" area includes less of it.
+- Flooded rice fields can be normal farming rather than a flood. Comparing each pass with the same weeks last
+  year removes most of this, but not all.
+- Passes a few days apart see the same flood, so they aren't independent tests either. Read "beats the
+  bathtub on N passes" as a trend, not N separate trials.
 """)
 with tab_elev:
     below_km2 = area.cell_area_km2[bkk & (area.dem <= level)].sum()

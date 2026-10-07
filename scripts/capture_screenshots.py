@@ -192,11 +192,12 @@ def main():
             ("Flood curve", "17_tab_curve"),
             ("District table", "18_tab_table"),
         ] + ([("ML model", "22_tab_ml")] if has_ml else []) + (
-            [("Current flood", "24_tab_current")] if has_radar else []):
+            [("Current flood", "24_tab_current")] if has_radar else []) + (
+            [("Validation", "28_tab_validation")] if has_ml or has_radar else []):
             pg.get_by_role("tab").filter(has_text=label).click()
             pg.wait_for_timeout(2500)
-            if name == "24_tab_current":
-                # Taller than the window: show the tab down to the end of the "Every radar pass" table
+            if name in ("24_tab_current", "28_tab_validation"):
+                # Taller than the window: show the tab down to the end of its first table
                 pg.set_viewport_size({"width": 1600, "height": 2100})
                 app.settle(2500)
                 tabs.evaluate("e => e.scrollIntoView({block: 'start'})")
