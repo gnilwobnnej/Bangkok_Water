@@ -36,7 +36,8 @@ If Earth Engine fails, it still updates rain and river flow, then marks the run 
 
 **One-time setup** (Earth Engine login for GitHub):
 1. In Google Cloud project `third-node-510023-u2`, create a service account. Give it the roles
-   *Earth Engine Resource Viewer* and *Service Usage Consumer*.
+   *Earth Engine Resource Writer* and *Service Usage Consumer*. (Writer is needed: downloading
+   images requires `earthengine.thumbnails.create`, which the read-only Viewer role lacks.)
 2. Create a JSON key for it, and keep it out of this folder.
 3. In the GitHub repo, go to Settings → Secrets and variables → Actions. Add the secret
    `GEE_SERVICE_ACCOUNT_KEY` with the whole JSON as its value, then delete the local key file.
