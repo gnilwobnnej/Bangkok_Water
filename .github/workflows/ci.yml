@@ -9,12 +9,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false  # always report both versions
+      matrix:
+        # 3.9 = local development environment; 3.14 = Streamlit Community Cloud (newer pandas/numpy too)
+        python-version: ["3.9", "3.14"]
+    name: tests (Python ${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.9"  # matches the local development environment
+          python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: requirements*.txt
 

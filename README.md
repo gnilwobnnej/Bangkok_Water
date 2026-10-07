@@ -136,7 +136,8 @@ pytest                      # ~30 s
 Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
 pocket and high ground. They cover the flood simulation, risk index, radar labels and per-pass weather.
 `tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
-`data/processed/` is missing. GitHub Actions runs everything on every push (`.github/workflows/ci.yml`).
+`data/processed/` is missing. GitHub Actions (`.github/workflows/ci.yml`) runs everything on every push, on
+Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).
 
 ## Limitations
 Exploratory model, not a forecast: ignores flood walls, pumps, drainage tunnels and water gates;
