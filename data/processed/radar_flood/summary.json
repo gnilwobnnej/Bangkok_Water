@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T00:57:07Z",
+  "generated": "2026-10-07T09:04:34Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -337,7 +337,7 @@
     },
     {
       "date": "2026-10-07",
-      "mm": 10.9
+      "mm": 3.7
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
