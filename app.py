@@ -14,7 +14,9 @@ from src.buildings import (
     available_districts, district_counts, impact_modes, load_building_grid, load_buildings, load_facilities,
     values_at,
 )
-from src.current_flood import district_flooded_pct, load_evaluation, load_pass, load_summary
+from src.current_flood import (
+    conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
+)
 from src.viz3d import city_deck, district_deck, district_view, footprint_coords
 from src.ml import load_ml
 from src.risk import compute_factors, district_mean, district_risk, risk_index
@@ -186,6 +188,11 @@ st.caption(
     "Raise the water level and watch where Bangkok floods first. Built on satellite elevation "
     "(Copernicus GLO-30), population (WorldPop 2020), and rivers & canals (OpenStreetMap)."
 )
+if radar is not None:
+    alerts = conditions_alert(radar[0], radar[1], radar[2])
+    if alerts:
+        st.warning("**Unusual conditions right now**\n\n" + "\n".join(f"- {a}" for a in alerts)
+                   + "\n\nSee the **Current flood** tab for the details.", icon="⚠️")
 
 
 def show_metrics(res, tbl):

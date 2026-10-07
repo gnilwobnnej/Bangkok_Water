@@ -1,0 +1,77 @@
+name: Update data
+
+# Daily: fetch new Sentinel-1 radar passes plus rain and river flow, re-score the models, and commit the results.
+# The push redeploys the Streamlit Community Cloud app. Needs the repo secret GEE_SERVICE_ACCOUNT_KEY
+# (a Google Cloud service account's JSON key with Earth Engine access; see the README).
+on:
+  schedule:
+    - cron: "30 2 * * *"  # 02:30 UTC = 09:30 in Bangkok
+  workflow_dispatch:      # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write  # to push the updated data
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"  # the version these scripts run on locally
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt earthengine-api
+
+      # Raw downloads aren't committed (data/raw is gitignored); keeping them between runs means passes already
+      # fetched are reprocessed from disk instead of downloaded again.
+      - name: Restore downloaded radar scenes
+        uses: actions/cache@v4
+        with:
+          path: data/raw/radar
+          key: radar-raw-${{ github.run_id }}
+          restore-keys: radar-raw-
+
+      - name: Fetch new radar passes, rainfall and river flow
+        id: radar
+        continue-on-error: true
+        env:
+          GEE_SERVICE_ACCOUNT_KEY: ${{ secrets.GEE_SERVICE_ACCOUNT_KEY }}
+        run: python scripts/fetch_current_flood.py
+
+      - name: Radar failed - update rainfall and river flow only
+        if: steps.radar.outcome == 'failure'
+        run: python scripts/fetch_current_flood.py --weather-only
+
+      - name: Re-score the models against the radar passes
+        if: steps.radar.outcome == 'success'
+        run: python scripts/evaluate_current.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed/radar_flood
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          passes=$(python -c "import json; print(len(json.load(open('data/processed/radar_flood/summary.json'))['passes']))")
+          git commit -m "Update radar flood data and weather (automated; $passes passes)"
+          git pull --rebase
+          git push
+
+      # Fail the run (GitHub emails you) if the radar step failed, after the weather has still been saved
+      - name: Report a radar failure
+        if: steps.radar.outcome == 'failure'
+        run: |
+          echo "::error::The radar fetch failed (see the 'Fetch new radar passes' step). Rain and river flow were still updated."
+          exit 1

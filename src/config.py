@@ -34,6 +34,13 @@ RADAR_DIR = PROCESSED_DIR / "radar_flood"            # one GeoTIFF per pass date
 RADAR_SUMMARY_FILE = RADAR_DIR / "summary.json"
 RADAR_EVAL_FILE = RADAR_DIR / "evaluation.json"
 
+# "Unusual conditions" banner (src/current_flood.py conditions_alert)
+ALERT_FLOOD_RATIO = 2.0      # latest pass flooded area >= this x the median of earlier passes
+ALERT_MIN_EARLIER_PASSES = 3  # ...judged only once there are this many earlier passes to compare with
+ALERT_PASS_MAX_AGE_DAYS = 14  # ...and only while the latest pass is this recent
+ALERT_RIVER_PCT = 130        # Chao Phraya flow >= this % of normal for the date
+ALERT_RAIN_3DAY_MM = 100     # rain over the last 3 days >= this
+
 # Buildings (scripts/prepare_buildings.py)
 BUILDINGS_DIR = PROCESSED_DIR / "buildings"              # one GeoParquet per district
 BUILDINGS_GRID_FILE = PROCESSED_DIR / "buildings_grid.tif"  # band 1 building count, band 2 mean height (m)

@@ -13,10 +13,37 @@ streamlit run app.py
 
 ## Deploying (Streamlit Community Cloud)
 `data/processed/` (~235 MB) is committed on purpose so the hosted app has its data; `data/raw/` stays local.
-To refresh (e.g. new radar passes), re-run the prepare scripts locally, then commit and push `data/processed/`.
-For just the latest rain and river flow, run `python scripts/fetch_current_flood.py --weather-only` and commit
-`data/processed/radar_flood/summary.json`.
+Radar, rain and river data update themselves daily (next section). Other layers change rarely: re-run their
+prepare scripts locally, then commit and push `data/processed/`.
 `shap` is only needed for `train_model.py`: `pip install shap` before training.
+
+## Automatic daily updates
+`.github/workflows/update-data.yml` runs every day at 09:30 Bangkok time, and on demand from the Actions tab
+(**Update data → Run workflow**). It:
+- fetches new Sentinel-1 passes, rainfall and river flow;
+- re-scores the models with `evaluate_current.py`;
+- commits `data/processed/radar_flood/` as github-actions[bot], which redeploys the hosted app.
+
+If Earth Engine fails, it still updates rain and river flow, then marks the run as failed so GitHub emails you.
+
+- **History is kept:** new passes are merged into `summary.json` instead of replacing it (use `--replace` to
+  start over). Each pass adds about 0.45 MB to the repo, roughly 30 MB a year.
+- **Banner:** the app shows an "Unusual conditions" banner when any of these hold (thresholds in
+  `src/config.py`):
+  - the latest pass (within 14 days) has at least 2× the typical flooded area;
+  - the Chao Phraya is at or above 130% of normal;
+  - 3-day rain is at or above 100 mm.
+
+**One-time setup** (Earth Engine login for GitHub):
+1. In Google Cloud project `third-node-510023-u2`, create a service account. Give it the roles
+   *Earth Engine Resource Viewer* and *Service Usage Consumer*.
+2. Create a JSON key for it, and keep it out of this folder.
+3. In the GitHub repo, go to Settings → Secrets and variables → Actions. Add the secret
+   `GEE_SERVICE_ACCOUNT_KEY` with the whole JSON as its value, then delete the local key file.
+4. In Settings → Actions → General → Workflow permissions, choose *Read and write*.
+
+Locally, `fetch_current_flood.py` uses this key too if `GEE_SERVICE_ACCOUNT_KEY` is set; otherwise it uses your
+own `earthengine authenticate` login.
 
 ## Features
 - **Water-level slider (0–3 m)** with live flooded area, people affected, and districts at risk
@@ -68,8 +95,10 @@ Each pass is compared with the same weeks last year from the same orbit (`--base
 January-March instead), with permanent water removed (JRC Global Surface Water). The app gains a
 "Radar flood" layer with a date picker, a "Flooded now" column and a **Current flood** tab with rainfall
 (Open-Meteo, no key) and Chao Phraya river flow vs its 1996-2025 normal (GloFAS via the Open-Meteo Flood API,
-no key), plus a table of every pass with its rain and river flow. Re-run both commands to pick up new passes;
-`python scripts/fetch_current_flood.py --weather-only` refreshes just the rain and river data.
+no key), plus a table of every pass with its rain and river flow. A daily GitHub Actions run picks up new
+passes automatically (see "Automatic daily updates"). To update by hand, re-run both commands; new passes are
+added to the archive. `python scripts/fetch_current_flood.py --weather-only` refreshes just the rain and
+river data.
 
 **27 Sep 2026 pass** (after ~200 mm of rain on 25-27 Sep): 99 km² of unusual water across greater Bangkok,
 32 km² inside the city, mostly eastern farmland (Nong Chok 8.3%, Lat Krabang 5.9%). Tested against it, the

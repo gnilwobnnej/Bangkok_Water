@@ -4,6 +4,10 @@
     python scripts/fetch_current_flood.py --gee-project ID --since 2026-08-01 --baseline dry
     python scripts/fetch_current_flood.py --weather-only    # refresh rain + river flow only, no Earth Engine
 
+New passes are MERGED into the existing summary.json, so the archive grows over time (--replace starts
+over). In GitHub Actions, set GEE_SERVICE_ACCOUNT_KEY to a service account's JSON key instead of logging in;
+--gee-project then defaults to the key's project.
+
 Radar sees through cloud. Open water reflects the signal away from the satellite, so it looks dark.
 For every recent pass, a cell is marked flooded when it is now dark AND clearly darker than a baseline
 from the SAME orbit (different orbits view the ground from different angles):
@@ -18,9 +22,12 @@ Outputs (data/processed/radar_flood/):
     summary.json     dates, orbits, thresholds and flooded area per pass, plus daily rainfall and
                      Chao Phraya discharge (with the 30-year normal for each date) for context
 """
+from __future__ import annotations
+
 import argparse
 import datetime as dt
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -55,6 +62,41 @@ RIVER_LAT, RIVER_LON = 13.825, 100.475
 OPEN_METEO_FLOOD = "https://flood-api.open-meteo.com/v1/flood"
 RIVER_NORMAL_YEARS = (1996, 2025)  # the "normal" for each calendar day is the median over these years
 WEATHER_LEAD_DAYS = 7  # weather starts this long before the first pass, so it has its run-up rain
+KEY_ENV = "GEE_SERVICE_ACCOUNT_KEY"  # service account JSON key (GitHub Actions secret)
+
+
+def init_earth_engine(project: str | None):
+    """Log in with the service account key in $GEE_SERVICE_ACCOUNT_KEY if set, else the user's own login."""
+    import ee
+
+    key = os.environ.get(KEY_ENV)
+    if key:
+        info = json.loads(key)
+        ee.Initialize(ee.ServiceAccountCredentials(info["client_email"], key_data=key),
+                      project=project or info["project_id"])
+        print(f"Earth Engine: service account {info['client_email']}")
+    else:
+        ee.Initialize(project=project)
+    return ee
+
+
+def merge_by_date(old: list, new: list) -> list:
+    """Records from both lists, one per date (new wins), sorted by date. Used for passes and daily weather."""
+    merged = {r["date"]: r for r in old}
+    merged.update({r["date"]: r for r in new})
+    return [merged[d] for d in sorted(merged)]
+
+
+def load_existing_summary(mode: str) -> dict:
+    """The current summary.json, or {} if there is none or it used a different baseline (not comparable)."""
+    if not C.RADAR_SUMMARY_FILE.exists():
+        return {}
+    old = json.loads(C.RADAR_SUMMARY_FILE.read_text())
+    if old.get("method", {}).get("baseline") != mode:
+        print(f"  existing summary uses baseline {old.get('method', {}).get('baseline')!r}, not {mode!r}: "
+              "starting a new archive")
+        return {}
+    return old
 
 
 def s1_collection(ee, region):
@@ -141,10 +183,16 @@ def fetch_river_discharge(since: str) -> list:
         return []
 
 
-def fetch_weather(since: str) -> dict:
-    """Rainfall and river discharge from WEATHER_LEAD_DAYS before `since`, as summary.json fields."""
+def fetch_weather(since: str, old: dict = None) -> dict:
+    """Rainfall and river discharge from WEATHER_LEAD_DAYS before `since`, as summary.json fields.
+
+    Merged into the weather already in `old` (a previous summary): the rainfall source only reaches back
+    92 days, so older days are kept from earlier runs, and a failed download keeps what was there.
+    """
+    old = old or {}
     start = str(dt.date.fromisoformat(since) - dt.timedelta(days=WEATHER_LEAD_DAYS))
-    rain, river = fetch_rainfall(start), fetch_river_discharge(start)
+    rain = merge_by_date(old.get("rainfall", []), fetch_rainfall(start))
+    river = merge_by_date(old.get("river", []), fetch_river_discharge(start))
     print(f"  weather: {len(rain)} days of rainfall, {len(river)} days of river discharge")
     return {
         "rainfall": rain,
@@ -160,7 +208,7 @@ def update_weather_only():
     """Refresh the weather in an existing summary.json without touching Earth Engine."""
     summary = json.loads(C.RADAR_SUMMARY_FILE.read_text())
     first_pass = min(p["date"] for p in summary["passes"])
-    summary.update(fetch_weather(first_pass))
+    summary.update(fetch_weather(first_pass, summary))
     C.RADAR_SUMMARY_FILE.write_text(json.dumps(summary, indent=2))
     print(f"Updated weather in {C.RADAR_SUMMARY_FILE}")
 
@@ -186,10 +234,9 @@ def to_grid(raw_path: Path) -> np.ndarray:
     return np.stack(out)
 
 
-def main(project: str, since: str, until: str, mode: str, refresh: bool):
-    import ee
-
-    ee.Initialize(project=project)
+def main(project: str | None, since: str, until: str, mode: str, refresh: bool, replace: bool = False):
+    ee = init_earth_engine(project)
+    old = {} if replace else load_existing_summary(mode)
     region = ee.Geometry.Rectangle([C.WEST, C.SOUTH, C.EAST, C.NORTH])
     C.RADAR_DIR.mkdir(parents=True, exist_ok=True)
     raw_dir = C.RAW_DIR / "radar"
@@ -232,29 +279,33 @@ def main(project: str, since: str, until: str, mode: str, refresh: bool):
               f"({rec['flooded_km2_bangkok']:.1f} in Bangkok), coverage {rec['coverage_pct']:.0f}%, "
               f"baseline {n_base} scenes")
 
+    all_passes = merge_by_date(old.get("passes", []), summary)
     C.RADAR_SUMMARY_FILE.write_text(json.dumps({
         "generated": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "method": {"water_db": WATER_DB, "change_db": CHANGE_DB, "permanent_pct": PERMANENT_PCT,
                    "baseline": mode, "speckle_radius_m": SPECKLE_RADIUS_M, "scale_m": DOWNLOAD_SCALE_M},
-        "passes": summary,
-        **fetch_weather(since),
+        "passes": all_passes,
+        **fetch_weather(all_passes[0]["date"] if all_passes else since, old),
     }, indent=2))
-    print(f"Wrote {len(summary)} dates to {C.RADAR_DIR}")
+    print(f"Wrote {len(summary)} dates to {C.RADAR_DIR}; the archive now has {len(all_passes)} passes")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--gee-project", help="Google Cloud project id registered for Earth Engine")
+    ap.add_argument("--gee-project", help="Google Cloud project id registered for Earth Engine "
+                                          f"(default with ${KEY_ENV}: the key's project)")
     ap.add_argument("--since", default=str(dt.date.today() - dt.timedelta(days=45)))
     ap.add_argument("--until", default=str(dt.date.today() + dt.timedelta(days=1)))
     ap.add_argument("--baseline", choices=["seasonal", "dry"], default="seasonal")
     ap.add_argument("--refresh", action="store_true", help="re-download dates already fetched")
     ap.add_argument("--weather-only", action="store_true",
                     help="only refresh rainfall and river discharge in the existing summary.json")
+    ap.add_argument("--replace", action="store_true",
+                    help="start a new archive instead of merging into the existing summary.json")
     args = ap.parse_args()
     if args.weather_only:
         update_weather_only()
-    elif not args.gee_project:
-        ap.error("--gee-project is required (unless --weather-only)")
+    elif not (args.gee_project or os.environ.get(KEY_ENV)):
+        ap.error(f"--gee-project is required (unless --weather-only or ${KEY_ENV} is set)")
     else:
-        main(args.gee_project, args.since, args.until, args.baseline, args.refresh)
+        main(args.gee_project, args.since, args.until, args.baseline, args.refresh, args.replace)

@@ -44,6 +44,44 @@ def pass_weather(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.DataFrame) 
     return out
 
 
+def conditions_alert(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.DataFrame, today=None) -> list:
+    """Plain-language warnings when recent conditions are unusual (thresholds in src/config.py); [] if none.
+
+    Judged on the latest data: the newest radar pass (if recent), the last 3 days of rain and the latest
+    river flow. `today` defaults to the newest date in the weather data (the data's "now").
+    """
+    if today is None:
+        newest = [df["date"].max() for df in (rain, river) if len(df)]
+        today = max(newest) if newest else pd.Timestamp.now().normalize()
+    now = pd.Timestamp(today)
+    alerts = []
+
+    if len(passes) > C.ALERT_MIN_EARLIER_PASSES:
+        ordered = passes.sort_values("date")
+        latest, earlier = ordered.iloc[-1], ordered.iloc[:-1]["flooded_km2"]
+        typical = earlier.median()
+        recent = (now - pd.Timestamp(latest["date"])).days <= C.ALERT_PASS_MAX_AGE_DAYS
+        if recent and typical > 0 and latest["flooded_km2"] >= C.ALERT_FLOOD_RATIO * typical:
+            alerts.append(f"Radar on {latest['date']} found **{latest['flooded_km2']:.0f} km²** of unusual water, "
+                          f"{latest['flooded_km2'] / typical:.1f}× the typical {typical:.0f} km² of earlier passes.")
+
+    if len(river):
+        last = river.dropna(subset=["m3s", "normal_m3s"]).sort_values("date").tail(1)
+        if len(last) and last["normal_m3s"].iloc[0] > 0:
+            pct = last["m3s"].iloc[0] / last["normal_m3s"].iloc[0] * 100
+            if pct >= C.ALERT_RIVER_PCT:
+                alerts.append(f"The Chao Phraya is running at **{pct:.0f}% of normal** for the date "
+                              f"({last['date'].iloc[0]}, modelled flow).")
+
+    if len(rain):
+        daily = rain.set_index(pd.to_datetime(rain["date"]))["mm"].astype(float).sort_index()
+        window = daily.loc[now - pd.Timedelta(days=2):now]
+        if window.notna().sum() == 3 and window.sum() >= C.ALERT_RAIN_3DAY_MM:
+            alerts.append(f"**{window.sum():.0f} mm of rain** fell in the 3 days to {now.date()} (weather-model estimate).")
+
+    return alerts
+
+
 def load_evaluation():
     """Per-date scores of each method against the radar maps, or None."""
     if not C.RADAR_EVAL_FILE.exists():

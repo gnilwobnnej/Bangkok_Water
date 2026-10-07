@@ -509,7 +509,7 @@
   <pre>python scripts/prepare_ml_data.py --gee-project YOUR_PROJECT   # or --label-file a downloaded GFD map
 python scripts/train_model.py                                  # about 2 min; prints scores vs existing methods</pre>
   <h3>Updating the current flood</h3>
-  <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes (last 45 days)
+  <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes, added to the archive (also runs daily on GitHub)
 python scripts/evaluate_current.py                                 # re-score the models against them
 python scripts/fetch_current_flood.py --weather-only               # just refresh rain + river flow (no Earth Engine)</pre>
   <h3>Rebuilding the building data</h3>
