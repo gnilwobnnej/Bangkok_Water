@@ -41,6 +41,10 @@ ALERT_PASS_MAX_AGE_DAYS = 14  # ...and only while the latest pass is this recent
 ALERT_RIVER_PCT = 130        # Chao Phraya flow >= this % of normal for the date
 ALERT_RAIN_3DAY_MM = 100     # rain over the last 3 days >= this
 
+# Flood defences (scripts/prepare_defences.py): river walls and dikes as crest heights (m above mean sea level)
+DEFENCES_FILE = PROCESSED_DIR / "defences.tif"          # float32 crest height, NaN = no defence
+DEFENCE_LINES_FILE = PROCESSED_DIR / "defences.geojson"  # the lines, with name, crest_m, source and note
+
 # Buildings (scripts/prepare_buildings.py)
 BUILDINGS_DIR = PROCESSED_DIR / "buildings"              # one GeoParquet per district
 BUILDINGS_GRID_FILE = PROCESSED_DIR / "buildings_grid.tif"  # band 1 building count, band 2 mean height (m)

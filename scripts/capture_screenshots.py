@@ -133,6 +133,14 @@ def main():
         app.shot_map("06_connectivity_off")
         app.checkbox("Water must flow from rivers/canals", True)
 
+        # 4b. Flood defences at 2.0 m (only once scripts/prepare_defences.py has run)
+        if pg.locator('[data-testid="stSidebar"] label').filter(has_text="Include flood defences").count():
+            app.level(2.0)
+            app.checkbox("Include flood defences", True)
+            app.shot_map("29_defences_2_0")
+            app.checkbox("Include flood defences", False)
+            app.level(1.0)
+
         # 5. Animation, captured mid-run
         pg.get_by_role("button", name="Animate rising water").click()
         pg.wait_for_timeout(3500)

@@ -122,6 +122,7 @@ def build_map(
     show_waterways: bool, dark: bool, elevation_range: tuple[float, float] | None = None,
     ml_prob: np.ndarray | None = None, observed: np.ndarray | None = None,
     radar: np.ndarray | None = None, radar_label: str = "Radar flood",
+    defences: "gpd.GeoDataFrame | None" = None, level: float | None = None,
 ) -> folium.Map:
     m = folium.Map(
         location=CENTER, zoom_start=11, control_scale=True,
@@ -203,6 +204,24 @@ def build_map(
         highlight_function=lambda f: {"color": "#ffffff", "weight": 3, "fillOpacity": 0.1},
         tooltip=folium.GeoJsonTooltip(fields=fields, aliases=aliases),
     ).add_to(m)
+    if defences is not None:
+        # Added after the districts so hovering a line shows the line, not the district.
+        d = defences.copy()
+        d["geometry"] = d.geometry.simplify(0.0002)
+        d["status"] = np.where(d["crest_m"] > (level if level is not None else -np.inf), "holding", "overtopped")
+        d["crest_label"] = d["crest_m"].map("{:.1f} m above sea level".format)
+        folium.GeoJson(
+            d[["name", "crest_label", "status", "source", "geometry"]].to_json(),
+            name="Flood defences",
+            style_function=lambda f: {
+                "color": "#ff7f0e" if f["properties"]["status"] == "holding" else "#d62728",
+                "weight": 4, "opacity": 0.95,
+                "dashArray": None if f["properties"]["status"] == "holding" else "6 6",
+            },
+            tooltip=folium.GeoJsonTooltip(fields=["name", "crest_label", "status", "source"],
+                                          aliases=["Defence", "Crest", "At this water level", "Source"],
+                                          style="max-width:420px;white-space:normal"),
+        ).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
     return m
 
@@ -272,7 +291,7 @@ def elevation_histogram(dem: np.ndarray, cell_area_km2: np.ndarray, level: float
 
 def model_comparison_chart(cv: pd.DataFrame) -> go.Figure:
     """Spatial cross-validation scores of the ML model vs the existing methods."""
-    order = ["ML model (LightGBM)", "ML model (trained on 2011)", "Bathtub simulation",
+    order = ["ML model (LightGBM)", "ML model (trained on 2011)", "Bathtub + defences", "Bathtub simulation",
              "Risk index (default weights)"]
     known = [m for m in order if m in set(cv["method"])]
     cv = cv.set_index("method").reindex(known + [m for m in cv["method"] if m not in known]).reset_index()
@@ -356,7 +375,7 @@ def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.Dat
 
 
 METHOD_COLORS = {"ML model (trained on 2011)": "#2b7bd6", "Bathtub simulation": "#f28e2b",
-                 "Risk index (default weights)": "#8a94a3"}
+                 "Bathtub + defences": "#59a14f", "Risk index (default weights)": "#8a94a3"}
 
 
 def _rgba(hex_color: str, alpha: float) -> str:

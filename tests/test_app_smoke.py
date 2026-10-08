@@ -23,6 +23,20 @@ def test_app_runs_without_errors():
     assert "Validation" in tab_labels
 
 
+@pytest.mark.skipif(not C.DEFENCES_FILE.exists(), reason="defences not prepared")
+def test_defences_toggle():
+    """Including flood defences redraws the whole app without errors and lowers the people affected."""
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file(str(APP), default_timeout=600).run()
+    at.slider[0].set_value(2.0).run()
+    people = lambda: next(m.value for m in at.metric if m.label.startswith("People affected"))  # noqa: E731
+    before = people()
+    next(t for t in at.toggle if t.label == "Include flood defences").set_value(True).run()
+    assert not at.exception, [e.message for e in at.exception]
+    assert people() != before
+
+
 @pytest.mark.skipif(not C.RADAR_EVAL_FILE.exists(), reason="no radar evaluation")
 def test_validation_tab_controls():
     """Switching the Validation tab to PR-AUC and to the 50 districts redraws without errors."""

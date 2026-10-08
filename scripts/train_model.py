@@ -51,16 +51,58 @@ def spatial_blocks() -> np.ndarray:
     return (br * (bc.max() + 1) + bc).ravel()
 
 
-def bathtub_onset(area, levels=np.round(np.arange(0, 3.01, 0.1), 1)) -> np.ndarray:
+def bathtub_onset(area, levels=np.round(np.arange(0, 3.01, 0.1), 1), defences: bool = False) -> np.ndarray:
     """Lowest simulated water level at which each cell floods (river-connected mode)."""
     onset = np.full(area.dem.shape, levels[-1] + 1.0, dtype="float32")
     for lv in levels[::-1]:
-        onset[flood_mask(area, float(lv), connected=True)] = lv
+        onset[flood_mask(area, float(lv), connected=True, defences=defences)] = lv
     return onset
+
+
+def baseline_methods(area) -> dict:
+    """Score per cell for each method that isn't trained (higher = more likely to flood)."""
+    methods = {
+        "Risk index (default weights)": risk_index(compute_factors(area), 0.5, 0.3, 0.2),
+        "Bathtub simulation": -bathtub_onset(area),  # floods earlier = higher score
+    }
+    if area.defences is not None:
+        methods["Bathtub + defences"] = -bathtub_onset(area, defences=True)
+    return methods
 
 
 def scores(y, s) -> dict:
     return {"roc_auc": float(roc_auc_score(y, s)), "pr_auc": float(average_precision_score(y, s))}
+
+
+def cv_summary(rows: list) -> list:
+    """Mean and standard deviation over the folds, per method."""
+    summary = pd.DataFrame(rows).groupby("method", sort=False)[["roc_auc", "pr_auc"]].agg(["mean", "std"])
+    print("\nSpatial cross-validation (mean +/- std over folds):")
+    for method, r in summary.iterrows():
+        print(f"  {method:32s} ROC-AUC {r[('roc_auc', 'mean')]:.3f} +/- {r[('roc_auc', 'std')]:.3f}   "
+              f"PR-AUC {r[('pr_auc', 'mean')]:.3f} +/- {r[('pr_auc', 'std')]:.3f}")
+    return [{"method": m, "roc_auc": r[("roc_auc", "mean")], "roc_auc_std": r[("roc_auc", "std")],
+             "pr_auc": r[("pr_auc", "mean")], "pr_auc_std": r[("pr_auc", "std")]} for m, r in summary.iterrows()]
+
+
+def rescore_baselines(labels_path: Path, report_path: Path):
+    """Re-score only the untrained methods on the same folds; the trained ML model and its scores are kept."""
+    area = load_study_area()
+    with rasterio.open(labels_path) as src:
+        labels = src.read(1).ravel()
+    known = labels != C.LABEL_NODATA
+    y = labels[known].astype(int)
+    groups = spatial_blocks()[known]
+    baselines = {n: s.ravel()[known] for n, s in baseline_methods(area).items()}
+    report = json.loads(report_path.read_text())
+    rows = [r for r in report["cv"]["folds_detail"] if r["method"].startswith("ML model")]
+    for fold, (_, te) in enumerate(GroupKFold(N_FOLDS).split(np.zeros(len(y)), y, groups), start=1):
+        rows += [{"fold": fold, "method": n, **scores(y[te], s[te])} for n, s in baselines.items()]
+    rows.sort(key=lambda r: r["fold"])
+    report["cv"]["folds_detail"] = rows
+    report["cv"]["summary"] = cv_summary(rows)
+    report_path.write_text(json.dumps(report, indent=2))
+    print(f"\nUpdated {report_path}")
 
 
 def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
@@ -75,10 +117,7 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
     pos_rate = y.mean()
     print(f"Training cells: {len(y):,}  flooded share: {pos_rate:.1%}  features: {X.shape[1]}")
 
-    baselines = {
-        "Risk index (default weights)": risk_index(compute_factors(area), 0.5, 0.3, 0.2).ravel()[known],
-        "Bathtub simulation": -bathtub_onset(area).ravel()[known],  # floods earlier = higher score
-    }
+    baselines = {n: s.ravel()[known] for n, s in baseline_methods(area).items()}
 
     rows = []
     oof = np.zeros(len(y), dtype="float32")
@@ -89,14 +128,9 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
         rows.append({"fold": fold, "method": "ML model (LightGBM)", **scores(y[te], oof[te])})
         for name, s in baselines.items():
             rows.append({"fold": fold, "method": name, **scores(y[te], s[te])})
-        print(f"  fold {fold}: ML ROC-AUC {rows[-3]['roc_auc']:.3f}")
+        print(f"  fold {fold}: ML ROC-AUC {rows[-1 - len(baselines)]['roc_auc']:.3f}")
 
-    cv = pd.DataFrame(rows)
-    summary = cv.groupby("method")[["roc_auc", "pr_auc"]].agg(["mean", "std"])
-    print("\nSpatial cross-validation (mean +/- std over folds):")
-    for method, r in summary.iterrows():
-        print(f"  {method:32s} ROC-AUC {r[('roc_auc', 'mean')]:.3f} +/- {r[('roc_auc', 'std')]:.3f}   "
-              f"PR-AUC {r[('pr_auc', 'mean')]:.3f} +/- {r[('pr_auc', 'std')]:.3f}")
+    summary = cv_summary(rows)
     print(f"  (PR-AUC of a random guess = flooded share = {pos_rate:.3f})")
 
     # Final model on all labelled cells, applied everywhere
@@ -137,9 +171,7 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
         "n_training_cells": int(len(y)), "flooded_share": float(pos_rate),
         "excluded_features": [FEATURE_LABELS.get(c, c) for c in exclude],
         "cv": {"block_m": BLOCK_M, "folds": N_FOLDS,
-               "summary": [{"method": m, "roc_auc": r[("roc_auc", "mean")], "roc_auc_std": r[("roc_auc", "std")],
-                            "pr_auc": r[("pr_auc", "mean")], "pr_auc_std": r[("pr_auc", "std")]}
-                           for m, r in summary.iterrows()],
+               "summary": summary,
                "folds_detail": rows},
         "features": [
             {"feature": c, "label": FEATURE_LABELS.get(c, c), "mean_abs_shap": float(mean_abs[i]),
@@ -171,7 +203,13 @@ if __name__ == "__main__":
     ap.add_argument("--model-path", type=Path, default=C.ML_MODEL_FILE)
     ap.add_argument("--exclude", nargs="*", default=DEFAULT_EXCLUDE,
                     help="feature names to leave out (default: %(default)s; give none to use all)")
+    ap.add_argument("--baselines-only", action="store_true",
+                    help="re-score only the untrained methods (bathtub, risk index) in the existing report, "
+                         "e.g. after preparing flood defences; the ML model is left as it is")
     args = ap.parse_args()
     if not args.labels.exists():
         raise SystemExit(f"{args.labels} not found. Run scripts/prepare_ml_data.py first.")
-    main(args.labels, args.out_dir, args.model_path, args.exclude)
+    if args.baselines_only:
+        rescore_baselines(args.labels, args.out_dir / C.ML_REPORT_FILE.name)
+    else:
+        main(args.labels, args.out_dir, args.model_path, args.exclude)

@@ -11,6 +11,7 @@ from streamlit_folium import st_folium
 
 from src import config as C
 from src.data_loader import load_study_area, missing_files
+from src.defences import load_defence_lines
 from src.buildings import (
     available_districts, district_counts, impact_modes, load_building_grid, load_buildings, load_facilities,
     values_at,
@@ -106,8 +107,13 @@ def get_facilities():
 
 
 @st.cache_data(show_spinner="Computing flood curve…")
-def get_curve(connected: bool):
-    return level_curve(get_area(), LEVELS, connected)
+def get_curve(connected: bool, defences: bool):
+    return level_curve(get_area(), LEVELS, connected, defences)
+
+
+@st.cache_resource
+def get_defence_lines():
+    return load_defence_lines()
 
 
 area = get_area()
@@ -128,6 +134,15 @@ with st.sidebar:
         help="On: only low ground connected to a river or canal floods. "
              "Off: every cell below the level floods (like heavy rain pooling in low spots).",
     )
+    use_defences = False
+    if area.defences is not None:
+        use_defences = st.toggle(
+            "Include flood defences", value=False, disabled=not connected,
+            help="River walls along the Chao Phraya, the King's Dike around eastern Bangkok and the "
+                 "Suvarnabhumi Airport dike hold water out until it rises above their crest (2.5–3.5 m). "
+                 "Canals inside them are pumped, so they don't flood the land they run through. "
+                 "Only applies when water must flow from rivers/canals.",
+        ) and connected
     animate = st.button("Animate rising water (0 → 3 m)", use_container_width=True, type="primary")
 
     st.header("Risk index weights")
@@ -166,10 +181,14 @@ with st.sidebar:
             help="Sentinel-1 passes over Bangkok every few days. Also sets 'Flooded now' in tooltips and tables.",
         )
     show_waterways = st.checkbox("Rivers & canals", value=False)
+    show_defences = use_defences or st.checkbox(
+        "Flood defences", value=False, disabled=get_defence_lines() is None,
+        help="Orange = holding at this water level, dashed red = overtopped. Hover a line for its crest "
+             "height and source. Always shown while defences are included in the simulation.")
     dark = st.checkbox("Dark basemap", value=True)
 
 # ---------------- compute ----------------
-result = simulate(area, level, connected)
+result = simulate(area, level, connected, use_defences)
 risk = risk_index(factors, w_elev, w_water, w_pop)
 table = (
     area.districts[["district_id", "district"]]
@@ -209,7 +228,7 @@ if animate:
     stage = st.empty()
     base = get_basemap()
     for lv in LEVELS:
-        frame_res = simulate(area, float(lv), connected)
+        frame_res = simulate(area, float(lv), connected, use_defences)
         frame_tbl = table[["district_id"]].merge(frame_res.by_district.reset_index(), on="district_id")
         with stage.container():
             show_metrics(frame_res, frame_tbl)
@@ -233,6 +252,7 @@ fmap = build_map(
     observed=ml.observed if show_obs else None,
     radar=radar_pass["flood_pct"] if show_radar else None,
     radar_label=f"Radar flood {radar_date}",
+    defences=get_defence_lines() if show_defences else None, level=level,
 )
 st_folium(fmap, height=620, use_container_width=True, returned_objects=[])
 st.caption("Hover a district for details. Toggle layers in the sidebar or the map's layer control.")
@@ -539,6 +559,24 @@ with tab_valid:
                 m4.metric(f"2011 flood: ML minus bathtub ({metric_name})", f"{gap:+.2f}",
                           help="Mean over the 5 spatial cross-validation folds.")
 
+        def_name = "Bathtub + defences"
+        if ev_all is not None and def_name in set(ev_all["method"]):
+            w = wins(ev_all, def_name, vscope, vmetric)
+            d1, d2, d3, d4 = st.columns(4)
+            d1.metric(f"Defences improve the bathtub ({metric_name})", f"{w['better']} of {w['passes']} passes",
+                      help="The bathtub simulation with the river walls, King's Dike and airport dike, compared "
+                           "with the plain bathtub.")
+            if w["has_intervals"]:
+                d2.metric("Clearly better", w["clearly_better"],
+                          help=f"Passes where the {CI}% interval of the difference is entirely above zero.")
+                d3.metric("Clearly worse", w["clearly_worse"],
+                          help=f"Passes where the {CI}% interval of the difference is entirely below zero.")
+            cv11 = vt[vt["event"].str.startswith("2011")].set_index("method")
+            if {def_name, REFERENCE} <= set(cv11.index):
+                gap = cv11.loc[def_name, vmetric] - cv11.loc[REFERENCE, vmetric]
+                d4.metric("2011 flood: gain from defences", f"{gap:+.2f}",
+                          help="Mean over the 5 spatial cross-validation folds.")
+
         if ev_all is not None and not ev_all.empty:
             c1, c2 = st.columns(2)
             with c1:
@@ -632,7 +670,7 @@ with tab_curve:
         "the elevation data: Copernicus rounds many flat areas to 0.5 m heights, so large patches "
         "switch to flooded all at once. Read the overall slope, not the individual steps."
     )
-    st.plotly_chart(level_curve_chart(get_curve(connected), level), use_container_width=True)
+    st.plotly_chart(level_curve_chart(get_curve(connected, use_defences), level), use_container_width=True)
 with tab_table:
     st.dataframe(
         table.drop(columns="district_id").sort_values("risk", ascending=False),
@@ -656,6 +694,13 @@ with tab_method:
 the chosen water level floods. When *water must flow from rivers/canals* is on, a low area floods only
 if it is connected to a river or canal cell. Depth = water level − ground elevation.
 
+**Flood defences (optional).** With *Include flood defences* on, the Chao Phraya river walls (crest 2.5–3.0 m,
+by section), the King's Dike around eastern Bangkok (2.5 m) and the Suvarnabhumi Airport dike (3.5 m) block water
+until the level rises above their crest. Canals inside the walls don't flood the land around them, because pumps
+and gates keep them low. The routes follow published descriptions traced along OpenStreetMap roads; the crest
+heights are the lower end of published ranges. Hover a line on the map for its source. The northern closure
+between Phahon Yothin Road and the river is approximate.
+
 **Risk index.** A weighted blend of three factors, each scaled 0–1:
 low elevation (relative to the area), distance to the nearest river/canal (decays over ~1 km),
 and log population density. Change the weights in the sidebar to see how the ranking shifts.
@@ -666,7 +711,9 @@ geoBoundaries district boundaries. The study area covers greater Bangkok
 (≈ {fmt_people(area.population[bkk].sum())} people).
 
 **Limitations — this is an exploratory model, not a forecast:**
-- Ignores flood walls, dikes, pumping stations, drainage tunnels and water gates, which protect much of inner Bangkok.
+- Flood walls and dikes are modelled only when *Include flood defences* is on, with one crest height per
+  section; real walls vary along their length and have gaps. Pumping stations, drainage tunnels and the
+  capacity of the gates are not modelled, and the west bank's (Thonburi) polder dikes aren't included.
 - Water is static: no flow speed, rainfall timing, tides or duration.
 - The elevation data is a *surface* model (includes buildings). Taking the lowest value in each cell
   reduces this, but some errors remain, and Bangkok's ground is sinking a few cm per year.

@@ -25,9 +25,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from src import config as C  # noqa: E402
 from src.current_flood import DRY_PCT, FLOODED_PCT, load_pass, radar_labels  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
-from src.risk import compute_factors, risk_index  # noqa: E402
 from src.validation import N_BOOT, block_bootstrap  # noqa: E402
-from train_model import BLOCK_M, bathtub_onset, spatial_blocks  # noqa: E402
+from train_model import BLOCK_M, baseline_methods, spatial_blocks  # noqa: E402
 
 
 def score(y, s) -> dict:
@@ -39,10 +38,7 @@ def main():
     area = load_study_area()
     bkk = area.district_ids > 0
     blocks = spatial_blocks().reshape(bkk.shape)
-    methods = {
-        "Bathtub simulation": -bathtub_onset(area),
-        "Risk index (default weights)": risk_index(compute_factors(area), 0.5, 0.3, 0.2),
-    }
+    methods = baseline_methods(area)  # bathtub (with and without defences) and risk index
     if C.ML_PROB_FILE.exists():
         with rasterio.open(C.ML_PROB_FILE) as src:
             methods = {"ML model (trained on 2011)": src.read(1), **methods}

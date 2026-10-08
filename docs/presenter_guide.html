@@ -209,31 +209,50 @@
     <figure><img src="screenshots/06_connectivity_off.png" alt="Connected off"><figcaption><span class="pill">Off</span> Rain pooling: 1,104 km², 1.23 M people. Scattered low spots across the city now fill too.</figcaption></figure>
   </div>
   <div class="say">With the switch on, water has to physically reach a place from a river or canal. With it off, we're modelling heavy rain collecting in every low spot. In Bangkok the difference is small, because the canal network connects almost everything. That's a finding in itself.</div>
+</section>
 
-  <div class="step"><div class="n">7</div><h3>Change the risk weights</h3></div>
+<section class="page">
+  <div class="step"><div class="n">7</div><h3>Add the flood defences</h3></div>
+  <p class="do">Set the level to <b>2.0 m</b>, switch <b>“Water must flow from rivers/canals”</b> back on, then switch on <b>“Include flood defences”</b>. Hover a defence line for its crest height and source.</p>
+  <figure><img src="screenshots/29_defences_2_0.png" alt="Flood defences at 2.0 m" style="max-height:105mm;width:auto;margin:0 auto"><figcaption><span class="pill">2.0 m, defences on</span> Orange lines = walls holding at this level: the Chao Phraya river walls, the King's Dike around eastern Bangkok, and the Suvarnabhumi Airport dike. The polder inside stays dry; the farmland east of the King's Dike, the west bank and the coast still flood.</figcaption></figure>
+  <table>
+    <tr><th>Bangkok's 50 districts</th><th class="num">1.0 m</th><th class="num">1.5 m</th><th class="num">2.0 m</th><th class="num">2.5 m</th></tr>
+    <tr><td>People affected, no defences</td><td class="num">0.32 M</td><td class="num">0.89 M</td><td class="num">1.93 M</td><td class="num">3.41 M</td></tr>
+    <tr><td><b>People affected, with defences</b></td><td class="num"><b>0.12 M</b></td><td class="num"><b>0.36 M</b></td><td class="num"><b>0.80 M</b></td><td class="num"><b>3.38 M</b></td></tr>
+    <tr><td>Flooded area, no defences → with</td><td class="num">168 → 132 km²</td><td class="num">371 → 271 km²</td><td class="num">678 → 490 km²</td><td class="num">937 → 933 km²</td></tr>
+  </table>
+  <ul>
+    <li><b>The walls more than halve the people affected up to 2 m</b>, mainly by keeping the inner east dry: at 2.0 m, Prawet goes from 64% flooded to 0%, Suan Luang from 40% and Bang Kapi from 36%, which together is about 370,000 people.</li>
+    <li><b>At 2.5 m the King's Dike is overtopped</b> and almost everything floods at once. Defences don't remove the risk; they move it to a cliff edge.</li>
+    <li><b>Outside the walls nothing changes:</b> Nong Chok (70% at 2.0 m), Bang Khun Thian (67%) and Thung Khru stay as they were. That's the 2011 story: the walls protected the centre while water stood in the east for weeks.</li>
+  </ul>
+  <div class="say">Here's the trade-off Bangkok makes. The walls keep the centre dry up to about two and a half metres, but every drop they hold back has to go somewhere, and that's the farmland outside them. Above the crest, the protection is gone all at once.</div>
+  <div class="note"><b>Be honest about the limits:</b> crest heights are the low end of published figures, one value per section; real walls vary and have gaps. The northern closure along Bangkok's boundary is approximate: it keeps Don Mueang dry, but Don Mueang flooded in 2011. Pumps and drainage tunnels aren't modelled, and neither are the west bank's polder dikes. With defences, the bathtub matches real floods better: ROC-AUC 0.67 → 0.72 for 2011 and better on all 8 radar passes, but still well behind the ML model.</div>
+
+  <div class="step"><div class="n">8</div><h3>Change the risk weights</h3></div>
   <p class="do">Tick <b>Risk index</b>, untick <b>Flood depth</b>, then move the three weight sliders. The full talk track and every reason to change the weights are in Section 5.</p>
 
-  <div class="step"><div class="n">8</div><h3>Show what really flooded in 2011 (machine learning)</h3></div>
+  <div class="step"><div class="n">9</div><h3>Show what really flooded in 2011 (machine learning)</h3></div>
   <p class="do">Untick <b>Risk index</b>, tick <b>Observed flood (2011)</b> with <b>Flood depth</b> on, then open the <b>ML model</b> tab. The full talk track is in Section 6.</p>
   <div class="say">So far, every map has been a model. This one is what actually happened. And it's not what the bathtub predicted.</div>
 
-  <div class="step"><div class="n">9</div><h3>Show this week's flood (satellite radar)</h3></div>
+  <div class="step"><div class="n">10</div><h3>Show this week's flood (satellite radar)</h3></div>
   <p class="do">Untick <b>Observed flood (2011)</b> and <b>Flood depth</b>, tick <b>Radar flood (Sentinel-1)</b>, then open the <b>Current flood</b> tab. The full talk track is in Section 7.</p>
   <div class="say">Everything so far was history or simulation. This is Bangkok this week, seen from space through the monsoon clouds. And the model trained on 2011 predicted it.</div>
 
-  <div class="step"><div class="n">10</div><h3>Show the buildings in 3D</h3></div>
+  <div class="step"><div class="n">11</div><h3>Show the buildings in 3D</h3></div>
   <p class="do">Set the water level to <b>1.5 m</b>, open the <b>Buildings 3D</b> tab, start on <b>Whole city</b>, then switch to <b>District</b> and pick Lat Krabang or Nong Chok. Right-drag to tilt and rotate. The full talk track is in Section 8.</p>
   <div class="say">Maps of blue areas are abstract. These are 2.1 million real buildings. At one and a half metres, the water reaches about 140,000 of them, and 58 hospitals, schools and emergency stations.</div>
 
-  <div class="step"><div class="n">11</div><h3>Show the charts</h3></div>
+  <div class="step"><div class="n">12</div><h3>Show the charts</h3></div>
   <div class="grid2">
     <figure><img src="screenshots/15_tab_top.png" alt="Top districts"><figcaption>Most affected districts at the current level.</figcaption></figure>
     <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve"><figcaption>Flooded area and people affected across all levels.</figcaption></figure>
   </div>
   <div class="note"><b>About the steps in the flood curve:</b> the jumps at exactly 0.5, 1.0, 1.5 and 2.0 m come from the elevation data, not from the real world. The Copernicus dataset rounds many flat areas to 0.5 m heights, so big patches flip to “flooded” together. Point the audience to the overall trend: the number of people affected climbs faster once the water passes about 1.5 m.</div>
 
-  <div class="step"><div class="n">12</div><h3>Close</h3></div>
-  <div class="say">This isn't a forecast. It ignores Bangkok's pumps, walls and drainage tunnels. But from free satellite data it shows where the terrain puts people at risk, and a model trained on the real 2011 flood tells us which of those warnings to trust. Next, I'd teach it more floods, including this year's, using satellite radar.</div>
+  <div class="step"><div class="n">13</div><h3>Close</h3></div>
+  <div class="say">This isn't a forecast. It models Bangkok's main walls and dikes but not its pumps or drainage tunnels. But from free satellite data it shows where the terrain puts people at risk, and a model trained on the real 2011 flood tells us which of those warnings to trust. Next, I'd teach it more floods, including this year's, using satellite radar.</div>
 </section>
 
 <!-- ============================ RISK WEIGHTS ============================ -->
@@ -355,10 +374,11 @@
 
 <section>
   <h3>Did the models see it coming?</h3>
-  <p>None of the three methods has ever seen this flood, which makes this the fairest test in the project.</p>
+  <p>None of the methods has ever seen this flood, which makes this the fairest test in the project.</p>
   <table>
     <tr><th>Method, scored against the 27 Sep radar map</th><th class="num">ROC-AUC, greater Bangkok</th><th class="num">ROC-AUC, Bangkok (50)</th><th class="num">PR-AUC, greater Bangkok</th></tr>
     <tr><td><b>ML model (trained on 2011)</b></td><td class="num"><b>0.91</b></td><td class="num"><b>0.94</b></td><td class="num"><b>0.154</b></td></tr>
+    <tr><td>Bathtub + flood defences</td><td class="num">0.75</td><td class="num">0.88</td><td class="num">0.042</td></tr>
     <tr><td>Bathtub simulation</td><td class="num">0.70</td><td class="num">0.83</td><td class="num">0.036</td></tr>
     <tr><td>Hand-weighted risk index</td><td class="num">0.39</td><td class="num">0.47</td><td class="num">0.017</td></tr>
     <tr><td class="muted">Random guess</td><td class="num muted">0.50</td><td class="num muted">0.50</td><td class="num muted">0.023</td></tr>
@@ -373,7 +393,7 @@
 
 <section class="page">
   <h3>The Validation tab: is the difference real, or luck?</h3>
-  <p>The <b>Validation</b> tab collects every test in one place: the 2011 flood and every radar pass, for all three methods, with a <b>95% interval</b> on each score. Neighbouring cells flood together, so the intervals come from re-scoring on the map's 4 km blocks resampled 200 times (a <i>spatial block bootstrap</i>). The difference from the bathtub gets its own interval: when it stays above zero, the ML model's lead isn't luck.</p>
+  <p>The <b>Validation</b> tab collects every test in one place: the 2011 flood and every radar pass, for every method (including the bathtub with flood defences), with a <b>95% interval</b> on each score. Neighbouring cells flood together, so the intervals come from re-scoring on the map's 4 km blocks resampled 200 times (a <i>spatial block bootstrap</i>). The difference from the bathtub gets its own interval: when it stays above zero, the ML model's lead isn't luck.</p>
   <figure><img src="screenshots/28_tab_validation.png" alt="Validation tab" style="max-height:150mm;width:auto;margin:0 auto"><figcaption>The <b>Validation</b> tab: how often the ML model beats the bathtub, scores over time with shaded 95% intervals, each method's difference from the bathtub, and every result in a table that can be downloaded as CSV. Switch between ROC-AUC and PR-AUC, and between greater Bangkok and the 50 districts.</figcaption></figure>
   <table>
     <tr><th>ML model vs bathtub, 8 radar passes (20 Aug – 27 Sep)</th><th class="num">Greater Bangkok</th><th class="num">Bangkok (50)</th></tr>
@@ -448,6 +468,7 @@
     <li><b>Current flood (radar, 27 Sep 2026):</b> 99 km² of unusual water across greater Bangkok, 32 km² inside the city, after about 200 mm of rain on 25–27 Sep.</li>
     <li><b>Most flooded now:</b> Nong Chok 8.3%, Lat Krabang 5.9%, Min Buri 2.8%, Khlong Sam Wa 2.0%.</li>
     <li><b>Models vs this week's flood:</b> ML 0.91 (0.94 in Bangkok), bathtub 0.70, risk index 0.39 ROC-AUC.</li>
+    <li><b>Flood defences at 2.0 m:</b> people affected in Bangkok fall from 1.93 M to 0.80 M; at 2.5 m the King's Dike is overtopped. With defences the bathtub scores 0.72 vs 0.67 on 2011 and beats the plain bathtub on all 8 radar passes.</li>
     <li><b>Across all 8 radar passes:</b> ML beats the bathtub on 7 (8 inside the city); 5 of those are clear of the 95% interval, and it is never clearly worse.</li>
     <li><b>Buildings:</b> 2,116,261 mapped. Affected at 1.0 / 1.5 / 2.0 m: 36,711 / 139,517 / 353,200. Critical facilities affected: 17 / 58 / 148 of 1,390.</li>
   </ul>
@@ -460,7 +481,7 @@
   <table class="qa">
     <tr><th style="width:32%">Question</th><th>Suggested answer</th></tr>
     <tr><td>Is this a forecast of the current flood?</td><td>No. It's a “what-if” tool: it shows where water <i>would</i> go at a given height. The <i>Current flood</i> tab shows recent rainfall and modelled river flow for context, but they don't set the water level. Driving the simulation from live river gauges is a planned next step.</td></tr>
-    <tr><td>Why doesn't central Bangkok flood more?</td><td>Two reasons. The elevation data includes buildings, which makes the dense core look higher than the ground really is. In reality, the centre is also protected by flood walls, dikes and pumps, which this model doesn't include. Treat the centre's result with caution.</td></tr>
+    <tr><td>Why doesn't central Bangkok flood more?</td><td>Two reasons. The elevation data includes buildings, which makes the dense core look higher than the ground really is. The centre is also protected by flood walls, dikes and pumps: switch on <i>Include flood defences</i> and the inner city stays dry until the water tops the walls at about 2.5 m. Pumps and tunnels still aren't modelled, so treat the centre's result with caution.</td></tr>
     <tr><td>Why does the flooded area jump at 0.5, 1.0, 1.5 m?</td><td>That's a quirk of the elevation dataset, not a real threshold. Copernicus rounds many flat areas to 0.5 m heights, so big patches switch to flooded together. Look at the overall trend.</td></tr>
     <tr><td>Why are the headline numbers bigger than the table totals?</td><td>The headline cards cover the whole map area (greater Bangkok, about 18 M people). The table and district counts cover only Bangkok's 50 districts (about 10.9 M).</td></tr>
     <tr><td>How accurate is the elevation?</td><td>It's a 30 m global satellite surface model, good for relative comparisons across the city. Treat differences smaller than about half a metre, and any single street, as uncertain.</td></tr>
@@ -488,7 +509,7 @@
   <h3>Limitations (say these out loud, because it builds credibility)</h3>
   <ul>
     <li><b>“Bathtub” model:</b> water is static. There's no flow speed, rainfall timing, tide cycle or flood duration.</li>
-    <li><b>No flood defences:</b> walls, dikes, pumping stations, drainage tunnels and water gates are not modelled.</li>
+    <li><b>Flood defences, simplified:</b> the river walls, King's Dike and airport dike are modelled (when switched on) with one crest height per section; pumping stations, drainage tunnels, gate capacity and the west bank's polder dikes are not.</li>
     <li><b>Surface elevation:</b> buildings and trees inflate heights, especially in the centre. Ground subsidence of a few cm per year isn't included.</li>
     <li><b>Elevation rounding:</b> many flat areas are stored in 0.5 m steps, which makes the curve jump at those levels.</li>
     <li><b>Population:</b> 2020 modelled estimates of where people live, not where they are during the day.</li>
@@ -501,7 +522,7 @@
   <ol>
     <li><b>More floods for the model:</b> use this month's radar flood maps as a second training event, so the model learns from both a river flood (2011) and a rain flood (2026).</li>
     <li><b>Go live:</b> rainfall and modelled river flow are now shown next to each radar pass; the next step is using real river-gauge levels to set the simulated water level.</li>
-    <li><b>Add defences:</b> include the known flood walls and dikes as barriers in the connectivity step.</li>
+    <li><b>Refine defences:</b> surveyed crest heights along each wall, the west bank's polder dikes, and pumping capacity.</li>
     <li><b>Add vulnerability:</b> hospitals, schools and income data to go beyond exposure.</li>
     <li><b>Share it:</b> deploy on Streamlit Community Cloud so anyone can open a link.</li>
   </ol>
@@ -521,6 +542,7 @@
     <tr><td>River flow</td><td>GloFAS via the Open-Meteo Flood API (no key), Chao Phraya at Nonthaburi; normal = 1996–2025 median for the date</td><td>Daily, ~5 km</td></tr>
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
+    <tr><td>Flood defences</td><td>Routes: Royal Development Projects Board and Think of Living (2011), traced on OpenStreetMap roads. Crests: BMA flood-wall figures, JICA (Rom Klao Road 2.47 m), Airports of Thailand (3.5 m)</td><td>Lines, ~65 m grid</td></tr>
     <tr><td>Basemap</td><td>Esri World Gray Canvas tiles</td><td>Online tiles</td></tr>
   </table>
   <h3>Rebuilding the ML model</h3>
@@ -530,6 +552,10 @@ python scripts/train_model.py                                  # about 2 min; pr
   <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes, added to the archive (also runs daily on GitHub)
 python scripts/evaluate_current.py                                 # re-score the models, with 95% intervals (~3 min)
 python scripts/fetch_current_flood.py --weather-only               # just refresh rain + river flow (no Earth Engine)</pre>
+  <h3>Rebuilding the flood defences</h3>
+  <pre>python scripts/prepare_defences.py               # routes from OpenStreetMap roads, crests from the sources in the script
+python scripts/train_model.py --baselines-only    # re-score the bathtub on 2011 without retraining the ML model
+python scripts/evaluate_current.py                # and on every radar pass</pre>
   <h3>Rebuilding the building data</h3>
   <pre>python scripts/prepare_buildings.py --gee-project YOUR_PROJECT   # all 50 districts, about 45 min</pre>
   <h3>Regenerating the screenshots and this PDF</h3>

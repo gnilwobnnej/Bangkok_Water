@@ -1,4 +1,6 @@
 """Load the preprocessed rasters and vectors produced by scripts/prepare_data.py."""
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 import geopandas as gpd
@@ -22,6 +24,7 @@ class StudyArea:
     districts: gpd.GeoDataFrame
     waterways: gpd.GeoDataFrame
     transform: object
+    defences: np.ndarray | None = None  # crest height of walls/dikes, m (NaN = none); None if not prepared
 
 
 def missing_files():
@@ -57,4 +60,5 @@ def load_study_area() -> StudyArea:
         dem=dem.astype("float32"), population=population.astype("float32"),
         water=water.astype(bool), cell_area_km2=cell_area, district_ids=district_ids,
         districts=districts, waterways=waterways, transform=transform,
+        defences=_read(C.DEFENCES_FILE)[0].astype("float32") if C.DEFENCES_FILE.exists() else None,
     )

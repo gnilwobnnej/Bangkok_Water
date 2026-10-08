@@ -48,12 +48,49 @@ own `earthengine authenticate` login.
 
 ## Features
 - **Water-level slider (0–3 m)** with live flooded area, people affected, and districts at risk
-- **"Bathtub + connectivity" flood model**: low ground floods only if linked to a river/canal (toggleable)
+- **"Bathtub + connectivity" flood model**: low ground floods only if linked to a river/canal (toggleable),
+  optionally held back by the river walls, King's Dike and airport dike until the water tops them
 - **Flood risk index** blending low elevation, proximity to waterways, and population density, with adjustable weights
 - **Interactive map**: flood-depth, ground-elevation (adjustable colour range + relief shading) and risk overlays, rivers & canals, district hover tooltips
 - **Elevation profile**: histogram of land area by height vs. the water level, lowest districts
 - **Animation** of rising water from 0 to 3 m
 - District ranking chart, flood-vs-level curve, and a sortable district table
+
+## Flood defences (optional)
+```bash
+python scripts/prepare_defences.py   # ~1 min; OpenStreetMap roads -> data/processed/defences.tif + .geojson
+```
+The sidebar switch **Include flood defences** adds Bangkok's main flood barriers to the river-connected
+simulation:
+
+| Defence | Route | Crest (m above sea level) |
+|---|---|---|
+| King's Dike | Bangkok's northern boundary from the river → Phahon Yothin, Sai Mai, Hathai Rat, Rom Klao, King Kaew and Tamru-Bang Phli roads → Old Sukhumvit Road at Samut Prakan | 2.5 |
+| Chao Phraya river walls (both banks) | Bangkok's northern boundary to Samut Prakan | 3.0 upstream, 2.8 middle, 2.5 downstream |
+| Suvarnabhumi Airport dike | Ring around the airport | 3.5 |
+
+- **How walls work in the model:** a wall blocks water until the level rises above its crest. Canals inside the
+  walls don't flood the land around them, because pumps and gates keep them low. Only rivers and canals
+  connected to the map edge (the Gulf and the rivers running off the map) feed the flood.
+- **Sources:** routes follow published descriptions (Royal Development Projects Board; Think of Living, 2011),
+  traced along OpenStreetMap roads. Crest heights are the lower end of published ranges: BMA flood-wall figures,
+  JICA's 2.47 m design level for Rom Klao Road, and Airports of Thailand for the airport dike. Every line carries
+  its source; hover it on the map. Edit `SECTIONS`, `RIVER_WALLS` or `AIRPORT_DIKE` in the script to change an
+  assumption.
+- **Caveats:**
+  - The northern closure along Bangkok's boundary is approximate. It keeps Don Mueang dry, but Don Mueang
+    flooded in 2011.
+  - Walls are one crest height per section.
+  - The west bank's (Thonburi) polder dikes, pumps and tunnels aren't modelled.
+  - Crest heights are above Thai mean sea level and the DEM is above the EGM2008 geoid. These differ by a few
+    tens of cm, and no correction is applied.
+
+**Effect at 2.0 m (Bangkok's 50 districts):** flooded area falls from 678 to 490 km², and people affected from
+1.93 M to 0.80 M. At 2.5 m the King's Dike is overtopped, and the results return to the no-defence numbers.
+
+**Against real floods:** on the 2011 flood, ROC-AUC rises from 0.668 to 0.722. The gain holds in all 5
+cross-validation folds. Results for the radar passes are in the Validation tab. To re-score 2011 without
+retraining the ML model, run `python scripts/train_model.py --baselines-only`.
 
 ## Machine-learning model (optional)
 A LightGBM model learns flood susceptibility from where Bangkok **actually flooded in 2011**
@@ -106,7 +143,7 @@ river data.
 2011-trained ML model scores ROC-AUC 0.91 (0.94 within Bangkok), the bathtub 0.70 and the risk index 0.39.
 
 ## Validation
-The **Validation** tab gathers every test of the three methods (ML model, bathtub simulation, risk index) on
+The **Validation** tab gathers every test of the methods (ML model, bathtub with and without defences, risk index) on
 floods they never saw: the 2011 flood (spatial cross-validation) and every radar pass. It shows:
 - how often the ML model beats the bathtub, and on how many passes the difference is clear of noise;
 - ROC-AUC or PR-AUC over time with shaded 95% intervals, and each method's difference from the bathtub;
@@ -147,6 +184,7 @@ buildings).
 | River flow | GloFAS via the Open-Meteo Flood API, Chao Phraya at Nonthaburi, daily; normal = 1996-2025 median |
 | Buildings | Google Open Buildings v3 footprints + 2.5D Temporal heights* |
 | Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
+| Flood defences | Routes: Royal Development Projects Board, OpenStreetMap roads; crests: BMA, JICA, Airports of Thailand |
 
 ## Project layout
 ```
@@ -157,12 +195,14 @@ scripts/train_model.py          Train + evaluate the LightGBM flood model
 scripts/fetch_current_flood.py  Sentinel-1 radar flood maps, rainfall and river flow
 scripts/evaluate_current.py     Score every method against the radar maps
 scripts/prepare_buildings.py    Building footprints, heights and facilities per district
+scripts/prepare_defences.py     River walls, King's Dike and airport dike -> crest-height grid
 scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
 scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF
 src/config.py                   Study area, grid, file paths
 src/data_loader.py              Load processed data
 src/risk.py                     Risk index
-src/simulate.py                 Flood simulation + impact stats
+src/simulate.py                 Flood simulation (optionally with defences) + impact stats
+src/defences.py                 Defence lines -> crest grid, load lines for the map
 src/features.py                 ML features
 src/ml.py                       Load the ML model outputs
 src/current_flood.py            Load radar passes, rainfall and river flow
@@ -186,7 +226,8 @@ bootstrap scores (checked against scikit-learn).
 Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).
 
 ## Limitations
-Exploratory model, not a forecast: ignores flood walls, pumps, drainage tunnels and water gates;
+Exploratory model, not a forecast: flood walls and dikes only with the defences switch, one crest per
+section; pumps, drainage tunnels and gate capacity aren't modelled;
 water is static (no flow, rainfall timing, or tides); the DEM is a surface model that includes
 some buildings; population is a 2020 estimate.
 

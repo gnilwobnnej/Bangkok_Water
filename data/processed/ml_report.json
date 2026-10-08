@@ -16,13 +16,6 @@
     "folds": 5,
     "summary": [
       {
-        "method": "Bathtub simulation",
-        "roc_auc": 0.6679124387185524,
-        "roc_auc_std": 0.01887021064751789,
-        "pr_auc": 0.28777418207570477,
-        "pr_auc_std": 0.029731691114671624
-      },
-      {
         "method": "ML model (LightGBM)",
         "roc_auc": 0.8669936152875077,
         "roc_auc_std": 0.016204960700643055,
@@ -35,6 +28,20 @@
         "roc_auc_std": 0.026475513715604207,
         "pr_auc": 0.18138023860712277,
         "pr_auc_std": 0.0247517991248537
+      },
+      {
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6679124387185524,
+        "roc_auc_std": 0.01887021064751789,
+        "pr_auc": 0.28777418207570477,
+        "pr_auc_std": 0.029731691114671624
+      },
+      {
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7216441607970907,
+        "roc_auc_std": 0.014016560507793398,
+        "pr_auc": 0.32789317998231027,
+        "pr_auc_std": 0.04092550478369956
       }
     ],
     "folds_detail": [
@@ -57,6 +64,12 @@
         "pr_auc": 0.2745972484453996
       },
       {
+        "fold": 1,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7105337762516412,
+        "pr_auc": 0.3097925244497584
+      },
+      {
         "fold": 2,
         "method": "ML model (LightGBM)",
         "roc_auc": 0.8535021285514165,
@@ -73,6 +86,12 @@
         "method": "Bathtub simulation",
         "roc_auc": 0.6856150728934887,
         "pr_auc": 0.30914713923387144
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7359985159608853,
+        "pr_auc": 0.34633883351561223
       },
       {
         "fold": 3,
@@ -93,6 +112,12 @@
         "pr_auc": 0.302049172773842
       },
       {
+        "fold": 3,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.730624370916964,
+        "pr_auc": 0.3702496776849644
+      },
+      {
         "fold": 4,
         "method": "ML model (LightGBM)",
         "roc_auc": 0.8742775409247724,
@@ -111,6 +136,12 @@
         "pr_auc": 0.31153303414362377
       },
       {
+        "fold": 4,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7278000826100963,
+        "pr_auc": 0.3473219008430307
+      },
+      {
         "fold": 5,
         "method": "ML model (LightGBM)",
         "roc_auc": 0.879353408762487,
@@ -127,6 +158,12 @@
         "method": "Bathtub simulation",
         "roc_auc": 0.6702626692863605,
         "pr_auc": 0.24154431578178698
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7032640582458669,
+        "pr_auc": 0.2657629634181858
       }
     ]
   },
