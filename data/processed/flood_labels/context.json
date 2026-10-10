@@ -1,0 +1,113 @@
+{
+  "season": "August-November",
+  "rain_source": "Open-Meteo historical weather archive (ERA5 reanalysis) at 13.8N 100.75E",
+  "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E)",
+  "normal_years": [
+    1996,
+    2025
+  ],
+  "rain_normal_mm": 694.0,
+  "alert_river_pct": 130,
+  "years": [
+    {
+      "year": 2011,
+      "rain_total_mm": 746.0,
+      "rain_pct_normal": 107.0,
+      "rain_max_3day_mm": 86.0,
+      "river_peak_m3s": 9461.0,
+      "river_peak_date": "2011-10-06",
+      "river_peak_pct_normal": 209.0,
+      "river_days_above_alert": 122
+    },
+    {
+      "year": 2017,
+      "rain_total_mm": 821.0,
+      "rain_pct_normal": 118.0,
+      "rain_max_3day_mm": 82.0,
+      "river_peak_m3s": 5597.0,
+      "river_peak_date": "2017-10-20",
+      "river_peak_pct_normal": 152.0,
+      "river_days_above_alert": 52
+    },
+    {
+      "year": 2018,
+      "rain_total_mm": 733.0,
+      "rain_pct_normal": 106.0,
+      "rain_max_3day_mm": 92.0,
+      "river_peak_m3s": 7111.0,
+      "river_peak_date": "2018-08-29",
+      "river_peak_pct_normal": 219.0,
+      "river_days_above_alert": 55
+    },
+    {
+      "year": 2019,
+      "rain_total_mm": 723.0,
+      "rain_pct_normal": 104.0,
+      "rain_max_3day_mm": 167.0,
+      "river_peak_m3s": 7395.0,
+      "river_peak_date": "2019-09-05",
+      "river_peak_pct_normal": 211.0,
+      "river_days_above_alert": 33
+    },
+    {
+      "year": 2020,
+      "rain_total_mm": 1016.0,
+      "rain_pct_normal": 146.0,
+      "rain_max_3day_mm": 153.0,
+      "river_peak_m3s": 4344.0,
+      "river_peak_date": "2020-10-19",
+      "river_peak_pct_normal": 117.0,
+      "river_days_above_alert": 0
+    },
+    {
+      "year": 2021,
+      "rain_total_mm": 1002.0,
+      "rain_pct_normal": 144.0,
+      "rain_max_3day_mm": 110.0,
+      "river_peak_m3s": 7481.0,
+      "river_peak_date": "2021-09-27",
+      "river_peak_pct_normal": 168.0,
+      "river_days_above_alert": 48
+    },
+    {
+      "year": 2022,
+      "rain_total_mm": 1033.0,
+      "rain_pct_normal": 149.0,
+      "rain_max_3day_mm": 76.0,
+      "river_peak_m3s": 6137.0,
+      "river_peak_date": "2022-10-06",
+      "river_peak_pct_normal": 135.0,
+      "river_days_above_alert": 11
+    },
+    {
+      "year": 2023,
+      "rain_total_mm": 1029.0,
+      "rain_pct_normal": 148.0,
+      "rain_max_3day_mm": 88.0,
+      "river_peak_m3s": 5635.0,
+      "river_peak_date": "2023-10-13",
+      "river_peak_pct_normal": 140.0,
+      "river_days_above_alert": 3
+    },
+    {
+      "year": 2024,
+      "rain_total_mm": 870.0,
+      "rain_pct_normal": 125.0,
+      "rain_max_3day_mm": 69.0,
+      "river_peak_m3s": 5308.0,
+      "river_peak_date": "2024-10-07",
+      "river_peak_pct_normal": 118.0,
+      "river_days_above_alert": 0
+    },
+    {
+      "year": 2025,
+      "rain_total_mm": 864.0,
+      "rain_pct_normal": 124.0,
+      "rain_max_3day_mm": 78.0,
+      "river_peak_m3s": 5057.0,
+      "river_peak_date": "2025-10-02",
+      "river_peak_pct_normal": 112.0,
+      "river_days_above_alert": 24
+    }
+  ]
+}

@@ -28,6 +28,14 @@ ML_PROB_FILE = PROCESSED_DIR / "ml_susceptibility.tif"             # trained on 
 ML_PROB_2011_FILE = PROCESSED_DIR / "ml_susceptibility_2011.tif"   # trained on 2011 only (the "before" model)
 ML_REPORT_FILE = PROCESSED_DIR / "ml_report.json"
 ML_MODEL_FILE = MODELS_DIR / "flood_lgbm.txt"
+ML_DISAGREEMENT_FILE = PROCESSED_DIR / "ml_disagreement.tif"  # std of the CV fold models' probabilities
+
+# Elevation uncertainty (scripts/dem_uncertainty.py)
+DEM_UNCERTAINTY_DIR = PROCESSED_DIR / "dem_uncertainty"
+DEM_UNCERTAINTY_FILE = DEM_UNCERTAINTY_DIR / "summary.json"  # P5/P50/P95 curves per mode
+# ...plus chance_<mode>.tif: % of runs flooded, one uint8 band per level in src/uncertainty.PROB_LEVELS
+# The same with twice the error (--sigma 1.4), curves only: shows how much the assumed error size matters
+DEM_UNCERTAINTY_PESSIMISTIC_FILE = PROCESSED_DIR / "dem_uncertainty_pessimistic" / "summary.json"
 LABEL_NODATA = 255
 # Wet-season radar flood labels, one per year (scripts/build_flood_archive.py), same 1/0/255 format
 FLOOD_LABELS_DIR = PROCESSED_DIR / "flood_labels"        # radar_YYYY.tif + summary.json

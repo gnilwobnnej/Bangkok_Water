@@ -14,13 +14,16 @@ Two models are trained side by side, so the gain from the extra floods can be me
 
 Evaluation:
     Spatial block CV (~4 km blocks, 5 folds). A block is held out of every event at once, so a model is never
-    trained on a place it is tested on, in any year. Scored per event, against the bathtub and risk index.
+    trained on a place it is tested on, in any year. Scored per event, against the bathtub and risk index:
+    per fold, and pooled (every cell scored by the fold model that never saw it) with 95% block bootstrap
+    intervals. How much the 5 fold models disagree on each cell is saved as a map.
     Leave-one-event-out: train on every flood but one, test on that one (all its cells), with 95% block
     bootstrap intervals. This asks "how well does it predict a flood year it has never seen?".
 
 Outputs:
     data/processed/ml_susceptibility.tif        flood probability 0-1, all-floods model
     data/processed/ml_susceptibility_2011.tif   the same from the 2011-only model
+    data/processed/ml_disagreement.tif          standard deviation of the 5 CV fold models' probabilities
     data/processed/ml_report.json               events, CV and leave-one-event-out scores, feature
                                                 importance, per-district stats
     models/flood_lgbm.txt, models/flood_lgbm_2011.txt
@@ -197,6 +200,16 @@ def rescore_baselines(labels_path: Path, report_path: Path):
     print(f"\nUpdated {report_path} (2011 scores only)")
 
 
+def load_context() -> tuple:
+    """Per-year rainfall and river context (scripts/event_context.py): ({year: dict}, sources), or ({}, None)."""
+    path = C.FLOOD_LABELS_DIR / "context.json"
+    if not path.exists():
+        return {}, None
+    d = json.loads(path.read_text())
+    return ({r["year"]: {k: v for k, v in r.items() if k != "year"} for r in d["years"]},
+            {k: v for k, v in d.items() if k != "years"})
+
+
 def block_folds(blocks: np.ndarray) -> np.ndarray:
     """Fold number (1..N_FOLDS) per cell, from GroupKFold over the spatial blocks of the whole grid."""
     fold_of = np.zeros(len(blocks), dtype="int8")
@@ -229,15 +242,33 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
 
     # ---- Spatial block CV: each fold's blocks are held out of every event ----
     rows = []
+    fold_probs = []  # each fold model's prediction everywhere, for the disagreement map
+    oof = {m: np.zeros(len(blocks), dtype="float32") for m in ([ML_ALL, ML_2011] if compare_2011 else [ML_ALL])}
     for fold in range(1, N_FOLDS + 1):
         train_ok, test_ok = fold_of != fold, fold_of == fold
         preds = {ML_ALL: fit_predict(X, *training_set(events, train_ok))[1]}
         if compare_2011:
             preds[ML_2011] = fit_predict(X, *training_set(ev2011, train_ok, cap=10 ** 9))[1]
+        fold_probs.append(preds[ML_ALL])
+        for m in oof:
+            oof[m][test_ok] = preds[m][test_ok]  # out-of-fold: each cell predicted by the model that never saw it
         preds.update(baselines)
         for ev in events:
             rows += [{"fold": fold, **r} for r in score_all(preds, ev, test_ok)]
         print(f"  CV fold {fold} done")
+    disagreement = np.std(fold_probs, axis=0).astype("float32").reshape(C.HEIGHT, C.WIDTH)
+    del fold_probs
+
+    # Every cell scored once by a model that never saw its block, per event, with 95% block bootstrap intervals
+    pooled = []
+    for ev in events:
+        known = ev["labels"] != C.LABEL_NODATA
+        y = ev["labels"][known].astype(int)
+        preds = {**oof, **baselines}
+        ci = block_bootstrap(y, {n: p[known] for n, p in preds.items()}, blocks[known])
+        for r in score_all(preds, ev, np.ones(len(blocks), dtype=bool)):
+            pooled.append({**r, **ci[r["method"]], "flooded_share": ev["flooded_share"], "n_cells": ev["n_cells"]})
+    print_table("Spatial CV, out-of-fold scores per event:", pooled)
     per_event = cv_summary(rows, keys=("event", "method"))
     print_table("Spatial cross-validation, per event (mean +/- std over folds):", per_event)
     mean_over_events = (pd.DataFrame(per_event).groupby("method", sort=False)[["roc_auc", "pr_auc"]].mean()
@@ -302,11 +333,14 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     ]
 
     cv_2011 = [r for r in rows if r["event"] == ev2011[0]["name"]] if ev2011 else rows
+    context, context_meta = load_context()
     report = {
         # 2011 kept as "event" for the app's 2011 comparisons; every event is in "events"
         "event": {"id": "DFO_3850", "source": "Global Flood Database (MODIS, 250 m)",
                   "began": "2011-08-05", "ended": "2012-01-09"},
-        "events": [{k: e[k] for k in ("id", "year", "name", "source", "n_cells", "flooded_share")} for e in events],
+        "events": [{**{k: e[k] for k in ("id", "year", "name", "source", "n_cells", "flooded_share")},
+                    **({"context": context[e["year"]]} if e["year"] in context else {})} for e in events],
+        "event_context": context_meta,
         "test_years_from": C.TEST_YEARS_FROM,
         "cells_per_event": CELLS_PER_EVENT,
         "n_training_cells": int(sum(min(e["n_cells"], CELLS_PER_EVENT) for e in events)),
@@ -317,7 +351,8 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
                "folds_detail": [{k: v for k, v in r.items() if k != "event"} for r in cv_2011],
                "per_event": per_event,
                "mean_over_events": mean_over_events,
-               "per_event_folds": rows},
+               "per_event_folds": rows,
+               "pooled": pooled},
         "leave_one_event_out": loeo,
         "features": [
             {"feature": c, "label": FEATURE_LABELS.get(c, c), "mean_abs_shap": float(mean_abs[i]),
@@ -333,6 +368,8 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
                    transform=area.transform, compress="deflate", dtype="float32")
     with rasterio.open(out_dir / C.ML_PROB_FILE.name, "w", **profile) as dst:
         dst.write(prob, 1)
+    with rasterio.open(out_dir / C.ML_DISAGREEMENT_FILE.name, "w", **profile) as dst:
+        dst.write(disagreement, 1)
     if compare_2011:
         with rasterio.open(out_dir / C.ML_PROB_2011_FILE.name, "w", **profile) as dst:
             dst.write(prob_2011.reshape(C.HEIGHT, C.WIDTH), 1)

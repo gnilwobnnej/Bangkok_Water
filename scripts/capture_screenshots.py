@@ -182,6 +182,21 @@ def main():
             app.checkbox("Flood depth", True)  # simulated 1.5 m under the observed 2011 extent
             app.shot_map("21_observed_vs_simulated")
             app.checkbox("Observed flood (2011)", False)
+            if pg.locator('[data-testid="stSidebar"] label').filter(has_text="ML model disagreement").count():
+                app.checkbox("Flood depth", False)
+                app.checkbox("ML model disagreement", True)
+                app.shot_map("31_ml_disagreement")
+                app.checkbox("ML model disagreement", False)
+                app.checkbox("Flood depth", True)
+
+        # 8b. Elevation uncertainty (only once scripts/dem_uncertainty.py has run): chance flooded at 1.5 m
+        if pg.locator('[data-testid="stSidebar"] label').filter(has_text="Chance flooded").count():
+            app.level(1.5)
+            app.checkbox("Flood depth", False)
+            app.checkbox("Chance flooded", True)
+            app.shot_map("30_chance_flooded_1_5")
+            app.checkbox("Chance flooded", False)
+            app.checkbox("Flood depth", True)
 
         # 9. Current flood from Sentinel-1 radar (only once scripts/fetch_current_flood.py has run)
         has_radar = pg.locator('[data-testid="stSidebar"] label').filter(has_text="Radar flood").count() > 0

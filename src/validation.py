@@ -84,8 +84,18 @@ def block_bootstrap(y: np.ndarray, scores: dict, blocks: np.ndarray, n_boot: int
 
 
 def cv_table(report: dict) -> pd.DataFrame:
-    """The cross-validation scores of every training event, in the same shape as the radar results
-    (spread = fold min-max). Reports from before multi-flood training have only the 2011 folds."""
+    """The cross-validation scores of every training event, in the same shape as the radar results.
+
+    Pooled out-of-fold scores with 95% block bootstrap intervals when the report has them; otherwise the
+    mean over the folds, with the fold min-max as the spread. Reports from before multi-flood training have
+    only the 2011 folds."""
+    pooled = report["cv"].get("pooled")
+    if pooled:
+        df = _with_intervals(pd.DataFrame(pooled))
+        df["date"] = df["event"].map({e["name"]: e["year"] for e in report["events"]}).astype(str)
+        df["scope"] = "Greater Bangkok"
+        df["interval"] = f"{CI}% block bootstrap (out-of-fold)"
+        return df
     if "per_event_folds" in report["cv"]:
         folds = pd.DataFrame(report["cv"]["per_event_folds"])
         events = {e["name"]: e for e in report["events"]}
@@ -113,17 +123,22 @@ def loeo_table(report: dict | None) -> pd.DataFrame:
     rows = (report or {}).get("leave_one_event_out", [])
     if not rows:
         return pd.DataFrame()
-    df = pd.DataFrame(rows)
+    df = _with_intervals(pd.DataFrame(rows))
+    year = {e["name"]: e["year"] for e in report["events"]}
+    df["date"] = df["event"].map(year).astype(str)
+    df["scope"] = "Greater Bangkok"
+    df["random_pr_auc"] = df["flooded_share"]
+    return df
+
+
+def _with_intervals(df: pd.DataFrame) -> pd.DataFrame:
+    """Split the report's [lo, hi] interval lists into _lo / _hi columns (NaN where missing)."""
     for key in ("roc_auc", "pr_auc"):
         for suffix, col in (("", f"{key}_ci"), ("_diff", f"{key}_diff_ci")):
             vals = df[col] if col in df else pd.Series([None] * len(df))
             lohi = [v if isinstance(v, (list, tuple)) else (np.nan, np.nan) for v in vals]
             df[f"{key}{suffix}_lo"] = [v[0] for v in lohi]
             df[f"{key}{suffix}_hi"] = [v[1] for v in lohi]
-    year = {e["name"]: e["year"] for e in report["events"]}
-    df["date"] = df["event"].map(year).astype(str)
-    df["scope"] = "Greater Bangkok"
-    df["random_pr_auc"] = df["flooded_share"]
     return df.drop(columns=[c for c in df if c.endswith("_ci")])
 
 

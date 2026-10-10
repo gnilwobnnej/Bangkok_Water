@@ -27,6 +27,10 @@ RISK_CMAP = colormaps["YlOrRd"]
 ELEV_COLORS = ["#3b0f70", "#8c2981", "#de4968", "#fe9f6d", "#fcfdbf"]
 ELEV_CMAP = LinearSegmentedColormap.from_list("elevation", ELEV_COLORS)
 ML_CMAP = colormaps["RdPu"]
+# Chance flooded (elevation uncertainty): pale yellow-green (rarely) to deep blue (almost always)
+CHANCE_COLORS = ["#edf8b1", "#7fcdbb", "#2c7fb8", "#253494"]
+CHANCE_CMAP = LinearSegmentedColormap.from_list("chance", CHANCE_COLORS)
+DISAGREE_CMAP = colormaps["viridis"]
 OBSERVED_COLOR = (255, 176, 0)  # amber, so it stands out against the simulated-flood blues
 RADAR_COLOR = (255, 64, 64)     # red: flooding seen by radar on the selected date
 BOUNDS = [[C.SOUTH, C.WEST], [C.NORTH, C.EAST]]
@@ -73,6 +77,23 @@ def elevation_rgba(dem: np.ndarray, vmin: float, vmax: float, alpha: int = 225) 
 def probability_rgba(prob: np.ndarray, alpha: int = 170) -> np.ndarray:
     rgba = (ML_CMAP(np.clip(prob, 0, 1)) * 255).astype("uint8")
     rgba[..., 3] = alpha
+    return rgba
+
+
+def chance_rgba(chance: np.ndarray, max_alpha: int = 215) -> np.ndarray:
+    """Share of elevation-error runs (0-1) in which a cell floods; under 5% transparent, so rare cells don't fog
+    the map."""
+    rgba = (CHANCE_CMAP(np.clip(chance, 0, 1)) * 255).astype("uint8")
+    rgba[..., 3] = np.where(chance >= 0.05, (90 + np.clip(chance, 0, 1) * (max_alpha - 90)).astype("uint8"), 0)
+    return rgba
+
+
+def disagreement_rgba(std: np.ndarray, vmax: float, alpha: int = 190) -> np.ndarray:
+    """Spread of the CV fold models' probabilities. Cells where they broadly agree (under a quarter of vmax) are
+    transparent, so the map shows where disagreement stands out rather than colouring every cell."""
+    norm = np.clip(std / max(vmax, 1e-6), 0, 1)
+    rgba = (DISAGREE_CMAP(norm) * 255).astype("uint8")
+    rgba[..., 3] = np.where(norm >= 0.25, alpha, 0)
     return rgba
 
 
@@ -126,12 +147,20 @@ def build_map(
     ml_prob: np.ndarray | None = None, observed: np.ndarray | None = None,
     radar: np.ndarray | None = None, radar_label: str = "Radar flood",
     defences: "gpd.GeoDataFrame | None" = None, level: float | None = None,
+    chance: np.ndarray | None = None, chance_label: str = "Chance flooded",
+    disagreement: np.ndarray | None = None,
 ) -> folium.Map:
     m = folium.Map(
         location=CENTER, zoom_start=11, control_scale=True,
         tiles=ESRI_CANVAS.format("World_Dark_Gray_Base" if dark else "World_Light_Gray_Base"),
         attr=ESRI_ATTR,
     )
+    if elevation_range is not None or chance is not None or disagreement is not None:
+        # White card behind the legends so they stay readable on the dark basemap.
+        m.get_root().header.add_child(folium.Element(
+            "<style>.legend.leaflet-control{background:rgba(255,255,255,.88);"
+            "padding:4px 8px 2px;border-radius:6px}</style>"
+        ))
     if elevation_range is not None:
         vmin, vmax = elevation_range
         folium.raster_layers.ImageOverlay(
@@ -141,11 +170,6 @@ def build_map(
         legend = bcm.LinearColormap(ELEV_COLORS, vmin=vmin, vmax=vmax)
         legend.caption = "Ground elevation (m)"
         legend.add_to(m)
-        # White card behind the legend so it stays readable on the dark basemap.
-        m.get_root().header.add_child(folium.Element(
-            "<style>.legend.leaflet-control{background:rgba(255,255,255,.88);"
-            "padding:4px 8px 2px;border-radius:6px}</style>"
-        ))
     if risk is not None:
         folium.raster_layers.ImageOverlay(
             to_data_url(risk_rgba(risk, area.district_ids > 0)), bounds=BOUNDS,
@@ -156,6 +180,23 @@ def build_map(
             to_data_url(probability_rgba(ml_prob)), bounds=BOUNDS,
             name="ML flood susceptibility", interactive=False, zindex=2,
         ).add_to(m)
+    if disagreement is not None:
+        vmax = float(np.percentile(disagreement, 99))
+        folium.raster_layers.ImageOverlay(
+            to_data_url(disagreement_rgba(disagreement, vmax)), bounds=BOUNDS,
+            name="ML model disagreement", interactive=False, zindex=2,
+        ).add_to(m)
+        legend = bcm.LinearColormap([DISAGREE_CMAP(x) for x in np.linspace(0.25, 1, 6)], vmin=vmax / 4, vmax=vmax)
+        legend.caption = "ML model disagreement (std)"
+        legend.add_to(m)
+    if chance is not None:
+        folium.raster_layers.ImageOverlay(
+            to_data_url(chance_rgba(chance)), bounds=BOUNDS,
+            name=chance_label, interactive=False, zindex=3,
+        ).add_to(m)
+        legend = bcm.LinearColormap(CHANCE_COLORS, vmin=0, vmax=100)
+        legend.caption = chance_label + " (% of runs)"
+        legend.add_to(m)
     if observed is not None:
         folium.raster_layers.ImageOverlay(
             to_data_url(observed_rgba(observed)), bounds=BOUNDS,
@@ -255,8 +296,18 @@ def top_districts_chart(table: pd.DataFrame, n: int = 10) -> go.Figure:
     return fig
 
 
-def level_curve_chart(curve: pd.DataFrame, level: float) -> go.Figure:
+def level_curve_chart(curve: pd.DataFrame, level: float, band: pd.DataFrame | None = None) -> go.Figure:
+    """Flooded area and people vs water level. `band` (src/uncertainty.py) adds shaded P5-P95 ranges from the
+    elevation-error runs."""
     fig = go.Figure()
+    if band is not None:
+        x = list(band["level"]) + list(band["level"][::-1])
+        for col, scale, color, axis in [("area_km2", 1, "#2b7bd6", "y"), ("people", 1e6, "#f28e2b", "y2")]:
+            fig.add_trace(go.Scatter(
+                x=x, y=list(band[f"{col}_p95"] / scale) + list(band[f"{col}_p5"][::-1] / scale), yaxis=axis,
+                mode="lines", fill="toself", fillcolor=_rgba(color, 0.32), line=dict(width=0),
+                hoverinfo="skip", name=("Area" if col == "area_km2" else "People") + ": 90% range",
+            ))
     fig.add_trace(go.Scatter(
         x=curve["level"], y=curve["area_km2"], name="Flooded area (km²)",
         line=dict(color="#2b7bd6", width=3),
@@ -267,6 +318,14 @@ def level_curve_chart(curve: pd.DataFrame, level: float) -> go.Figure:
         line=dict(color="#f28e2b", width=3, dash="dot"),
         hovertemplate="%{x:.1f} m → %{y:.2f} M people<extra></extra>",
     ))
+    if band is not None:  # hover text with the ranges
+        fig.add_trace(go.Scatter(
+            x=band["level"], y=band["area_km2_p50"], mode="markers", marker=dict(size=0.1, color="rgba(0,0,0,0)"),
+            showlegend=False, customdata=band[["area_km2_p5", "area_km2_p95", "people_p5", "people_p95"]]
+            .assign(people_p5=band["people_p5"] / 1e6, people_p95=band["people_p95"] / 1e6),
+            hovertemplate="%{x:.1f} m, 90% range: %{customdata[0]:,.0f}–%{customdata[1]:,.0f} km², "
+                          "%{customdata[2]:.2f}–%{customdata[3]:.2f} M people<extra></extra>",
+        ))
     fig.add_vline(x=level, line_dash="dash", line_color="gray",
                   annotation_text=f"{level:.1f} m", annotation_position="top left")
     fig.update_layout(
@@ -308,10 +367,14 @@ def model_comparison_chart(cv: pd.DataFrame) -> go.Figure:
     cv = cv.set_index("method").reindex(known + [m for m in cv["method"] if m not in known]).reset_index()
     fig = go.Figure()
     for metric, name, color in [("roc_auc", "ROC-AUC", "#2b7bd6"), ("pr_auc", "PR-AUC", "#de4968")]:
-        std = f"{metric}_std"
+        std, lo, hi = f"{metric}_std", f"{metric}_lo", f"{metric}_hi"
+        if lo in cv:  # 95% interval
+            bars = dict(type="data", symmetric=False, array=cv[hi] - cv[metric], arrayminus=cv[metric] - cv[lo],
+                        visible=True)
+        else:  # spread over the CV folds (older reports)
+            bars = dict(type="data", array=cv[std], visible=True) if std in cv else None
         fig.add_trace(go.Bar(
-            x=cv["method"], y=cv[metric], name=name, marker_color=color,
-            error_y=dict(type="data", array=cv[std], visible=True) if std in cv else None,
+            x=cv["method"], y=cv[metric], name=name, marker_color=color, error_y=bars,
             text=cv[metric].map("{:.2f}".format), textposition="inside", insidetextanchor="middle",
             hovertemplate="%{x}<br>" + name + " %{y:.3f}<extra></extra>",
         ))

@@ -55,6 +55,8 @@ own `earthengine authenticate` login.
 - **Elevation profile**: histogram of land area by height vs. the water level, lowest districts
 - **Animation** of rising water from 0 to 3 m
 - District ranking chart, flood-vs-level curve, and a sortable district table
+- **Uncertainty**: 90% ranges from elevation error on the headline numbers and the flood curve, a "chance flooded"
+  map layer, and an "ML model disagreement" layer
 
 ## Flood defences (optional)
 ```bash
@@ -106,7 +108,9 @@ python scripts/prepare_ml_data.py --label-file data/raw/gfd_dfo_3850.tif
 python scripts/prepare_ml_data.py --gee-project YOUR_CLOUD_PROJECT_ID
 # 2. Wet-season radar labels 2017-2025 (~10 min per year; passes are cached in data/raw/flood_archive/)
 python scripts/build_flood_archive.py --gee-project YOUR_CLOUD_PROJECT_ID
-# 3. Train + evaluate (~7 min); prints scores per flood vs the existing methods
+# 3. Optional: each season's rain and river peak, shown next to the training floods (no key)
+python scripts/event_context.py
+# 4. Train + evaluate (~35 min); prints scores per flood vs the existing methods
 python scripts/train_model.py
 ```
 Each radar season combines its August-November passes, each compared with the same weeks of the year before:
@@ -116,7 +120,7 @@ same 1/0/255 format as flood_2011.tif; `summary.json` lists the passes used). In
 land flooded, against 21% in 2011.
 
 Evaluation: **spatial 5-fold CV** on 4 km blocks, held out of every flood year at once, and **leave one flood
-out** (train on the other nine, test on all of the tenth, with 95% block-bootstrap intervals).
+out** (train on the other nine, test on all of the tenth). Both get 95% block-bootstrap intervals.
 
 **Results (ROC-AUC; PR-AUC in brackets):**
 
@@ -125,9 +129,9 @@ out** (train on the other nine, test on all of the tenth, with 95% block-bootstr
 | 2011 flood, spatial CV | 0.853 (0.58) | **0.872 (0.68)** | 0.721 (0.33) | 0.667 (0.29) | 0.449 (0.18) |
 | 2017-2025 seasons, spatial CV (mean) | **0.975 (0.58)** | 0.918 (0.27) | 0.795 (0.09) | 0.749 (0.07) | 0.421 (0.03) |
 | Each season left out (range) | **0.972-0.987** | 0.901-0.931 | 0.769-0.807 | | |
-| 2026 radar passes, never trained on (8) | **0.91-0.96** | 0.82-0.91 | 0.75-0.86 | 0.70-0.85 | 0.39-0.57 |
+| 2026 radar passes, never trained on (9) | **0.91-0.96** | 0.82-0.91 | 0.74-0.86 | 0.69-0.85 | 0.37-0.57 |
 
-On the latest 2026 pass (27 September) the 95% intervals don't overlap: 0.955-0.968 for the new model against
+On the 27 September 2026 pass the 95% intervals don't overlap: 0.955-0.968 for the new model against
 0.892-0.923 for the 2011-only model. **The trade-off:** the new model is slightly worse on the extreme 2011 flood
 (0.853 vs 0.872), because nine of its ten floods are ordinary seasons. It is the better guide to a typical year;
 the 2011 map stays the guide to a rare, extreme one.
@@ -135,8 +139,19 @@ the 2011 map stays the guide to a rare, extreme one.
 Population density and built-up land are excluded by default: with them the 2011 model scores 0.893, but its top
 factor becomes "dense city = dry", which mostly reflects flood defences and satellites missing urban floodwater.
 
-The app then gains "ML flood susceptibility" and "Observed flood (2011)" layers and a **ML model** tab listing the
-floods it was trained on. Caveats: radar and MODIS both under-detect flooding between buildings; the seasonal
+**Event context** (`scripts/event_context.py` -> `data/processed/flood_labels/context.json`, added to each event in
+the report): August-November rain (Open-Meteo historical archive, ERA5) and Chao Phraya flow (GloFAS) for each
+training flood. It is context for reading the scores, not a model input.
+
+| Season | Rain, Aug-Nov (vs 694 mm normal) | Wettest 3 days | River peak (vs normal) | Days river >= 130% of normal |
+|---|---|---|---|---|
+| 2011 | 746 mm (107%) | 86 mm | 9,461 m³/s (209%) | **122** |
+| 2017-2025 | 723-1,033 mm (104-149%) | 69-167 mm | 4,344-7,481 m³/s (112-219%) | 0-55 |
+
+2011 was a river flood: its local rain was ordinary, but the river stayed far above normal for four months.
+
+The app then gains "ML flood susceptibility", "ML model disagreement" and "Observed flood (2011)" layers and a
+**ML model** tab listing the floods it was trained on, with their rain and river. Caveats: radar and MODIS both under-detect flooding between buildings; the seasonal
 baseline hides places that flood every year and can hide a flood in the year after a wet one; the model doesn't
 know about short cloudburst flooding.
 
@@ -159,7 +174,8 @@ river data.
 
 **27 Sep 2026 pass** (after ~200 mm of rain on 25-27 Sep): 99 km² of unusual water across greater Bangkok,
 32 km² inside the city, mostly eastern farmland (Nong Chok 8.3%, Lat Krabang 5.9%). Tested against it, the
-2011-trained ML model scores ROC-AUC 0.91 (0.94 within Bangkok), the bathtub 0.70 and the risk index 0.39.
+all-floods ML model scores ROC-AUC 0.96 (0.98 within Bangkok), the 2011-only model 0.91, the bathtub 0.70 and the
+risk index 0.39. The 9 Oct pass still shows 104 km², with little new rain: the water hasn't drained.
 
 ## Validation
 The **Validation** tab gathers every test of the methods (ML model, bathtub with and without defences, risk index) on
@@ -175,8 +191,8 @@ turn, and every recent radar pass. It shows:
 The intervals come from a **spatial block bootstrap** in `evaluate_current.py` (`src/validation.py`): 4 km blocks
 are resampled 200 times and every method is re-scored on each resample, so neighbouring cells, which flood
 together, aren't counted as independent evidence. Each method's difference from the bathtub uses the same
-resamples and gets its own interval. `train_model.py` does the same for the left-out floods. For spatial CV the
-range shown is the spread over the 5 folds.
+resamples and gets its own interval. `train_model.py` does the same for the left-out floods and for spatial CV, where the five folds are pooled
+so every cell is scored once by the model that never saw its block (out-of-fold).
 
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
@@ -208,6 +224,55 @@ buildings).
 | Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
 | Flood defences | Routes: Royal Development Projects Board, OpenStreetMap roads; crests: BMA, JICA, Airports of Thailand |
 
+## Uncertainty
+**Elevation error** (`scripts/dem_uncertainty.py`, ~4 min; `src/uncertainty.py`). The bathtub simulation is rerun
+50 times. Each run adds a random error field to the elevation: zero mean, standard deviation **0.7 m**, correlated
+over about **300 m**, so neighbouring cells are wrong together. This is done for every level from 0 to 3 m and for
+each mode: river-connected, with defences, and rain ponding. Defence crests are kept fixed.
+
+```bash
+python scripts/dem_uncertainty.py                 # writes data/processed/dem_uncertainty/
+python scripts/dem_uncertainty.py --sigma 1.4 --out-dir data/processed/dem_uncertainty_pessimistic
+# (only summary.json of the pessimistic run is committed; its chance maps aren't used)
+```
+
+- **Method:** simulating plausible versions of a global DEM with correlated error follows Hawker et al. (2018),
+  *Frontiers in Earth Science* 6:233.
+- **Error size:** an assumption, not a measurement. Copernicus GLO-30 is off by 1.6 m on average in built-up areas
+  (Hawker et al. 2022, FABDEM, *Environ. Res. Lett.* 17:024016), mostly because it includes buildings. Taking the
+  lowest value in each ~65 m cell removes much of that, so 0.7 m is assumed for what remains. Both values are
+  command-line options.
+
+The app shows:
+- the **5th–95th percentile** under each headline number;
+- a shaded band on the flood curve;
+- a **"Chance flooded"** layer: the share of runs in which each cell floods, at 0.5, 1.0 … 3.0 m (`chance_<mode>.tif`).
+
+River-connected mode, greater Bangkok:
+
+| Level | Flooded area: single run [90% range] | People: single run [90% range] | Districts > 25%: single run [range] |
+|---|---|---|---|
+| 1.0 m | 1,024 km² [951–984] | 1.02 M [1.26–1.34] | 2 [2–2] |
+| 1.5 m | 1,553 km² [1,511–1,543] | 2.11 M [2.47–2.57] | 7 [7–10] |
+| 2.0 m | 2,259 km² [2,130–2,162] | 3.92 M [4.24–4.38] | 15 [17–21] |
+
+What the ranges show:
+- **Totals are stable.** Errors average out over thousands of cells, so the flooded area moves by only a few percent.
+- **Individual places are not.** At 1.5 m, almost all of Bangkok's low ground floods in some runs and not others. Read
+  the map at district scale, not street scale.
+- **The error size matters more than the spread.** With `--sigma 1.4` (kept in
+  `data/processed/dem_uncertainty_pessimistic/summary.json` and shown in the Flood curve tab), the range at 1.0 m
+  becomes 1,135–1,174 km² and 2.24–2.36 M people, against 951–984 km² and 1.26–1.34 M at 0.7 m. Treat the people
+  figures as an order of magnitude.
+- **The single run sits outside the range.** The elevation data rounds flat areas to 0.5 m steps, so at exactly 1.0 m a
+  whole plateau floods at once. With a little error only part of it does, which lowers the flooded area. At the same
+  time, small dips let water through to populated land the plain run keeps dry, which raises the people affected.
+  The single run's numbers are a rounding artefact as much as a result.
+
+**ML model disagreement** (`data/processed/ml_disagreement.tif`, written by `train_model.py`): the per-cell standard
+deviation of the flood probability across the five spatial-CV models, each trained without a different fifth of the
+map. Bright areas are where the prediction depends on which places the model learned from.
+
 ## Project layout
 ```
 app.py                          Streamlit UI
@@ -219,6 +284,8 @@ scripts/fetch_current_flood.py  Sentinel-1 radar flood maps, rainfall and river 
 scripts/evaluate_current.py     Score every method against the radar maps
 scripts/prepare_buildings.py    Building footprints, heights and facilities per district
 scripts/prepare_defences.py     River walls, King's Dike and airport dike -> crest-height grid
+scripts/dem_uncertainty.py      Elevation-error ensemble: flood ranges and chance-flooded maps
+scripts/event_context.py        Rainfall and river peaks for each training flood
 scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
 scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF
 src/config.py                   Study area, grid, file paths
@@ -230,6 +297,7 @@ src/features.py                 ML features
 src/ml.py                       Load the ML model outputs
 src/current_flood.py            Load radar passes, rainfall and river flow
 src/validation.py               Block-bootstrap intervals and the Validation tab's tables
+src/uncertainty.py              Elevation-error model, load the uncertainty results
 src/buildings.py                Load buildings, flood impact per building
 src/viz.py                      Map layers, animation frames, charts
 src/viz3d.py                    3D building maps (pydeck)
@@ -243,7 +311,8 @@ pytest                      # ~30 s
 ```
 Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
 pocket and high ground. They cover the flood simulation, risk index, radar labels, per-pass weather, the alert rules,
-the bootstrap scores (checked against scikit-learn), the wet-season labels and the multi-flood training sets.
+the bootstrap scores (checked against scikit-learn), the wet-season labels, the multi-flood training sets, the
+elevation-error noise (spread and correlation distance), the uncertainty statistics and the event context.
 `tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
 `data/processed/` is missing. GitHub Actions (`.github/workflows/ci.yml`) runs everything on every push, on
 Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).
@@ -252,7 +321,13 @@ Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, wi
 Exploratory model, not a forecast: flood walls and dikes only with the defences switch, one crest per
 section; pumps, drainage tunnels and gate capacity aren't modelled;
 water is static (no flow, rainfall timing, or tides); the DEM is a surface model that includes
-some buildings; population is a 2020 estimate.
+some buildings (its effect is shown as a range, under an assumed error size); population is a 2020 estimate.
+The ranges cover elevation error and the ML model's sensitivity to its training data, not every limit listed
+here, so the real uncertainty is larger.
+
+## Methods
+`docs/METHODS.md` is a short, citable write-up of the data, models, validation, uncertainty and limitations, with
+references.
 
 ## Presenting
 `docs/Bangkok_Flood_Simulator_Presenter_Guide.pdf` is a presenter guide with screenshots, a step-by-step

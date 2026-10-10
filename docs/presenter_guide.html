@@ -88,9 +88,10 @@
     <li><b>Tour of the screen</b> — what every control does</li>
     <li><b>Live demo script</b> — step by step, with what to click and what to say</li>
     <li><b>The risk index and its weights</b> — how it works and every reason to change the weights</li>
-    <li><b>The machine-learning model</b> — what the 2011 flood teaches us</li>
+    <li><b>The machine-learning model</b> — what ten real floods (2011 and nine radar-mapped wet seasons) teach us</li>
     <li><b>The current flood</b> — what satellite radar sees this week, which model saw it coming, and whether that's luck</li>
     <li><b>Buildings in 3D</b> — 2.1 million buildings, and which ones the water reaches</li>
+    <li><b>How sure is this?</b> — ranges from elevation error, chance-flooded maps, and where the ML model disagrees with itself</li>
     <li><b>Key numbers cheat sheet</b></li>
     <li><b>Anticipated questions</b></li>
     <li><b>Limitations and next steps</b></li>
@@ -130,7 +131,7 @@
     <tr><td>10:30–12:30</td><td>Machine learning: what really flooded in 2011</td><td>Step 8</td></tr>
     <tr><td>12:30–14:30</td><td>The current flood from satellite radar</td><td>Step 9</td></tr>
     <tr><td>14:30–16:30</td><td>Buildings in 3D: who the water reaches</td><td>Step 10</td></tr>
-    <tr><td>16:30–18:00</td><td>Charts, limitations and next steps</td><td>Steps 11–12</td></tr>
+    <tr><td>16:30–18:00</td><td>Charts, how sure we are (uncertainty), limitations</td><td>Steps 12–13</td></tr>
   </table>
   <div class="note"><b>If something breaks live:</b> refresh the browser tab (it keeps no state). If the map background is blank, the internet is down. The flood overlay still works, so carry on and mention it.</div>
 </section>
@@ -145,8 +146,8 @@
     <div class="dot" style="left:20.5%;top:29%">3</div>
     <div class="dot" style="left:15.5%;top:34.8%">4</div>
     <div class="dot" style="left:11%;top:66.8%">5</div>
-    <div class="dot" style="left:92%;top:24.5%">6</div>
-    <div class="dot" style="left:96%;top:38%">7</div>
+    <div class="dot" style="left:92%;top:32.5%">6</div>
+    <div class="dot" style="left:96%;top:52%">7</div>
     <figcaption>The app at its starting state: water at 1.0 m, flood depth shown on a dark basemap.</figcaption>
   </figure>
   <ol class="legend-list">
@@ -154,11 +155,11 @@
     <li><b>“Water must flow from rivers/canals”</b>. On: a river or tidal flood (low ground floods only if water can reach it). Off: rain pooling in every low spot.</li>
     <li><b>Animate rising water</b>. Plays 0 → 3 m in about 10 s. This is the moment that grabs the audience.</li>
     <li><b>Risk index weights</b>. How much low ground, nearness to water, and population density count toward risk (Section 5).</li>
-    <li><b>Map layers</b>. Flood depth, ground elevation (with an adjustable colour range), risk index, ML flood susceptibility, observed 2011 flood, radar flood (with a date picker), rivers &amp; canals, dark/light basemap.</li>
-    <li><b>Headline numbers</b>. Water level, flooded area, people affected (whole map area), and how many of the 50 districts are more than 25% flooded.</li>
+    <li><b>Map layers</b>. Flood depth, ground elevation (with an adjustable colour range), chance flooded (elevation uncertainty), risk index, ML flood susceptibility, ML model disagreement, observed 2011 flood, radar flood (with a date picker), rivers &amp; canals, flood defences, dark/light basemap.</li>
+    <li><b>Headline numbers</b>. Water level, flooded area, people affected (whole map area), and how many of the 50 districts are more than 25% flooded. The grey “range” under each is the middle 90% of 50 simulations with elevation error (Section 9).</li>
     <li><b>Interactive map</b>. Zoom, pan, and hover any district for its details. The layer button is at the top right.</li>
   </ol>
-  <p class="muted">Below the map are eight tabs: <i>Most affected districts</i>, <i>Elevation profile</i>, <i>Flood curve</i>, <i>Current flood</i>, <i>Buildings 3D</i>, <i>ML model</i>, <i>District table</i> and <i>Method &amp; limitations</i>.</p>
+  <p class="muted">Below the map are nine tabs: <i>Most affected districts</i>, <i>Elevation profile</i>, <i>Flood curve</i>, <i>Current flood</i>, <i>Buildings 3D</i>, <i>ML model</i>, <i>Validation</i>, <i>District table</i> and <i>Method &amp; limitations</i>.</p>
 </section>
 
 <!-- ============================ DEMO SCRIPT ============================ -->
@@ -238,7 +239,7 @@
 
   <div class="step"><div class="n">10</div><h3>Show this week's flood (satellite radar)</h3></div>
   <p class="do">Untick <b>Observed flood (2011)</b> and <b>Flood depth</b>, tick <b>Radar flood (Sentinel-1)</b>, then open the <b>Current flood</b> tab. The full talk track is in Section 7.</p>
-  <div class="say">Everything so far was history or simulation. This is Bangkok this week, seen from space through the monsoon clouds. And the model trained on 2011 predicted it.</div>
+  <div class="say">Everything so far was history or simulation. This is Bangkok this week, seen from space through the monsoon clouds. And a model trained on past floods, none of them from this year, predicted it.</div>
 
   <div class="step"><div class="n">11</div><h3>Show the buildings in 3D</h3></div>
   <p class="do">Set the water level to <b>1.5 m</b>, open the <b>Buildings 3D</b> tab, start on <b>Whole city</b>, then switch to <b>District</b> and pick Lat Krabang or Nong Chok. Right-drag to tilt and rotate. The full talk track is in Section 8.</p>
@@ -247,12 +248,14 @@
   <div class="step"><div class="n">12</div><h3>Show the charts</h3></div>
   <div class="grid2">
     <figure><img src="screenshots/15_tab_top.png" alt="Top districts"><figcaption>Most affected districts at the current level.</figcaption></figure>
-    <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve"><figcaption>Flooded area and people affected across all levels.</figcaption></figure>
+    <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve"><figcaption>Flooded area and people affected across all levels. The shaded bands are the 90% range with elevation error (Section 9).</figcaption></figure>
   </div>
-  <div class="note"><b>About the steps in the flood curve:</b> the jumps at exactly 0.5, 1.0, 1.5 and 2.0 m come from the elevation data, not from the real world. The Copernicus dataset rounds many flat areas to 0.5 m heights, so big patches flip to “flooded” together. Point the audience to the overall trend: the number of people affected climbs faster once the water passes about 1.5 m.</div>
+  <div class="note"><b>About the steps in the flood curve:</b> the jumps at exactly 0.5, 1.0, 1.5 and 2.0 m come from the elevation data, not from the real world. The Copernicus dataset rounds many flat areas to 0.5 m heights, so big patches flip to “flooded” together. The shaded uncertainty bands are smooth, because a little elevation error breaks those plateaus up. Point the audience to the overall trend: the number of people affected climbs faster once the water passes about 1.5 m.</div>
+  <p class="do">Then tick <b>Chance flooded (elevation uncertainty)</b> with <b>Flood depth</b> off. The full talk track is in Section 9.</p>
+  <div class="say">One more honest question: how sure is all this? Here is the same flood rerun fifty times with realistic errors in the elevation. The dark blue floods every time; the pale areas only sometimes.</div>
 
   <div class="step"><div class="n">13</div><h3>Close</h3></div>
-  <div class="say">This isn't a forecast. It models Bangkok's main walls and dikes but not its pumps or drainage tunnels. But from free satellite data it shows where the terrain puts people at risk, and a model trained on the real 2011 flood tells us which of those warnings to trust. Next, I'd teach it more floods, including this year's, using satellite radar.</div>
+  <div class="say">This isn't a forecast. It models Bangkok's main walls and dikes but not its pumps or drainage tunnels. It also shows how much its answers depend on imperfect elevation data. From free satellite data it shows where the terrain puts people at risk, and a model trained on ten real floods tells us which of those warnings to trust. Every score has an error bar, and this year's floods are kept out of training, so the test stays honest.</div>
 </section>
 
 <!-- ============================ RISK WEIGHTS ============================ -->
@@ -314,23 +317,25 @@
 <!-- ============================ ML ============================ -->
 <section class="page">
   <h2>6. The machine-learning model</h2>
-  <p>The risk index uses weights that <i>we</i> chose. The machine-learning model asks a different question: <b>given where Bangkok actually flooded in 2011, which combination of terrain and land cover best explains it?</b></p>
+  <p>The risk index uses weights that <i>we</i> chose. The machine-learning model asks a different question: <b>given where Bangkok actually flooded, which combination of terrain and land cover best explains it?</b></p>
   <h3>How it was built</h3>
   <ul>
-    <li><b>What really flooded:</b> the Global Flood Database's map of the 2011 flood (event DFO_3850, 5 Aug 2011 – 9 Jan 2012), made from MODIS satellite images at 250 m. That's 846,343 grid cells marked flooded or dry, and 21% of them flooded.</li>
+    <li><b>What really flooded, ten times:</b> the Global Flood Database's map of the <b>2011 flood</b> (event DFO_3850, MODIS satellites, 250 m; 21% of cells flooded), plus <b>nine wet seasons, 2017–2025</b>, mapped from Sentinel-1 radar. For each season, every August–November pass is compared with the same weeks of the year before; a cell counts as flooded if it was flooded on at least two passes. In those seasons 2–5% of the land flooded.</li>
+    <li><b>Every flood counts equally:</b> 200,000 labelled cells are drawn from each, so 2011 doesn't swamp the seasons or the reverse.</li>
+    <li><b>This year is kept out:</b> nothing from 2026 is trained on, so this year's radar passes (Section 7) are a fair test.</li>
     <li><b>What the model sees:</b> elevation, height above the nearest waterway, elevation compared with the surroundings, slope, distance to any canal and to the Chao Phraya, and land cover (cropland, water, trees, grassland, wetland) from ESA WorldCover.</li>
-    <li><b>Model:</b> LightGBM, a gradient-boosted tree model that works well on this kind of table-style data.</li>
-    <li><b>Fair test:</b> the map is cut into 4 km blocks, and each method is scored only on blocks the model never saw. That stops it from “cheating” by memorising neighbouring cells.</li>
+    <li><b>Model:</b> LightGBM, a gradient-boosted tree model that works well on this kind of table-style data. The original model, trained on 2011 alone, is kept for comparison.</li>
+    <li><b>Fair tests:</b> the map is cut into 4 km blocks, and each method is scored only on blocks the model never saw, in any year. And each flood in turn is left out completely: train on the other nine, test on that one.</li>
   </ul>
   <table>
-    <tr><th>Method (scored on unseen blocks)</th><th class="num">ROC-AUC</th><th class="num">PR-AUC</th></tr>
-    <tr><td><b>ML model</b></td><td class="num"><b>0.87</b></td><td class="num"><b>0.67</b></td></tr>
-    <tr><td>Bathtub simulation</td><td class="num">0.67</td><td class="num">0.29</td></tr>
-    <tr><td>Hand-weighted risk index (default weights)</td><td class="num">0.45</td><td class="num">0.18</td></tr>
-    <tr><td class="muted">Random guess</td><td class="num muted">0.50</td><td class="num muted">0.21</td></tr>
+    <tr><th>ROC-AUC (PR-AUC)</th><th class="num">ML, all floods</th><th class="num">ML, 2011 only</th><th class="num">Bathtub + defences</th><th class="num">Bathtub</th><th class="num">Risk index</th></tr>
+    <tr><td>2011 flood, unseen blocks</td><td class="num">0.85 (0.58)</td><td class="num"><b>0.87 (0.68)</b></td><td class="num">0.72 (0.33)</td><td class="num">0.67 (0.29)</td><td class="num">0.45 (0.18)</td></tr>
+    <tr><td>2017–2025 seasons, unseen blocks (mean)</td><td class="num"><b>0.98 (0.58)</b></td><td class="num">0.92 (0.27)</td><td class="num">0.79 (0.09)</td><td class="num">0.75 (0.07)</td><td class="num">0.42 (0.03)</td></tr>
+    <tr><td>Each season left out (range)</td><td class="num"><b>0.97–0.99</b></td><td class="num">0.90–0.93</td><td class="num">0.77–0.81</td><td class="num"></td><td class="num"></td></tr>
+    <tr><td>2026 radar passes, never trained on (9, greater Bangkok)</td><td class="num"><b>0.91–0.96</b></td><td class="num">0.82–0.91</td><td class="num">0.74–0.86</td><td class="num">0.69–0.85</td><td class="num">0.37–0.57</td></tr>
   </table>
-  <p class="muted" style="font-size:9pt">ROC-AUC: how often the method ranks a flooded cell above a dry one (0.5 = coin flip, 1.0 = perfect). PR-AUC: how well it finds flooded cells without false alarms. A random guess scores the flooded share (0.21).</p>
-  <figure><img src="screenshots/22_tab_ml.png" alt="ML model tab" style="max-height:118mm;width:auto;margin:0 auto"><figcaption>The <b>ML model</b> tab: the model vs the existing methods, what drives its predictions (SHAP), and predicted vs observed flooding by district.</figcaption></figure>
+  <p class="muted" style="font-size:9pt">ROC-AUC: how often the method ranks a flooded cell above a dry one (0.5 = coin flip, 1.0 = perfect). PR-AUC: how well it finds flooded cells without false alarms; a random guess scores the flooded share (0.21 in 2011, 0.02–0.05 in the seasons). Every score has a 95% interval in the app.</p>
+  <figure><img src="screenshots/22_tab_ml.png" alt="ML model tab" style="max-height:118mm;width:auto;margin:0 auto"><figcaption>The <b>ML model</b> tab: the model vs the existing methods with 95% intervals (2011 flood), what drives its predictions (SHAP), and predicted vs observed flooding by district. An expander lists the ten training floods with each season's rain and river.</figcaption></figure>
 </section>
 
 <section>
@@ -343,13 +348,15 @@
 
   <h3>What to point out</h3>
   <ul>
-    <li><b>The ML model beats both existing methods by a wide margin</b> (ROC-AUC 0.87 vs 0.67 and 0.45). At district level, its score correlates 0.72 with the share of each district that flooded.</li>
+    <li><b>The ML model beats every existing method by a wide margin</b>, on every flood and every test.</li>
+    <li><b>More floods helped, with one trade-off.</b> Trained on ten floods, the model predicts each left-out season far better than the 2011-only model (0.97–0.99 vs 0.90–0.93), and this year's passes too. On the extreme 2011 flood it is slightly worse (0.85 vs 0.87), because nine of its ten floods are ordinary seasons. It is the better guide to a typical year; the 2011 map stays the guide to a rare, extreme one.</li>
+    <li><b>What each year was like:</b> the training-flood table shows each season's rain and river. 2011 stands out for its river, not its local rain: the Chao Phraya ran above 130% of normal for 122 days, while Bangkok's own rain was ordinary. The water came down from the north.</li>
     <li><b>The hand-weighted risk index scored below random.</b> It ranks dense, canal-rich inner districts highest, but in 2011 those were protected by flood walls and pumping and stayed dry. It's the strongest argument for testing a model against reality.</li>
     <li><b>What the model learned:</b> low ground and cropland flooded, and being closer to the Chao Phraya raised the chance. Farmland on the city's edge absorbed the flood while the protected core stayed dry.</li>
     <li><b>A judgment call made visible:</b> population density and built-up land were left out on purpose. With them the model scored higher (0.89), but its main lesson became “dense city = dry”. That mostly reflects defences, plus the satellite's difficulty seeing water between buildings, and it would be a dangerous message in a flood tool.</li>
   </ul>
-  <div class="say">The weights I picked by hand pointed at the wrong places. They scored worse than a coin flip against what actually happened in 2011. A model that learned from the real flood ranks flooded places above dry ones about 87% of the time. That's why you test models against reality.</div>
-  <div class="note"><b>Be honest about the limits:</b> the 2011 map is 250 m resolution and under-counts flooding in dense urban areas. Some coastal “flooding” is shrimp and fish ponds. It's one river flood, so it teaches nothing about cloudbursts. The model also misses some places: <b>Don Mueang</b>, whose airport famously flooded in 2011 (21% of the district), scores only 0.27.</div>
+  <div class="say">The weights I picked by hand pointed at the wrong places. They scored worse than a coin flip against what actually happened. A model that learned from ten real floods ranks flooded places above dry ones more than 95% of the time in a year it has never seen. That's why you test models against reality.</div>
+  <div class="note"><b>Be honest about the limits:</b> the 2011 map is 250 m resolution, and radar and MODIS both under-count flooding between buildings. Some coastal “flooding” is shrimp and fish ponds. Each radar season is compared with the year before, so places that flood every year aren't counted, and a wet year can hide floods in the next. The model knows nothing about short cloudbursts in the city, and it under-rates places that flood only in an extreme year like 2011, such as <b>Don Mueang</b>, whose airport famously flooded then.</div>
 </section>
 
 <!-- ============================ CURRENT FLOOD ============================ -->
@@ -357,7 +364,7 @@
   <h2>7. The current flood</h2>
   <p>Sentinel-1 radar satellites pass over Bangkok every 4–8 days. Radar sees through cloud, and calm open water reflects the signal away from the satellite, so it shows up dark. For each pass, the app marks water that is <b>unusual for the time of year</b>: cells that are dark now and much darker than the same weeks last year, seen from the same orbit, with permanent rivers and ponds removed.</p>
   <div class="note"><b>Before you present:</b> the figures below are from the <b>27 Sep 2026</b> pass. To add passes since then, re-run <code>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT</code> and <code>python scripts/evaluate_current.py</code>, and check the numbers in the app before quoting them.</div>
-  <figure><img src="screenshots/23_radar_flood.png" alt="Radar flood 27 Sep 2026"><figcaption><span class="pill">27 Sep 2026</span> Red = unusual water seen by radar. It is concentrated in the eastern farmland: Nong Chok, Lat Krabang, Min Buri, and beyond the city boundary.</figcaption></figure>
+  <figure><img src="screenshots/23_radar_flood.png" alt="Radar flood 9 Oct 2026"><figcaption><span class="pill">9 Oct 2026</span> Red = unusual water seen by radar, on the latest pass (the sidebar date picker opens on it). Twelve days after the 27 Sep rain it is still concentrated in the eastern farmland: Nong Chok, Lat Krabang, Min Buri, and beyond the city boundary.</figcaption></figure>
   <h3>The story in three numbers</h3>
   <ul>
     <li><b>About 200 mm of rain in three days</b> (about 122 mm on 25 Sep alone, weather-model estimate), on top of a <b>Chao Phraya already running about 15% above normal</b>. By the 27 Sep pass the river was at about 130% of normal for the date (GloFAS river model).</li>
@@ -377,34 +384,37 @@
   <p>None of the methods has ever seen this flood, which makes this the fairest test in the project.</p>
   <table>
     <tr><th>Method, scored against the 27 Sep radar map</th><th class="num">ROC-AUC, greater Bangkok</th><th class="num">ROC-AUC, Bangkok (50)</th><th class="num">PR-AUC, greater Bangkok</th></tr>
-    <tr><td><b>ML model (trained on 2011)</b></td><td class="num"><b>0.91</b></td><td class="num"><b>0.94</b></td><td class="num"><b>0.154</b></td></tr>
+    <tr><td><b>ML model (all floods)</b></td><td class="num"><b>0.96</b></td><td class="num"><b>0.98</b></td><td class="num"><b>0.344</b></td></tr>
+    <tr><td>ML model (2011 only)</td><td class="num">0.91</td><td class="num">0.94</td><td class="num">0.154</td></tr>
     <tr><td>Bathtub + flood defences</td><td class="num">0.75</td><td class="num">0.88</td><td class="num">0.042</td></tr>
     <tr><td>Bathtub simulation</td><td class="num">0.70</td><td class="num">0.83</td><td class="num">0.036</td></tr>
     <tr><td>Hand-weighted risk index</td><td class="num">0.39</td><td class="num">0.47</td><td class="num">0.017</td></tr>
     <tr><td class="muted">Random guess</td><td class="num muted">0.50</td><td class="num muted">0.50</td><td class="num muted">0.023</td></tr>
   </table>
   <ul>
-    <li><b>A model trained on a flood from 15 years ago predicted this week's flood well.</b> It finds flooded cells about 7 times better than random (PR-AUC 0.154 vs 0.023).</li>
-    <li>It has beaten the bathtub on 7 of the 8 radar passes since late August (all 8 inside the city). The hand-weighted index is below random again.</li>
+    <li><b>A model trained on past floods predicted this one well.</b> It finds flooded cells about 15 times better than random (PR-AUC 0.344 vs 0.023), twice as well as the model trained on 2011 alone.</li>
+    <li>It has beaten the bathtub on all 9 radar passes since late August, every time clear of the 95% interval. The hand-weighted index is below random again.</li>
+    <li><b>The next pass, 9 Oct:</b> 104 km² of unusual water, with little new rain. The water hasn't drained: Nong Chok is still 8.3% flooded, Lat Krabang 4.9%. The model scores the same (0.96).</li>
   </ul>
-  <div class="say">I trained this model on 2011, fifteen years ago. This week, on a flood it had never seen, it pointed at the right places far better than chance. That's the difference between a map that looks convincing and a model that's been tested.</div>
+  <div class="say">None of this year's floods were in the training data. On a flood it had never seen, the model pointed at the right places far better than chance. That's the difference between a map that looks convincing and a model that's been tested.</div>
   <div class="note"><b>Be honest about the limits:</b> radar misses water between buildings, so flooding in the dense city is under-counted. Flooded fields and runways can look like floodwater. Most of this flood is in farmland, which is also where the ML model expects flooding, so part of the match comes from that shared pattern. Each pass is a snapshot every few days, and the rainfall figures are weather-model estimates. River flow is also a model estimate (GloFAS) that reads high on the Chao Phraya, so compare it with its normal rather than quoting the exact m³/s. Pass dates are in UTC: a descending pass dated 19 Sep was taken at about 06:10 on 20 Sep, Bangkok time.</div>
 </section>
 
 <section class="page">
   <h3>The Validation tab: is the difference real, or luck?</h3>
-  <p>The <b>Validation</b> tab collects every test in one place: the 2011 flood and every radar pass, for every method (including the bathtub with flood defences), with a <b>95% interval</b> on each score. Neighbouring cells flood together, so the intervals come from re-scoring on the map's 4 km blocks resampled 200 times (a <i>spatial block bootstrap</i>). The difference from the bathtub gets its own interval: when it stays above zero, the ML model's lead isn't luck.</p>
+  <p>The <b>Validation</b> tab collects every test in one place: every training flood (scored on unseen blocks), each training flood left out in turn, and every radar pass, for every method (including the bathtub with flood defences and the old 2011-only model), with a <b>95% interval</b> on each score. Neighbouring cells flood together, so the intervals come from re-scoring on the map's 4 km blocks resampled 200 times (a <i>spatial block bootstrap</i>). The difference from the bathtub gets its own interval: when it stays above zero, the ML model's lead isn't luck.</p>
   <figure><img src="screenshots/28_tab_validation.png" alt="Validation tab" style="max-height:150mm;width:auto;margin:0 auto"><figcaption>The <b>Validation</b> tab: how often the ML model beats the bathtub, scores over time with shaded 95% intervals, each method's difference from the bathtub, and every result in a table that can be downloaded as CSV. Switch between ROC-AUC and PR-AUC, and between greater Bangkok and the 50 districts.</figcaption></figure>
   <table>
-    <tr><th>ML model vs bathtub, 8 radar passes (20 Aug – 27 Sep)</th><th class="num">Greater Bangkok</th><th class="num">Bangkok (50)</th></tr>
-    <tr><td>Higher ROC-AUC</td><td class="num">7 of 8</td><td class="num">8 of 8</td></tr>
-    <tr><td>Clearly higher (95% interval above zero)</td><td class="num">5</td><td class="num">5</td></tr>
+    <tr><th>ML model (all floods) vs bathtub, 9 radar passes (20 Aug – 9 Oct)</th><th class="num">Greater Bangkok</th><th class="num">Bangkok (50)</th></tr>
+    <tr><td>Higher ROC-AUC</td><td class="num">9 of 9</td><td class="num">9 of 9</td></tr>
+    <tr><td>Clearly higher (95% interval above zero)</td><td class="num">9</td><td class="num">9</td></tr>
     <tr><td>Clearly lower</td><td class="num">0</td><td class="num">0</td></tr>
-    <tr><td>27 Sep ROC-AUC, ML (95% interval)</td><td class="num">0.91 (0.89–0.92)</td><td class="num">0.94 (0.93–0.95)</td></tr>
+    <tr><td>27 Sep ROC-AUC, ML all floods (95% interval)</td><td class="num">0.96 (0.96–0.97)</td><td class="num">0.98 (0.97–0.98)</td></tr>
+    <tr><td>27 Sep ROC-AUC, ML 2011 only (95% interval)</td><td class="num">0.91 (0.89–0.92)</td><td class="num">0.94 (0.93–0.95)</td></tr>
     <tr><td>27 Sep ROC-AUC, bathtub (95% interval)</td><td class="num">0.70 (0.65–0.73)</td><td class="num">0.83 (0.79–0.87)</td></tr>
   </table>
-  <div class="say">Every score here has an error bar. On the 27 September flood the model's lower bound is still well above the bathtub's upper bound, so the gap isn't luck. On the quieter early passes the bars overlap, and I'd call those a draw.</div>
-  <div class="note"><b>Be honest about the limits:</b> passes a few days apart see the same flood, so “7 of 8” is a trend, not 8 independent trials. On quiet passes under 0.5% of cells flooded, so PR-AUC is low for every method; compare it with the random-guess line. Most detected flooding is farmland on the city's edge, so the scores mostly describe the rural fringe.</div>
+  <div class="say">Every score here has an error bar. On the 27 September flood the new model's lower bound is above the old model's upper bound, and far above the bathtub's, so the gap isn't luck.</div>
+  <div class="note"><b>Be honest about the limits:</b> passes a few days apart see the same flood, so “9 of 9” is a trend, not 9 independent trials. On quiet passes under 0.5% of cells flooded, so PR-AUC is low for every method; compare it with the random-guess line. Most detected flooding is farmland on the city's edge, so the scores mostly describe the rural fringe.</div>
 </section>
 
 <!-- ============================ BUILDINGS 3D ============================ -->
@@ -443,9 +453,46 @@
   <div class="note"><b>Be honest about the limits:</b> footprints and heights are AI estimates and some are wrong or missing. “Affected” means a building stands in a ~65 m cell that floods, not that water entered it; many ground floors are raised. Radar can't see water between buildings, so in the radar view a building counts when floodwater was detected within ~65 m. In the six largest districts, footprints under 30 m² (sheds and the like) were left out to keep the view fast.</div>
 </section>
 
+<!-- ============================ UNCERTAINTY ============================ -->
+<section class="page">
+  <h2>9. How sure is this? Uncertainty</h2>
+  <p>Every number so far came from one simulation on one elevation map. But satellite elevation has errors, and in a city this flat a few tens of centimetres decide whether a street floods. The app now shows how much the answers move when the elevation is a little wrong, and where the ML model is least sure of itself.</p>
+  <h3>Elevation error: ranges on every headline number</h3>
+  <ul>
+    <li><b>How it works:</b> the bathtub simulation is rerun <b>50 times</b>. Each run adds random errors to the elevation map: standard deviation <b>0.7 m</b>, correlated over about <b>300 m</b>, so neighbouring cells are wrong together. This way of simulating DEM error follows Hawker et al. (2018). The defence crest heights stay fixed.</li>
+    <li><b>Where you see it:</b> a grey “range” under the flooded area, people affected and district count (the middle 90% of runs); a shaded band on the <b>Flood curve</b> tab; and the <b>Chance flooded</b> map layer.</li>
+    <li><b>Why 0.7 m:</b> it's an assumption, and the guide should say so. Copernicus elevation is off by about 1.6 m on average in built-up areas (Hawker et al. 2022), mostly because it includes buildings. The app takes the lowest value in each ~65 m cell, which removes much of that.</li>
+  </ul>
+  <div class="grid2">
+    <figure><img src="screenshots/30_chance_flooded_1_5.png" alt="Chance flooded at 1.5 m"><figcaption><span class="pill">Chance flooded, 1.5 m</span> Dark blue = floods in nearly every run; pale = floods only in some. Only the lowest ground by the coast and in the east is close to certain.</figcaption></figure>
+    <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve with uncertainty band"><figcaption><span class="pill">Flood curve</span> The shaded bands are the 90% range over the 50 runs. The text below the chart gives the range at the current level and the result with twice the error.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h3>The numbers to quote (river mode, greater Bangkok)</h3>
+  <table>
+    <tr><th class="num">Level</th><th class="num">Flooded area: single run [90% range]</th><th class="num">People: single run [90% range]</th><th class="num">Districts &gt;25%</th></tr>
+    <tr><td class="num">1.0 m</td><td class="num">1,024 km² [951–984]</td><td class="num">1.02 M [1.26–1.34]</td><td class="num">2 [2–2]</td></tr>
+    <tr><td class="num">1.5 m</td><td class="num">1,553 km² [1,511–1,543]</td><td class="num">2.11 M [2.47–2.57]</td><td class="num">7 [7–10]</td></tr>
+    <tr><td class="num">2.0 m</td><td class="num">2,259 km² [2,130–2,162]</td><td class="num">3.92 M [4.24–4.38]</td><td class="num">15 [17–21]</td></tr>
+  </table>
+  <ul>
+    <li><b>Totals are stable; places are not.</b> Errors average out over thousands of cells, so the flooded area moves by only a few percent. But at 1.5 m only <b>69 km²</b> of Bangkok floods in at least 90% of runs; another <b>299 km²</b> floods in 50–90%, and <b>487 km²</b> in 10–50%. The single run says 371 km².</li>
+    <li><b>The single run sits outside its own range.</b> The elevation data rounds flat land to 0.5 m steps, so at exactly 1.0 m a whole plateau floods at once. Add a little error and only part of it does, which lowers the area. Small dips also let water through to populated land, which raises the people count.</li>
+    <li><b>The error size matters most.</b> With twice the error (1.4 m), the range at 1.0 m becomes 1,135–1,174 km² and <b>2.24–2.36 M people</b>. Quote the people figures as an order of magnitude.</li>
+  </ul>
+  <div class="say">One simulation gives you one number, and it looks precise. Rerun it fifty times with realistic errors in the elevation, and the city-wide totals barely move, but which street floods changes from run to run. So read this as a district-scale picture, not a street map.</div>
+
+  <h3>ML model disagreement</h3>
+  <figure><img src="screenshots/31_ml_disagreement.png" alt="ML model disagreement" style="max-height:95mm;width:auto;margin:0 auto"><figcaption><span class="pill">ML model disagreement</span> How much five versions of the model, each trained with a different fifth of the map held out, disagree about each cell. Bright = the prediction depends on which places the model learned from.</figcaption></figure>
+  <p>Tick <b>ML model disagreement</b> in the sidebar. It shows the standard deviation of the flood probability across the five cross-validation models. Every model score in the <b>ML model</b> and <b>Validation</b> tabs now has a 95% interval from the spatial block bootstrap, including the cross-validation scores.</p>
+  <div class="note"><b>Be honest about the limits:</b> these ranges cover elevation error and the ML model's sensitivity to its training data. They don't cover the other limits (static water, no pumps or drainage, 2020 population), so the real uncertainty is larger than the bands.</div>
+</section>
+
 <!-- ============================ NUMBERS ============================ -->
 <section class="page">
-  <h2>9. Key numbers cheat sheet</h2>
+  <h2>10. Key numbers cheat sheet</h2>
   <p>River/tidal mode (connectivity on). <b>Greater Bangkok</b> is the whole map area (about 18 M people, including neighbouring provinces). The headline cards use this. <b>Bangkok (50 districts)</b> covers only the city proper (about 10.9 M people, 1,581 km²). The table and district counts use this.</p>
   <table>
     <tr><th class="num">Water level</th><th class="num">Flooded area<br>greater Bangkok</th><th class="num">People affected<br>greater Bangkok</th><th class="num">Flooded area<br>Bangkok (50)</th><th class="num">People affected<br>Bangkok (50)</th><th class="num">Districts &gt;25% flooded</th></tr>
@@ -462,14 +509,16 @@
     <li><b>Land at or below 1.5 m:</b> 414 km², 26% of Bangkok's 50 districts.</li>
     <li><b>Rain mode vs river mode at 1.0 m:</b> 1,104 vs 1,024 km², and 1.23 M vs 1.02 M people (greater Bangkok).</li>
     <li><b>Most robust risk district:</b> Suan Luang, #1 under 4 of 5 weightings.</li>
-    <li><b>ML model vs 2011 flood (unseen blocks):</b> ROC-AUC 0.87, vs 0.67 for the bathtub and 0.45 for the hand-weighted index. District-level correlation is 0.72.</li>
+    <li><b>ML model, trained on 10 floods:</b> ROC-AUC 0.97–0.99 on each left-out season (2011-only model 0.90–0.93); 0.85 on 2011's unseen blocks (2011-only 0.87, bathtub 0.67, risk index 0.45).</li>
+    <li><b>2011 was a river flood:</b> the Chao Phraya ran above 130% of normal for 122 days, against 0–55 days in 2017–2025. Bangkok's own August–November rain was only 107% of normal.</li>
+    <li><b>Uncertainty at 1.5 m:</b> 1,511–1,543 km² and 2.47–2.57 M people over 50 elevation-error runs (single run 1,553 km², 2.11 M). Only 69 km² of Bangkok floods in at least 90% of runs.</li>
     <li><b>Most flooded districts in 2011:</b> Nong Chok 31%, Khlong Sam Wa 23%, Don Mueang 21%, Bang Khun Thian 15%, Lat Krabang 13%.</li>
     <li><b>Highest ML scores:</b> Bang Khun Thian 0.53, Nong Chok 0.50, Khlong Sam Wa 0.42, Lat Krabang 0.41.</li>
     <li><b>Current flood (radar, 27 Sep 2026):</b> 99 km² of unusual water across greater Bangkok, 32 km² inside the city, after about 200 mm of rain on 25–27 Sep.</li>
     <li><b>Most flooded now:</b> Nong Chok 8.3%, Lat Krabang 5.9%, Min Buri 2.8%, Khlong Sam Wa 2.0%.</li>
-    <li><b>Models vs this week's flood:</b> ML 0.91 (0.94 in Bangkok), bathtub 0.70, risk index 0.39 ROC-AUC.</li>
-    <li><b>Flood defences at 2.0 m:</b> people affected in Bangkok fall from 1.93 M to 0.80 M; at 2.5 m the King's Dike is overtopped. With defences the bathtub scores 0.72 vs 0.67 on 2011 and beats the plain bathtub on all 8 radar passes.</li>
-    <li><b>Across all 8 radar passes:</b> ML beats the bathtub on 7 (8 inside the city); 5 of those are clear of the 95% interval, and it is never clearly worse.</li>
+    <li><b>Models vs the 27 Sep flood:</b> ML 0.96 (0.98 in Bangkok), 2011-only ML 0.91, bathtub 0.70, risk index 0.39 ROC-AUC.</li>
+    <li><b>Flood defences at 2.0 m:</b> people affected in Bangkok fall from 1.93 M to 0.80 M; at 2.5 m the King's Dike is overtopped. With defences the bathtub scores 0.72 vs 0.67 on 2011 and beats the plain bathtub on all 9 radar passes.</li>
+    <li><b>Across all 9 radar passes:</b> ML beats the bathtub on all 9, every one clear of the 95% interval.</li>
     <li><b>Buildings:</b> 2,116,261 mapped. Affected at 1.0 / 1.5 / 2.0 m: 36,711 / 139,517 / 353,200. Critical facilities affected: 17 / 58 / 148 of 1,390.</li>
   </ul>
   <figure><img src="screenshots/18_tab_table.png" alt="District table"><figcaption>District table (1.5 m, balanced weights). Every column can be sorted live, which is useful for audience questions about a specific district.</figcaption></figure>
@@ -477,19 +526,21 @@
 
 <!-- ============================ Q&A ============================ -->
 <section>
-  <h2 style="margin-top:24px">10. Anticipated questions</h2>
+  <h2 style="margin-top:24px">11. Anticipated questions</h2>
   <table class="qa">
     <tr><th style="width:32%">Question</th><th>Suggested answer</th></tr>
     <tr><td>Is this a forecast of the current flood?</td><td>No. It's a “what-if” tool: it shows where water <i>would</i> go at a given height. The <i>Current flood</i> tab shows recent rainfall and modelled river flow for context, but they don't set the water level. Driving the simulation from live river gauges is a planned next step.</td></tr>
     <tr><td>Why doesn't central Bangkok flood more?</td><td>Two reasons. The elevation data includes buildings, which makes the dense core look higher than the ground really is. The centre is also protected by flood walls, dikes and pumps: switch on <i>Include flood defences</i> and the inner city stays dry until the water tops the walls at about 2.5 m. Pumps and tunnels still aren't modelled, so treat the centre's result with caution.</td></tr>
     <tr><td>Why does the flooded area jump at 0.5, 1.0, 1.5 m?</td><td>That's a quirk of the elevation dataset, not a real threshold. Copernicus rounds many flat areas to 0.5 m heights, so big patches switch to flooded together. Look at the overall trend.</td></tr>
     <tr><td>Why are the headline numbers bigger than the table totals?</td><td>The headline cards cover the whole map area (greater Bangkok, about 18 M people). The table and district counts cover only Bangkok's 50 districts (about 10.9 M).</td></tr>
-    <tr><td>How accurate is the elevation?</td><td>It's a 30 m global satellite surface model, good for relative comparisons across the city. Treat differences smaller than about half a metre, and any single street, as uncertain.</td></tr>
+    <tr><td>How accurate is the elevation?</td><td>It's a 30 m global satellite surface model, good for relative comparisons across the city. The app now shows the effect: the grey ranges and the <i>Chance flooded</i> layer come from 50 reruns with an assumed 0.7 m error. City-wide totals move by a few percent; individual streets are genuinely uncertain.</td></tr>
     <tr><td>Who chose the weights? Aren't they arbitrary?</td><td>They're a transparent judgment, and that's why they're sliders. Show the five scenarios: the top districts stay much the same, so the conclusion doesn't depend on the exact weights. Calibrating against observed floods is the next step.</td></tr>
     <tr><td>Where does the data come from, and how current is it?</td><td>Copernicus GLO-30 elevation (satellite radar), WorldPop 2020 population estimates, OpenStreetMap rivers and canals, and geoBoundaries districts. All are free and open.</td></tr>
     <tr><td>Why stop at 3 m?</td><td>By 3 m most of the low-lying region is under water, and the bathtub assumption becomes unrealistic for a flood that big.</td></tr>
-    <tr><td>Is the machine-learning model better than the risk index?</td><td>Against the real 2011 flood, yes, by far: 0.87 vs 0.45 ROC-AUC, tested on areas it never saw. But it has only seen one flood. It's the best evidence we have, not a guarantee.</td></tr>
-    <tr><td>How do you know the ML model's lead isn't luck?</td><td>Open the <i>Validation</i> tab. Each score has a 95% interval from resampling 4 km blocks of the map. On 5 of the 8 radar passes the ML model's lead over the bathtub stays above zero across that interval, and it is never clearly behind.</td></tr>
+    <tr><td>Is the machine-learning model better than the risk index?</td><td>Yes, by far, on every flood: for example 0.85 vs 0.45 ROC-AUC on 2011 and 0.96 vs 0.39 on the 27 Sep flood, always on areas or years it never saw. It's the best evidence we have, not a guarantee.</td></tr>
+    <tr><td>Why not just train on 2011?</td><td>That was the first version, and it's still in the app for comparison. Trained on ten floods, the model predicts ordinary years much better (0.97–0.99 vs 0.90–0.93 on left-out seasons, and better on all 9 of this year's passes). The cost is a slightly weaker score on the extreme 2011 flood.</td></tr>
+    <tr><td>Your numbers have error bars. How big is the real uncertainty?</td><td>Bigger. The ranges cover elevation error and the model's sensitivity to its training data. They don't cover static water, missing pumps or 2020 population. And the assumed elevation error size matters: doubling it to 1.4 m almost doubles the people affected at 1.0 m.</td></tr>
+    <tr><td>How do you know the ML model's lead isn't luck?</td><td>Open the <i>Validation</i> tab. Each score has a 95% interval from resampling 4 km blocks of the map. On all 9 radar passes the ML model's lead over the bathtub stays above zero across that interval.</td></tr>
     <tr><td>Why did the hand-weighted index do worse than random?</td><td>It rates dense, canal-rich inner districts highest. In 2011 those were protected by walls and pumps and stayed dry, while farmland on the edge flooded. Hand-set weights can be confidently wrong, which is why testing matters.</td></tr>
     <tr><td>Why does being farther from canals <i>raise</i> the ML flood chance?</td><td>Canals are densest in the protected city, and the fields that flooded in 2011 are farther apart. The model is picking up “protected city vs open farmland”, not canals keeping places dry. That's a correlation, not a cause.</td></tr>
     <tr><td>Why leave population out of the ML model?</td><td>With it, the model learned “dense city = dry”, mostly because of flood defences and the satellite missing urban floodwater. That's a dangerous message for a flood tool, and removing it cost little accuracy (0.89 → 0.87).</td></tr>
@@ -505,29 +556,30 @@
 
 <!-- ============================ LIMITS & NEXT ============================ -->
 <section>
-  <h2 style="margin-top:24px">11. Limitations and next steps</h2>
+  <h2 style="margin-top:24px">12. Limitations and next steps</h2>
   <h3>Limitations (say these out loud, because it builds credibility)</h3>
   <ul>
     <li><b>“Bathtub” model:</b> water is static. There's no flow speed, rainfall timing, tide cycle or flood duration.</li>
     <li><b>Flood defences, simplified:</b> the river walls, King's Dike and airport dike are modelled (when switched on) with one crest height per section; pumping stations, drainage tunnels, gate capacity and the west bank's polder dikes are not.</li>
-    <li><b>Surface elevation:</b> buildings and trees inflate heights, especially in the centre. Ground subsidence of a few cm per year isn't included.</li>
-    <li><b>Elevation rounding:</b> many flat areas are stored in 0.5 m steps, which makes the curve jump at those levels.</li>
+    <li><b>Surface elevation:</b> buildings and trees inflate heights, especially in the centre. Ground subsidence of a few cm per year isn't included. Its effect is now <i>shown</i>, not just mentioned: ranges on every headline number and a chance-flooded map (Section 9). But the error size behind them (0.7 m) is an assumption.</li>
+    <li><b>Elevation rounding:</b> many flat areas are stored in 0.5 m steps, which makes the curve jump at those levels and puts the single simulation outside its own uncertainty range.</li>
     <li><b>Population:</b> 2020 modelled estimates of where people live, not where they are during the day.</li>
     <li><b>Risk index:</b> relative, not absolute. It has no vulnerability factor (for example income, building type, or access to hospitals). Against 2011 it scored below random.</li>
-    <li><b>ML model:</b> trained on one river flood with 250 m labels that under-count urban flooding. It reflects 2011-era defences and says nothing about cloudbursts.</li>
+    <li><b>ML model:</b> trained on one extreme river flood and nine ordinary seasons, with satellite labels that under-count urban flooding. It says nothing about cloudbursts and under-rates places that flood only in extreme years. Where its five cross-validation versions disagree is shown as a map layer.</li>
+    <li><b>Uncertainty shown is partial:</b> the ranges cover elevation error and the model's training data, not every limit on this list, so the real uncertainty is larger.</li>
     <li><b>Radar flood maps:</b> under-count water between buildings, can mistake smooth surfaces or field flooding for floodwater, and are snapshots every 4–8 days.</li>
     <li><b>Buildings:</b> AI-estimated footprints and heights; “affected” is judged per ~65 m cell, not per building; small sheds left out in the six largest districts.</li>
   </ul>
   <h3>Next steps</h3>
   <ol>
-    <li><b>More floods for the model:</b> use this month's radar flood maps as a second training event, so the model learns from both a river flood (2011) and a rain flood (2026).</li>
+    <li><b>Keep testing:</b> after the 2026 season, score it as a whole, then add it to training and hold out 2027.</li>
     <li><b>Go live:</b> rainfall and modelled river flow are now shown next to each radar pass; the next step is using real river-gauge levels to set the simulated water level.</li>
     <li><b>Refine defences:</b> surveyed crest heights along each wall, the west bank's polder dikes, and pumping capacity.</li>
     <li><b>Add vulnerability:</b> hospitals, schools and income data to go beyond exposure.</li>
     <li><b>Share it:</b> deploy on Streamlit Community Cloud so anyone can open a link.</li>
   </ol>
 
-  <h2 style="margin-top:24px">12. Appendix</h2>
+  <h2 style="margin-top:24px">13. Appendix</h2>
   <h3>Data sources</h3>
   <table>
     <tr><th>Layer</th><th>Source</th><th>Resolution</th></tr>
@@ -538,7 +590,8 @@
     <tr><td>2011 flood (ML training data)</td><td>Global Flood Database, event DFO_3850 (via Google Earth Engine)</td><td>250 m</td></tr>
     <tr><td>Land cover</td><td>ESA WorldCover 2021 (AWS open data)</td><td>10 m</td></tr>
     <tr><td>Current flood</td><td>Sentinel-1 radar (Copernicus, via Google Earth Engine); permanent water from JRC Global Surface Water</td><td>10 m, mapped at 20 m</td></tr>
-    <tr><td>Rainfall</td><td>Open-Meteo weather-model estimates (no key)</td><td>Daily</td></tr>
+    <tr><td>Rainfall</td><td>Open-Meteo weather-model estimates (no key); for past seasons, the Open-Meteo historical archive (ERA5)</td><td>Daily</td></tr>
+    <tr><td>Wet-season flood labels, 2017–2025</td><td>Sentinel-1 radar via Google Earth Engine, August–November, compared with the same weeks a year earlier</td><td>~65 m grid</td></tr>
     <tr><td>River flow</td><td>GloFAS via the Open-Meteo Flood API (no key), Chao Phraya at Nonthaburi; normal = 1996–2025 median for the date</td><td>Daily, ~5 km</td></tr>
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
@@ -547,7 +600,12 @@
   </table>
   <h3>Rebuilding the ML model</h3>
   <pre>python scripts/prepare_ml_data.py --gee-project YOUR_PROJECT   # or --label-file a downloaded GFD map
-python scripts/train_model.py                                  # about 2 min; prints scores vs existing methods</pre>
+python scripts/build_flood_archive.py --gee-project YOUR_PROJECT   # radar wet seasons 2017-2025 (~10 min a year)
+python scripts/event_context.py                                # each season's rain and river (no key)
+python scripts/train_model.py                                  # about 35 min; scores, intervals, disagreement map</pre>
+  <h3>Rebuilding the elevation uncertainty</h3>
+  <pre>python scripts/dem_uncertainty.py                              # 50 runs, about 4 min
+python scripts/dem_uncertainty.py --sigma 1.4 --out-dir data/processed/dem_uncertainty_pessimistic</pre>
   <h3>Updating the current flood</h3>
   <pre>python scripts/fetch_current_flood.py --gee-project YOUR_PROJECT   # new radar passes, added to the archive (also runs daily on GitHub)
 python scripts/evaluate_current.py                                 # re-score the models, with 95% intervals (~3 min)

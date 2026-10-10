@@ -12,7 +12,16 @@
       "name": "2011 flood (MODIS)",
       "source": "Global Flood Database DFO_3850 (MODIS, 250 m), 2011-08-05 to 2012-01-09",
       "n_cells": 846343,
-      "flooded_share": 0.21075497759182743
+      "flooded_share": 0.21075497759182743,
+      "context": {
+        "rain_total_mm": 746.0,
+        "rain_pct_normal": 107.0,
+        "rain_max_3day_mm": 86.0,
+        "river_peak_m3s": 9461.0,
+        "river_peak_date": "2011-10-06",
+        "river_peak_pct_normal": 209.0,
+        "river_days_above_alert": 122
+      }
     },
     {
       "id": "radar_2017",
@@ -20,7 +29,16 @@
       "name": "2017 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 759469,
-      "flooded_share": 0.03391711840772961
+      "flooded_share": 0.03391711840772961,
+      "context": {
+        "rain_total_mm": 821.0,
+        "rain_pct_normal": 118.0,
+        "rain_max_3day_mm": 82.0,
+        "river_peak_m3s": 5597.0,
+        "river_peak_date": "2017-10-20",
+        "river_peak_pct_normal": 152.0,
+        "river_days_above_alert": 52
+      }
     },
     {
       "id": "radar_2018",
@@ -28,7 +46,16 @@
       "name": "2018 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 749265,
-      "flooded_share": 0.04288202438389622
+      "flooded_share": 0.04288202438389622,
+      "context": {
+        "rain_total_mm": 733.0,
+        "rain_pct_normal": 106.0,
+        "rain_max_3day_mm": 92.0,
+        "river_peak_m3s": 7111.0,
+        "river_peak_date": "2018-08-29",
+        "river_peak_pct_normal": 219.0,
+        "river_days_above_alert": 55
+      }
     },
     {
       "id": "radar_2019",
@@ -36,7 +63,16 @@
       "name": "2019 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 751585,
-      "flooded_share": 0.026537251275637486
+      "flooded_share": 0.026537251275637486,
+      "context": {
+        "rain_total_mm": 723.0,
+        "rain_pct_normal": 104.0,
+        "rain_max_3day_mm": 167.0,
+        "river_peak_m3s": 7395.0,
+        "river_peak_date": "2019-09-05",
+        "river_peak_pct_normal": 211.0,
+        "river_days_above_alert": 33
+      }
     },
     {
       "id": "radar_2020",
@@ -44,7 +80,16 @@
       "name": "2020 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 758190,
-      "flooded_share": 0.041633363668737385
+      "flooded_share": 0.041633363668737385,
+      "context": {
+        "rain_total_mm": 1016.0,
+        "rain_pct_normal": 146.0,
+        "rain_max_3day_mm": 153.0,
+        "river_peak_m3s": 4344.0,
+        "river_peak_date": "2020-10-19",
+        "river_peak_pct_normal": 117.0,
+        "river_days_above_alert": 0
+      }
     },
     {
       "id": "radar_2021",
@@ -52,7 +97,16 @@
       "name": "2021 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 755294,
-      "flooded_share": 0.05060545959586598
+      "flooded_share": 0.05060545959586598,
+      "context": {
+        "rain_total_mm": 1002.0,
+        "rain_pct_normal": 144.0,
+        "rain_max_3day_mm": 110.0,
+        "river_peak_m3s": 7481.0,
+        "river_peak_date": "2021-09-27",
+        "river_peak_pct_normal": 168.0,
+        "river_days_above_alert": 48
+      }
     },
     {
       "id": "radar_2022",
@@ -60,7 +114,16 @@
       "name": "2022 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 760819,
-      "flooded_share": 0.033507312514540255
+      "flooded_share": 0.033507312514540255,
+      "context": {
+        "rain_total_mm": 1033.0,
+        "rain_pct_normal": 149.0,
+        "rain_max_3day_mm": 76.0,
+        "river_peak_m3s": 6137.0,
+        "river_peak_date": "2022-10-06",
+        "river_peak_pct_normal": 135.0,
+        "river_days_above_alert": 11
+      }
     },
     {
       "id": "radar_2023",
@@ -68,7 +131,16 @@
       "name": "2023 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 760007,
-      "flooded_share": 0.022380057025790552
+      "flooded_share": 0.022380057025790552,
+      "context": {
+        "rain_total_mm": 1029.0,
+        "rain_pct_normal": 148.0,
+        "rain_max_3day_mm": 88.0,
+        "river_peak_m3s": 5635.0,
+        "river_peak_date": "2023-10-13",
+        "river_peak_pct_normal": 140.0,
+        "river_days_above_alert": 3
+      }
     },
     {
       "id": "radar_2024",
@@ -76,7 +148,16 @@
       "name": "2024 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 759352,
-      "flooded_share": 0.02803047861861166
+      "flooded_share": 0.02803047861861166,
+      "context": {
+        "rain_total_mm": 870.0,
+        "rain_pct_normal": 125.0,
+        "rain_max_3day_mm": 69.0,
+        "river_peak_m3s": 5308.0,
+        "river_peak_date": "2024-10-07",
+        "river_peak_pct_normal": 118.0,
+        "river_days_above_alert": 0
+      }
     },
     {
       "id": "radar_2025",
@@ -84,9 +165,29 @@
       "name": "2025 wet season (radar)",
       "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)",
       "n_cells": 755408,
-      "flooded_share": 0.04553168618812615
+      "flooded_share": 0.04553168618812615,
+      "context": {
+        "rain_total_mm": 864.0,
+        "rain_pct_normal": 124.0,
+        "rain_max_3day_mm": 78.0,
+        "river_peak_m3s": 5057.0,
+        "river_peak_date": "2025-10-02",
+        "river_peak_pct_normal": 112.0,
+        "river_days_above_alert": 24
+      }
     }
   ],
+  "event_context": {
+    "season": "August-November",
+    "rain_source": "Open-Meteo historical weather archive (ERA5 reanalysis) at 13.8N 100.75E",
+    "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E)",
+    "normal_years": [
+      1996,
+      2025
+    ],
+    "rain_normal_mm": 694.0,
+    "alert_river_pct": 130
+  },
   "test_years_from": 2026,
   "cells_per_event": 200000,
   "n_training_cells": 2000000,
@@ -2466,6 +2567,1128 @@
         "method": "Bathtub + defences",
         "roc_auc": 0.808189135249909,
         "pr_auc": 0.13064179279646781
+      }
+    ],
+    "pooled": [
+      {
+        "event": "2011 flood (MODIS)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.8528834272794757,
+        "pr_auc": 0.5822354506980308,
+        "roc_auc_ci": [
+          0.837331954755269,
+          0.8697703604564484
+        ],
+        "pr_auc_ci": [
+          0.5272275058501331,
+          0.6434578630653183
+        ],
+        "roc_auc_diff_ci": [
+          0.1547277893398411,
+          0.22163596858207965
+        ],
+        "pr_auc_diff_ci": [
+          0.2526259456258902,
+          0.3422225611863711
+        ],
+        "flooded_share": 0.21075497759182743,
+        "n_cells": 846343
+      },
+      {
+        "event": "2011 flood (MODIS)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.8716650646143569,
+        "pr_auc": 0.6787362962884617,
+        "roc_auc_ci": [
+          0.8563550407269109,
+          0.8867640900145094
+        ],
+        "pr_auc_ci": [
+          0.6356846490054787,
+          0.7274760137079946
+        ],
+        "roc_auc_diff_ci": [
+          0.17030525585593612,
+          0.24237768252831213
+        ],
+        "pr_auc_diff_ci": [
+          0.3462071640072343,
+          0.43287709061625884
+        ],
+        "flooded_share": 0.21075497759182743,
+        "n_cells": 846343
+      },
+      {
+        "event": "2011 flood (MODIS)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.44761831772362426,
+        "pr_auc": 0.180626148469804,
+        "roc_auc_ci": [
+          0.41390842067778916,
+          0.4822467176399357
+        ],
+        "pr_auc_ci": [
+          0.1539897538150548,
+          0.21210372512636289
+        ],
+        "roc_auc_diff_ci": [
+          -0.2494359134959262,
+          -0.19095897254673824
+        ],
+        "pr_auc_diff_ci": [
+          -0.1335010925648344,
+          -0.08521790941766845
+        ],
+        "flooded_share": 0.21075497759182743,
+        "n_cells": 846343
+      },
+      {
+        "event": "2011 flood (MODIS)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6665355357794551,
+        "pr_auc": 0.2855588807838472,
+        "roc_auc_ci": [
+          0.6307055742636549,
+          0.7040073817925687
+        ],
+        "pr_auc_ci": [
+          0.24977051408137496,
+          0.32851276044180705
+        ],
+        "flooded_share": 0.21075497759182743,
+        "n_cells": 846343
+      },
+      {
+        "event": "2011 flood (MODIS)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7206220291099078,
+        "pr_auc": 0.3256597180573305,
+        "roc_auc_ci": [
+          0.6880891107712531,
+          0.7537807799514702
+        ],
+        "pr_auc_ci": [
+          0.2830806331711892,
+          0.37150960291795593
+        ],
+        "roc_auc_diff_ci": [
+          0.03843852057023577,
+          0.07225915542000184
+        ],
+        "pr_auc_diff_ci": [
+          0.02621381869019429,
+          0.05537275865690672
+        ],
+        "flooded_share": 0.21075497759182743,
+        "n_cells": 846343
+      },
+      {
+        "event": "2017 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9720819714426784,
+        "pr_auc": 0.5467958960916137,
+        "roc_auc_ci": [
+          0.967844097015323,
+          0.9759515658873275
+        ],
+        "pr_auc_ci": [
+          0.46712564438462106,
+          0.6185952723774931
+        ],
+        "roc_auc_diff_ci": [
+          0.20152372984685835,
+          0.2780910484745182
+        ],
+        "pr_auc_diff_ci": [
+          0.4148445439005192,
+          0.5482803576642483
+        ],
+        "flooded_share": 0.03391711840772961,
+        "n_cells": 759469
+      },
+      {
+        "event": "2017 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9245881284276953,
+        "pr_auc": 0.28514743038865814,
+        "roc_auc_ci": [
+          0.9135859437427338,
+          0.9365899982048034
+        ],
+        "pr_auc_ci": [
+          0.23349249906061617,
+          0.3481189810315199
+        ],
+        "roc_auc_diff_ci": [
+          0.14912650532574123,
+          0.23523778276848675
+        ],
+        "pr_auc_diff_ci": [
+          0.1759995881624301,
+          0.2846442474686993
+        ],
+        "flooded_share": 0.03391711840772961,
+        "n_cells": 759469
+      },
+      {
+        "event": "2017 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.41013096223728357,
+        "pr_auc": 0.02632055680711894,
+        "roc_auc_ci": [
+          0.36109986146648476,
+          0.4590627926331455
+        ],
+        "pr_auc_ci": [
+          0.021527059694475846,
+          0.03110781985375342
+        ],
+        "roc_auc_diff_ci": [
+          -0.34707700744237996,
+          -0.2994889682933498
+        ],
+        "pr_auc_diff_ci": [
+          -0.04592127636766775,
+          -0.025924192098086916
+        ],
+        "flooded_share": 0.03391711840772961,
+        "n_cells": 759469
+      },
+      {
+        "event": "2017 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7338985573176564,
+        "pr_auc": 0.06130504118672894,
+        "roc_auc_ci": [
+          0.6963695497855853,
+          0.7717715811971919
+        ],
+        "pr_auc_ci": [
+          0.04798877181154955,
+          0.0755145927975747
+        ],
+        "flooded_share": 0.03391711840772961,
+        "n_cells": 759469
+      },
+      {
+        "event": "2017 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7804638832118791,
+        "pr_auc": 0.0732790471630928,
+        "roc_auc_ci": [
+          0.7439971654852107,
+          0.8120253515156923
+        ],
+        "pr_auc_ci": [
+          0.059104268600416045,
+          0.08890902502494256
+        ],
+        "roc_auc_diff_ci": [
+          0.03262780552532762,
+          0.06430317154625495
+        ],
+        "pr_auc_diff_ci": [
+          0.007983595502758479,
+          0.01745896419180984
+        ],
+        "flooded_share": 0.03391711840772961,
+        "n_cells": 759469
+      },
+      {
+        "event": "2018 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9751273590128281,
+        "pr_auc": 0.6423073289994298,
+        "roc_auc_ci": [
+          0.9719758250610028,
+          0.97832819954426
+        ],
+        "pr_auc_ci": [
+          0.5916058078972515,
+          0.677605883965825
+        ],
+        "roc_auc_diff_ci": [
+          0.1763848573837623,
+          0.24348231003384357
+        ],
+        "pr_auc_diff_ci": [
+          0.5068271796478915,
+          0.5764736527444221
+        ],
+        "flooded_share": 0.04288202438389622,
+        "n_cells": 749265
+      },
+      {
+        "event": "2018 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9141720497415113,
+        "pr_auc": 0.2923156383097845,
+        "roc_auc_ci": [
+          0.9009668432775008,
+          0.9272063971925624
+        ],
+        "pr_auc_ci": [
+          0.2448236193898783,
+          0.347904511696804
+        ],
+        "roc_auc_diff_ci": [
+          0.11232788066098513,
+          0.18359494669932178
+        ],
+        "pr_auc_diff_ci": [
+          0.1530498813493703,
+          0.25667825416881307
+        ],
+        "flooded_share": 0.04288202438389622,
+        "n_cells": 749265
+      },
+      {
+        "event": "2018 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4378502080256324,
+        "pr_auc": 0.03511366823524498,
+        "roc_auc_ci": [
+          0.3958383038020819,
+          0.47909068146444056
+        ],
+        "pr_auc_ci": [
+          0.028252737898297884,
+          0.0419265065496932
+        ],
+        "roc_auc_diff_ci": [
+          -0.35144477525686035,
+          -0.3088087569742745
+        ],
+        "pr_auc_diff_ci": [
+          -0.07584108447027607,
+          -0.04316505562615732
+        ],
+        "flooded_share": 0.04288202438389622,
+        "n_cells": 749265
+      },
+      {
+        "event": "2018 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7674388468755433,
+        "pr_auc": 0.09325466471721218,
+        "roc_auc_ci": [
+          0.7310871293698219,
+          0.7995628939090149
+        ],
+        "pr_auc_ci": [
+          0.0717104307711337,
+          0.1161613591029448
+        ],
+        "flooded_share": 0.04288202438389622,
+        "n_cells": 749265
+      },
+      {
+        "event": "2018 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.8068697934310406,
+        "pr_auc": 0.11120784494401056,
+        "roc_auc_ci": [
+          0.7746788852273717,
+          0.8350939884500919
+        ],
+        "pr_auc_ci": [
+          0.08814108629239222,
+          0.13739552469868424
+        ],
+        "roc_auc_diff_ci": [
+          0.028388887329314418,
+          0.05453729132103693
+        ],
+        "pr_auc_diff_ci": [
+          0.012204971819983791,
+          0.02477804870270208
+        ],
+        "flooded_share": 0.04288202438389622,
+        "n_cells": 749265
+      },
+      {
+        "event": "2019 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9718959348722354,
+        "pr_auc": 0.4268578585478218,
+        "roc_auc_ci": [
+          0.9680501554152517,
+          0.9757857189682408
+        ],
+        "pr_auc_ci": [
+          0.38335394276099427,
+          0.47493024063655764
+        ],
+        "roc_auc_diff_ci": [
+          0.18293275986556592,
+          0.24696199929877374
+        ],
+        "pr_auc_diff_ci": [
+          0.3371518737954364,
+          0.41148055171782105
+        ],
+        "flooded_share": 0.026537251275637486,
+        "n_cells": 751585
+      },
+      {
+        "event": "2019 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9063140660215079,
+        "pr_auc": 0.17754637870407994,
+        "roc_auc_ci": [
+          0.8947775389872283,
+          0.9212449279289164
+        ],
+        "pr_auc_ci": [
+          0.15699753588983942,
+          0.20850671487405417
+        ],
+        "roc_auc_diff_ci": [
+          0.11605144044870545,
+          0.18636725513703833
+        ],
+        "pr_auc_diff_ci": [
+          0.10174097908920954,
+          0.14987345477169903
+        ],
+        "flooded_share": 0.026537251275637486,
+        "n_cells": 751585
+      },
+      {
+        "event": "2019 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4366179452627633,
+        "pr_auc": 0.021534864811604947,
+        "roc_auc_ci": [
+          0.3961278960522987,
+          0.47339647982086996
+        ],
+        "pr_auc_ci": [
+          0.01745730850226718,
+          0.025868611962964003
+        ],
+        "roc_auc_diff_ci": [
+          -0.3462145059300394,
+          -0.30244356671795525
+        ],
+        "pr_auc_diff_ci": [
+          -0.044447522414938385,
+          -0.025794979061182964
+        ],
+        "flooded_share": 0.026537251275637486,
+        "n_cells": 751585
+      },
+      {
+        "event": "2019 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7603425873231646,
+        "pr_auc": 0.055955275753443216,
+        "roc_auc_ci": [
+          0.7239560069516578,
+          0.7900949920886657
+        ],
+        "pr_auc_ci": [
+          0.04341819989813289,
+          0.06973799494697455
+        ],
+        "flooded_share": 0.026537251275637486,
+        "n_cells": 751585
+      },
+      {
+        "event": "2019 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.8029738571981044,
+        "pr_auc": 0.06739572839971361,
+        "roc_auc_ci": [
+          0.768136757069503,
+          0.8312951979703921
+        ],
+        "pr_auc_ci": [
+          0.05393200367829518,
+          0.08260754817581688
+        ],
+        "roc_auc_diff_ci": [
+          0.03102911484819828,
+          0.05923834382628065
+        ],
+        "pr_auc_diff_ci": [
+          0.007618035147958613,
+          0.01566009524246444
+        ],
+        "flooded_share": 0.026537251275637486,
+        "n_cells": 751585
+      },
+      {
+        "event": "2020 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9830628092350184,
+        "pr_auc": 0.6786892520558554,
+        "roc_auc_ci": [
+          0.9805659192092575,
+          0.9854199948432109
+        ],
+        "pr_auc_ci": [
+          0.6242288824696771,
+          0.7192475070683212
+        ],
+        "roc_auc_diff_ci": [
+          0.20402636890826717,
+          0.2750473727742102
+        ],
+        "pr_auc_diff_ci": [
+          0.5586503588870093,
+          0.6340272025133689
+        ],
+        "flooded_share": 0.041633363668737385,
+        "n_cells": 758190
+      },
+      {
+        "event": "2020 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9287438610753528,
+        "pr_auc": 0.32780789057205506,
+        "roc_auc_ci": [
+          0.9182369250121356,
+          0.9410906716887866
+        ],
+        "pr_auc_ci": [
+          0.28001107306140954,
+          0.3819844296576992
+        ],
+        "roc_auc_diff_ci": [
+          0.14714153832959134,
+          0.2247324740405074
+        ],
+        "pr_auc_diff_ci": [
+          0.20438601173445956,
+          0.3048522646065198
+        ],
+        "flooded_share": 0.041633363668737385,
+        "n_cells": 758190
+      },
+      {
+        "event": "2020 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4111530924312073,
+        "pr_auc": 0.03231822703300106,
+        "roc_auc_ci": [
+          0.3653722197067662,
+          0.45169308558423404
+        ],
+        "pr_auc_ci": [
+          0.026517607025945335,
+          0.03816815628891622
+        ],
+        "roc_auc_diff_ci": [
+          -0.3552518133625544,
+          -0.3123108332462012
+        ],
+        "pr_auc_diff_ci": [
+          -0.06069309242499697,
+          -0.034589069278626906
+        ],
+        "flooded_share": 0.041633363668737385,
+        "n_cells": 758190
+      },
+      {
+        "event": "2020 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7443697412096533,
+        "pr_auc": 0.07849007599469851,
+        "roc_auc_ci": [
+          0.7075606061932697,
+          0.778908812927667
+        ],
+        "pr_auc_ci": [
+          0.06106991507084561,
+          0.09953717825365845
+        ],
+        "flooded_share": 0.041633363668737385,
+        "n_cells": 758190
+      },
+      {
+        "event": "2020 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7926161166933685,
+        "pr_auc": 0.09497586172496914,
+        "roc_auc_ci": [
+          0.7563834691942085,
+          0.8238074676725539
+        ],
+        "pr_auc_ci": [
+          0.0770067478409361,
+          0.1166176546508267
+        ],
+        "roc_auc_diff_ci": [
+          0.03522860353256495,
+          0.06609630033558844
+        ],
+        "pr_auc_diff_ci": [
+          0.011015364096301774,
+          0.023453836414568545
+        ],
+        "flooded_share": 0.041633363668737385,
+        "n_cells": 758190
+      },
+      {
+        "event": "2021 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9854337493018238,
+        "pr_auc": 0.7609288189909968,
+        "roc_auc_ci": [
+          0.9829660966978434,
+          0.9875773759896315
+        ],
+        "pr_auc_ci": [
+          0.7110816701907253,
+          0.7945855276411884
+        ],
+        "roc_auc_diff_ci": [
+          0.20276849571202524,
+          0.2755489586240736
+        ],
+        "pr_auc_diff_ci": [
+          0.6223469256296903,
+          0.6962847818938259
+        ],
+        "flooded_share": 0.05060545959586598,
+        "n_cells": 755294
+      },
+      {
+        "event": "2021 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9327562555599463,
+        "pr_auc": 0.4087493285271917,
+        "roc_auc_ci": [
+          0.922154741755397,
+          0.9435661594154231
+        ],
+        "pr_auc_ci": [
+          0.34309458116193703,
+          0.46984071593856436
+        ],
+        "roc_auc_diff_ci": [
+          0.14873146511381563,
+          0.2288867487604557
+        ],
+        "pr_auc_diff_ci": [
+          0.25354597683917995,
+          0.38143919849439983
+        ],
+        "flooded_share": 0.05060545959586598,
+        "n_cells": 755294
+      },
+      {
+        "event": "2021 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.41070838672985815,
+        "pr_auc": 0.039265712534575135,
+        "roc_auc_ci": [
+          0.36727786716458194,
+          0.4531882606766602
+        ],
+        "pr_auc_ci": [
+          0.031529673275404985,
+          0.04602319201545331
+        ],
+        "roc_auc_diff_ci": [
+          -0.35685729694396706,
+          -0.3138632687193768
+        ],
+        "pr_auc_diff_ci": [
+          -0.07224663534204832,
+          -0.04142212492087428
+        ],
+        "flooded_share": 0.05060545959586598,
+        "n_cells": 755294
+      },
+      {
+        "event": "2021 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.747016546489226,
+        "pr_auc": 0.09483365013546124,
+        "roc_auc_ci": [
+          0.7104246542810962,
+          0.7840380594320402
+        ],
+        "pr_auc_ci": [
+          0.07295364764181708,
+          0.11950669052812975
+        ],
+        "flooded_share": 0.05060545959586598,
+        "n_cells": 755294
+      },
+      {
+        "event": "2021 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7972752772229612,
+        "pr_auc": 0.11550868895142385,
+        "roc_auc_ci": [
+          0.7611831094138625,
+          0.8294652407908195
+        ],
+        "pr_auc_ci": [
+          0.09285262319769072,
+          0.14449181706695743
+        ],
+        "roc_auc_diff_ci": [
+          0.03797466206024496,
+          0.06929933630743454
+        ],
+        "pr_auc_diff_ci": [
+          0.013896109286109643,
+          0.02933879519211218
+        ],
+        "flooded_share": 0.05060545959586598,
+        "n_cells": 755294
+      },
+      {
+        "event": "2022 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.97572483803213,
+        "pr_auc": 0.5427525686648316,
+        "roc_auc_ci": [
+          0.971208284323328,
+          0.9794095317782368
+        ],
+        "pr_auc_ci": [
+          0.4840778017356787,
+          0.5933904983898013
+        ],
+        "roc_auc_diff_ci": [
+          0.19281744991344185,
+          0.2591396355935361
+        ],
+        "pr_auc_diff_ci": [
+          0.4282088254439091,
+          0.5211259793530011
+        ],
+        "flooded_share": 0.033507312514540255,
+        "n_cells": 760819
+      },
+      {
+        "event": "2022 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9233506943623606,
+        "pr_auc": 0.2792137260755988,
+        "roc_auc_ci": [
+          0.9143590152274483,
+          0.9335555270586084
+        ],
+        "pr_auc_ci": [
+          0.24005855334213444,
+          0.31861767472846053
+        ],
+        "roc_auc_diff_ci": [
+          0.1397109747102847,
+          0.21107628503263506
+        ],
+        "pr_auc_diff_ci": [
+          0.17656106711922506,
+          0.2525253856462627
+        ],
+        "flooded_share": 0.033507312514540255,
+        "n_cells": 760819
+      },
+      {
+        "event": "2022 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4254796640186198,
+        "pr_auc": 0.02647296187758562,
+        "roc_auc_ci": [
+          0.386300757741542,
+          0.46016706397977797
+        ],
+        "pr_auc_ci": [
+          0.021062920304396326,
+          0.03190519316970995
+        ],
+        "roc_auc_diff_ci": [
+          -0.3461211984381191,
+          -0.3032810216890574
+        ],
+        "pr_auc_diff_ci": [
+          -0.04991179800572604,
+          -0.02826117408705897
+        ],
+        "flooded_share": 0.033507312514540255,
+        "n_cells": 760819
+      },
+      {
+        "event": "2022 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7490675551744628,
+        "pr_auc": 0.0642795334981606,
+        "roc_auc_ci": [
+          0.716069236672196,
+          0.7868941033435979
+        ],
+        "pr_auc_ci": [
+          0.049280617247530745,
+          0.08116790555504828
+        ],
+        "flooded_share": 0.033507312514540255,
+        "n_cells": 760819
+      },
+      {
+        "event": "2022 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7981585676966995,
+        "pr_auc": 0.0785844823156703,
+        "roc_auc_ci": [
+          0.7660468525702514,
+          0.8270593458751303
+        ],
+        "pr_auc_ci": [
+          0.0629950258383887,
+          0.09556310470412847
+        ],
+        "roc_auc_diff_ci": [
+          0.036210669669535046,
+          0.06639471921295291
+        ],
+        "pr_auc_diff_ci": [
+          0.00962851737642714,
+          0.02002927273195881
+        ],
+        "flooded_share": 0.033507312514540255,
+        "n_cells": 760819
+      },
+      {
+        "event": "2023 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9697185243142009,
+        "pr_auc": 0.4154753538615732,
+        "roc_auc_ci": [
+          0.9641392202074743,
+          0.974664786931735
+        ],
+        "pr_auc_ci": [
+          0.3557059479208769,
+          0.47237131543651595
+        ],
+        "roc_auc_diff_ci": [
+          0.21268800945407956,
+          0.2880095397881806
+        ],
+        "pr_auc_diff_ci": [
+          0.3189179436274077,
+          0.42854849407580986
+        ],
+        "flooded_share": 0.022380057025790552,
+        "n_cells": 760007
+      },
+      {
+        "event": "2023 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9101440736964842,
+        "pr_auc": 0.15937357055879406,
+        "roc_auc_ci": [
+          0.8965436457708388,
+          0.925958361260706
+        ],
+        "pr_auc_ci": [
+          0.1230993245414087,
+          0.20501392706441648
+        ],
+        "roc_auc_diff_ci": [
+          0.14992192136818205,
+          0.23062098115406165
+        ],
+        "pr_auc_diff_ci": [
+          0.08621466788183749,
+          0.1663297105623531
+        ],
+        "flooded_share": 0.022380057025790552,
+        "n_cells": 760007
+      },
+      {
+        "event": "2023 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.38178287862248567,
+        "pr_auc": 0.01638970943730534,
+        "roc_auc_ci": [
+          0.33880465175249047,
+          0.4225255135345181
+        ],
+        "pr_auc_ci": [
+          0.013297696356959135,
+          0.0193962030531478
+        ],
+        "roc_auc_diff_ci": [
+          -0.3612650468390298,
+          -0.3178434861899381
+        ],
+        "pr_auc_diff_ci": [
+          -0.029622158237408203,
+          -0.017952822825461002
+        ],
+        "flooded_share": 0.022380057025790552,
+        "n_cells": 760007
+      },
+      {
+        "event": "2023 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7211885704949641,
+        "pr_auc": 0.03916592246027704,
+        "roc_auc_ci": [
+          0.6831795998875383,
+          0.7592085302364516
+        ],
+        "pr_auc_ci": [
+          0.031609203871305,
+          0.04803188777391877
+        ],
+        "flooded_share": 0.022380057025790552,
+        "n_cells": 760007
+      },
+      {
+        "event": "2023 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.769306962443701,
+        "pr_auc": 0.047201429775273605,
+        "roc_auc_ci": [
+          0.7322643522804522,
+          0.8025825178708726
+        ],
+        "pr_auc_ci": [
+          0.03916501142345055,
+          0.058607168087981
+        ],
+        "roc_auc_diff_ci": [
+          0.03489581397999893,
+          0.06452238241745155
+        ],
+        "pr_auc_diff_ci": [
+          0.005450668838255251,
+          0.011228946358646033
+        ],
+        "flooded_share": 0.022380057025790552,
+        "n_cells": 760007
+      },
+      {
+        "event": "2024 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9712161357397573,
+        "pr_auc": 0.5256667228409944,
+        "roc_auc_ci": [
+          0.9658886400938339,
+          0.9762153917126177
+        ],
+        "pr_auc_ci": [
+          0.45665166913789124,
+          0.5803550218876175
+        ],
+        "roc_auc_diff_ci": [
+          0.18903125294826484,
+          0.2664863252114592
+        ],
+        "pr_auc_diff_ci": [
+          0.4060572111634024,
+          0.5262452778079348
+        ],
+        "flooded_share": 0.02803047861861166,
+        "n_cells": 759352
+      },
+      {
+        "event": "2024 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9074486881777397,
+        "pr_auc": 0.2022473974088272,
+        "roc_auc_ci": [
+          0.893940161061595,
+          0.9228593943549326
+        ],
+        "pr_auc_ci": [
+          0.16048760763194095,
+          0.250317701657389
+        ],
+        "roc_auc_diff_ci": [
+          0.1194227053117424,
+          0.206393874388965
+        ],
+        "pr_auc_diff_ci": [
+          0.10672891425072399,
+          0.19852901352561025
+        ],
+        "flooded_share": 0.02803047861861166,
+        "n_cells": 759352
+      },
+      {
+        "event": "2024 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.41001857193378655,
+        "pr_auc": 0.02161440724111129,
+        "roc_auc_ci": [
+          0.36411478191882124,
+          0.4527223009045428
+        ],
+        "pr_auc_ci": [
+          0.016819073754133586,
+          0.026247176264616513
+        ],
+        "roc_auc_diff_ci": [
+          -0.35923771980392843,
+          -0.31748664433569596
+        ],
+        "pr_auc_diff_ci": [
+          -0.04510852901409075,
+          -0.024600300602521608
+        ],
+        "flooded_share": 0.02803047861861166,
+        "n_cells": 759352
+      },
+      {
+        "event": "2024 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7477639790816879,
+        "pr_auc": 0.05501941310477392,
+        "roc_auc_ci": [
+          0.7054407297162514,
+          0.784105032981041
+        ],
+        "pr_auc_ci": [
+          0.04190560012142889,
+          0.06957584643656846
+        ],
+        "flooded_share": 0.02803047861861166,
+        "n_cells": 759352
+      },
+      {
+        "event": "2024 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7935054666104924,
+        "pr_auc": 0.06670827573043359,
+        "roc_auc_ci": [
+          0.7525235501368456,
+          0.8262861584731285
+        ],
+        "pr_auc_ci": [
+          0.054282199558721156,
+          0.08454875429029655
+        ],
+        "roc_auc_diff_ci": [
+          0.03275628962702362,
+          0.06237527447453067
+        ],
+        "pr_auc_diff_ci": [
+          0.007856593969284448,
+          0.01600754485518927
+        ],
+        "flooded_share": 0.02803047861861166,
+        "n_cells": 759352
+      },
+      {
+        "event": "2025 wet season (radar)",
+        "method": "ML model (all floods)",
+        "roc_auc": 0.9761613610294305,
+        "pr_auc": 0.6666337188761278,
+        "roc_auc_ci": [
+          0.9719770176257554,
+          0.9795093457990849
+        ],
+        "pr_auc_ci": [
+          0.5886044097503529,
+          0.7217680582066058
+        ],
+        "roc_auc_diff_ci": [
+          0.1907132697238561,
+          0.2652864708124151
+        ],
+        "pr_auc_diff_ci": [
+          0.5120562102542245,
+          0.6301750115344527
+        ],
+        "flooded_share": 0.04553168618812615,
+        "n_cells": 755408
+      },
+      {
+        "event": "2025 wet season (radar)",
+        "method": "ML model (2011 only)",
+        "roc_auc": 0.9224178987395495,
+        "pr_auc": 0.34709385939019843,
+        "roc_auc_ci": [
+          0.9105941990455543,
+          0.9343214087682312
+        ],
+        "pr_auc_ci": [
+          0.2858603283855749,
+          0.4077293636410371
+        ],
+        "roc_auc_diff_ci": [
+          0.13554518333493137,
+          0.21550552364714143
+        ],
+        "pr_auc_diff_ci": [
+          0.20160914637193222,
+          0.319056489053074
+        ],
+        "flooded_share": 0.04553168618812615,
+        "n_cells": 755408
+      },
+      {
+        "event": "2025 wet season (radar)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4127408370699389,
+        "pr_auc": 0.03539033915293793,
+        "roc_auc_ci": [
+          0.3673371169140302,
+          0.4533352506445666
+        ],
+        "pr_auc_ci": [
+          0.02880083160322661,
+          0.04199396154515505
+        ],
+        "roc_auc_diff_ci": [
+          -0.3581078545301749,
+          -0.31286435129782675
+        ],
+        "pr_auc_diff_ci": [
+          -0.07027507746354518,
+          -0.03909562368469906
+        ],
+        "flooded_share": 0.04553168618812615,
+        "n_cells": 755408
+      },
+      {
+        "event": "2025 wet season (radar)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.7485248455557288,
+        "pr_auc": 0.08805019358235414,
+        "roc_auc_ci": [
+          0.7116358122490901,
+          0.7873115794102757
+        ],
+        "pr_auc_ci": [
+          0.06833265653384615,
+          0.1122171313684715
+        ],
+        "flooded_share": 0.04553168618812615,
+        "n_cells": 755408
+      },
+      {
+        "event": "2025 wet season (radar)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.7983380981452722,
+        "pr_auc": 0.10737480473932214,
+        "roc_auc_ci": [
+          0.7629687074868229,
+          0.830685493243617
+        ],
+        "pr_auc_ci": [
+          0.08466472281069719,
+          0.13287443675905244
+        ],
+        "roc_auc_diff_ci": [
+          0.036542031357467294,
+          0.06801696101817942
+        ],
+        "pr_auc_diff_ci": [
+          0.013254865902642795,
+          0.027247851725940107
+        ],
+        "flooded_share": 0.04553168618812615,
+        "n_cells": 755408
       }
     ]
   },

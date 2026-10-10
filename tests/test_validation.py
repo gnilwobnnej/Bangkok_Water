@@ -137,3 +137,35 @@ def test_loeo_table_counts_wins_per_flood():
     assert wins(loeo, ML_ALL, "Greater Bangkok")["clearly_better"] == 1
     assert wins(loeo, ML_ALL, "Greater Bangkok", reference=ML_2011)["better"] == 1
     assert loeo_table(None).empty and loeo_table({"cv": {}}).empty
+
+
+def test_cv_table_prefers_pooled_scores_with_bootstrap_intervals():
+    report = multi_flood_report()
+    report["cv"]["pooled"] = [
+        {"event": "2011 flood (MODIS)", "method": ML_ALL, "roc_auc": 0.86, "pr_auc": 0.6,
+         "roc_auc_ci": [0.84, 0.88], "pr_auc_ci": [0.55, 0.65], "roc_auc_diff_ci": [0.1, 0.2],
+         "pr_auc_diff_ci": [0.0, 0.1], "flooded_share": 0.2, "n_cells": 500},
+        {"event": "2011 flood (MODIS)", "method": "Bathtub simulation", "roc_auc": 0.7, "pr_auc": 0.4,
+         "roc_auc_ci": [0.68, 0.72], "pr_auc_ci": [0.35, 0.45], "flooded_share": 0.2, "n_cells": 500},
+    ]
+    cv = validation_table(None, report)
+    cv = cv[cv["test"] == TEST_CV].set_index("method")
+    assert len(cv) == 2 and cv.loc[ML_ALL, "date"] == "2011"
+    assert (cv.loc[ML_ALL, "roc_auc"], cv.loc[ML_ALL, "roc_auc_lo"], cv.loc[ML_ALL, "roc_auc_hi"]) == \
+        pytest.approx((0.86, 0.84, 0.88))
+    assert cv.loc[ML_ALL, "roc_auc_diff_lo"] == pytest.approx(0.1)
+    assert "bootstrap" in cv.loc[ML_ALL, "interval"]
+
+
+def test_ml_cv_2011_uses_pooled_intervals_or_falls_back_to_fold_spread():
+    from src.ml import cv_2011
+    report = multi_flood_report()
+    report["cv"]["summary"] = [{"method": ML_ALL, "roc_auc": 0.8, "roc_auc_std": 0.01, "pr_auc": 0.5,
+                                "pr_auc_std": 0.02}]
+    assert "roc_auc_std" in cv_2011(report)
+    report["cv"]["pooled"] = [{"event": "2011 flood (MODIS)", "method": ML_ALL, "roc_auc": 0.86, "pr_auc": 0.6,
+                               "roc_auc_ci": [0.84, 0.88], "pr_auc_ci": [0.55, 0.65]},
+                              {"event": "2017 wet season (radar)", "method": ML_ALL, "roc_auc": 0.9,
+                               "pr_auc": 0.3, "roc_auc_ci": [0.8, 0.95], "pr_auc_ci": [0.2, 0.4]}]
+    cv = cv_2011(report)
+    assert list(cv["method"]) == [ML_ALL] and cv["roc_auc_lo"].iloc[0] == 0.84

@@ -23,6 +23,7 @@ from src.viz3d import city_deck, district_deck, district_view, footprint_coords
 from src.ml import ML_2011, ML_ALL, load_ml
 from src.risk import compute_factors, district_mean, district_risk, risk_index
 from src.simulate import level_curve, simulate
+from src.uncertainty import load_dem_uncertainty, load_flood_chance
 from src.validation import CI, REFERENCE, TEST_CV, TEST_RADAR, loeo_table, validation_table, wins
 from src.viz import (
     basemap_rgb, build_map, difference_chart, elevation_histogram, feature_importance_chart, flood_frame,
@@ -116,11 +117,23 @@ def get_defence_lines():
     return load_defence_lines()
 
 
+@st.cache_resource(max_entries=2)
+def get_dem_uncertainty(path, version: tuple):
+    return load_dem_uncertainty(path)
+
+
+@st.cache_resource(max_entries=4)
+def get_flood_chance(connected: bool, defences: bool, level: float, version: tuple):
+    return load_flood_chance(connected, defences, level)
+
+
 area = get_area()
 factors = get_factors()
 ml = get_ml(file_version(C.ML_PROB_FILE, C.ML_REPORT_FILE))
 radar_version = file_version(C.RADAR_SUMMARY_FILE)
 radar = get_radar(radar_version)
+unc_version = file_version(C.DEM_UNCERTAINTY_FILE)
+dem_unc = get_dem_uncertainty(C.DEM_UNCERTAINTY_FILE, unc_version)
 
 # ---------------- sidebar ----------------
 with st.sidebar:
@@ -158,11 +171,23 @@ with st.sidebar:
         help="Bangkok is very flat, so a narrow range makes small height differences visible. "
              "Anything outside the range gets the end colour.",
     )
+    show_chance = dem_unc is not None and st.checkbox(
+        "Chance flooded (elevation uncertainty)", value=False,
+        help="Share of 50 simulations, each with plausible errors added to the elevation data, in which a "
+             "cell floods. Shown for the nearest of 0.5, 1.0 … 3.0 m. Follows the connectivity and defence "
+             "settings above.")
     show_risk = st.checkbox("Risk index", value=False)
-    show_ml = show_obs = False
+    show_ml = show_obs = show_disagree = False
     if ml is not None:
         show_ml = st.checkbox("ML flood susceptibility", value=False,
-                              help="Probability of flooding learned from where Bangkok actually flooded in 2011.")
+                              help="Probability of flooding learned from where Bangkok flooded in 2011 and in "
+                                   "the radar-mapped wet seasons of 2017–2025.")
+        if ml.disagreement is not None:
+            show_disagree = st.checkbox(
+                "ML model disagreement", value=False,
+                help="How much five versions of the model, each trained with a different fifth of the map held "
+                     "out, disagree about each cell (standard deviation of their flood probabilities). Bright = "
+                     "the prediction depends on which places it learned from, so trust it less.")
         show_obs = st.checkbox("Observed flood (2011)", value=False,
                                help="Satellite-mapped flood extent, Aug 2011 – Jan 2012 (MODIS, 250 m).")
     show_radar, radar_date = False, None
@@ -216,12 +241,24 @@ if radar is not None:
                    + "\n\nSee the **Current flood** tab for the details.", icon="⚠️")
 
 
-def show_metrics(res, tbl):
+def show_metrics(res, tbl, unc=None):
+    """Headline numbers; `unc` (a row of the elevation-uncertainty curve) adds the 90% range under each."""
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Water level", f"{res.level:.1f} m")
-    c2.metric("Flooded area", f"{res.area_km2:,.0f} km²")
-    c3.metric("People affected", fmt_people(res.people))
-    c4.metric("Districts > 25% flooded", f"{(tbl['pct_flooded'] > 25).sum()} / {len(tbl)}")
+    rng = {}
+    if unc is not None:
+        rng = {"area": f"range {unc['area_km2_p5']:,.0f}–{unc['area_km2_p95']:,.0f} km²",
+               "people": f"range {fmt_people(unc['people_p5'])}–{fmt_people(unc['people_p95'])}",
+               "districts": f"range {unc['districts_25_p5']:.0f}–{unc['districts_25_p95']:.0f}"}
+        c1.caption("Ranges: 90% of simulations with elevation error (Flood curve tab)")
+    c2.metric("Flooded area", f"{res.area_km2:,.0f} km²", rng.get("area"), delta_color="off")
+    c3.metric("People affected", fmt_people(res.people), rng.get("people"), delta_color="off")
+    c4.metric("Districts > 25% flooded", f"{(tbl['pct_flooded'] > 25).sum()} / {len(tbl)}", rng.get("districts"),
+              delta_color="off")
+
+
+def unc_at(lv):
+    return dem_unc.at(connected, use_defences, lv) if dem_unc is not None else None
 
 
 if animate:
@@ -231,16 +268,17 @@ if animate:
         frame_res = simulate(area, float(lv), connected, use_defences)
         frame_tbl = table[["district_id"]].merge(frame_res.by_district.reset_index(), on="district_id")
         with stage.container():
-            show_metrics(frame_res, frame_tbl)
+            show_metrics(frame_res, frame_tbl, unc_at(float(lv)))
             st.image(flood_frame(base, frame_res.depth), use_container_width=True,
                      caption=f"Water level {lv:.1f} m — darker blue = deeper water")
         time.sleep(0.15)
     st.info("Animation finished. Use the slider for the interactive map at a specific level.")
     st.stop()
 
-show_metrics(result, table)
+show_metrics(result, table, unc_at(level))
 
 # ---------------- map ----------------
+chance = get_flood_chance(connected, use_defences, level, unc_version) if show_chance else None
 fmap = build_map(
     area, table,
     depth=result.depth if show_depth else None,
@@ -253,9 +291,14 @@ fmap = build_map(
     radar=radar_pass["flood_pct"] if show_radar else None,
     radar_label=f"Radar flood {radar_date}",
     defences=get_defence_lines() if show_defences else None, level=level,
+    disagreement=ml.disagreement if show_disagree else None,
+    chance=chance[0] if chance else None,
+    chance_label=f"Chance flooded at {chance[1]:.1f} m" if chance else "",
 )
 st_folium(fmap, height=620, use_container_width=True, returned_objects=[])
-st.caption("Hover a district for details. Toggle layers in the sidebar or the map's layer control.")
+st.caption("Hover a district for details. Toggle layers in the sidebar or the map's layer control."
+           + (f" The chance-flooded layer is for {chance[1]:.1f} m, the nearest level it was computed for."
+              if chance and abs(chance[1] - level) > 0.01 else ""))
 
 # ---------------- analysis tabs ----------------
 tab_top, tab_elev, tab_curve, tab_now, tab_3d, tab_ml, tab_valid, tab_table, tab_method = st.tabs([
@@ -482,17 +525,45 @@ with tab_ml:
                 f"{factors} relate to real flooding. Floods from {ml.report['test_years_from']} on are kept out "
                 "of training, so the **Validation** tab can test on them."
             )
-            with st.expander("The floods it was trained on"):
+            with st.expander("The floods it was trained on, with each season's rain and river"):
+                ctx = [e.get("context", {}) for e in events]
+                cols = {"Flood": [e["name"] for e in events],
+                        "Flooded": [e["flooded_share"] * 100 for e in events]}
+                if any(ctx):
+                    cols.update({
+                        "Rain": [c.get("rain_total_mm") for c in ctx],
+                        "Rain vs normal": [c.get("rain_pct_normal") for c in ctx],
+                        "Wettest 3 days": [c.get("rain_max_3day_mm") for c in ctx],
+                        "River peak": [c.get("river_peak_m3s") for c in ctx],
+                        "Peak vs normal": [c.get("river_peak_pct_normal") for c in ctx],
+                        "High-river days": [c.get("river_days_above_alert") for c in ctx],
+                    })
+                cols.update({"Labelled cells": [e["n_cells"] for e in events],
+                             "Source": [e["source"] for e in events]})
                 st.dataframe(
-                    pd.DataFrame({"Flood": [e["name"] for e in events], "Source": [e["source"] for e in events],
-                                  "Labelled cells": [e["n_cells"] for e in events],
-                                  "Flooded": [e["flooded_share"] * 100 for e in events]}),
-                    hide_index=True, use_container_width=True,
-                    column_config={"Flooded": st.column_config.NumberColumn("Flooded (% of labelled)",
-                                                                            format="%.1f%%")})
+                    pd.DataFrame(cols), hide_index=True, use_container_width=True,
+                    column_config={
+                        "Flooded": st.column_config.NumberColumn("Flooded (% of labelled)", format="%.1f%%"),
+                        "Rain": st.column_config.NumberColumn("Rain, Aug–Nov (mm)", format="%.0f"),
+                        "Rain vs normal": st.column_config.NumberColumn(format="%.0f%%"),
+                        "Wettest 3 days": st.column_config.NumberColumn("Wettest 3 days (mm)", format="%.0f"),
+                        "River peak": st.column_config.NumberColumn("River peak (m³/s)", format="%.0f"),
+                        "Peak vs normal": st.column_config.NumberColumn("River peak vs normal", format="%.0f%%"),
+                        "High-river days": st.column_config.NumberColumn(
+                            f"Days river ≥ {C.ALERT_RIVER_PCT}% of normal", format="%d"),
+                    })
                 st.caption("Radar seasons: August–November passes, each compared with the same weeks of the year "
                            "before. A cell is flooded if at least half of it was flooded on 2 or more passes, and "
                            "dry if it was seen and always under 10% flooded.")
+                meta = ml.report.get("event_context")
+                if meta:
+                    st.caption(
+                        f"Weather and river for context only; the model doesn't use them. August–November. Rain: "
+                        f"{meta['rain_source']}; normal = {meta['rain_normal_mm']:.0f} mm, the "
+                        f"{meta['normal_years'][0]}–{meta['normal_years'][1]} median. River: {meta['river_source']}, "
+                        "compared with the median for each date. Both are model estimates, not gauge readings. "
+                        "2011 stands out for its river, not its local rain: the flood came down the Chao Phraya "
+                        "from the north.")
         else:
             st.markdown(
                 f"A gradient-boosted tree model (LightGBM) trained on **{ml.report['n_training_cells']:,} grid "
@@ -511,7 +582,8 @@ with tab_ml:
                 verdict += (" The hand-weighted risk index scores *below random* for 2011: it ranks dense, "
                             "canal-rich inner districts highest, but those were largely protected and stayed dry.")
             st.caption(
-                f"{verdict} Scores come from spatial cross-validation: the map is cut into "
+                f"{verdict} Error bars = {'95% interval (spatial block bootstrap)' if 'roc_auc_lo' in ml.cv else 'spread over the folds'}. "
+                f"Scores come from spatial cross-validation: the map is cut into "
                 f"{ml.report['cv']['block_m'] / 1000:.0f} km blocks and each model is tested on blocks it never saw "
                 "(held out of every flood year at once). ROC-AUC 0.5 = random, 1.0 = perfect. PR-AUC rewards "
                 f"finding flooded cells without false alarms; a random guess scores {ml.report['flooded_share']:.2f}."
@@ -549,6 +621,8 @@ with tab_ml:
 - Some coastal "flooding" in the 2011 map is likely shrimp and fish ponds, which MODIS can't tell apart from floodwater.
 - Areas protected by flood walls stayed dry in 2011, so the model implicitly learns those defences.
   That's useful, but defences built since 2011 aren't included.
+- Tick **ML model disagreement** in the sidebar to see where the prediction is least stable: five versions of the
+  model, each trained without a different fifth of the map, give different answers there.
 """)
 with tab_valid:
     ev_all = get_radar_eval(file_version(C.RADAR_EVAL_FILE))
@@ -593,7 +667,7 @@ with tab_valid:
             if {ml_name, REFERENCE} <= set(cv11.index):
                 gap = cv11.loc[ml_name, vmetric] - cv11.loc[REFERENCE, vmetric]
                 m4.metric(f"2011 flood: ML minus bathtub ({metric_name})", f"{gap:+.2f}",
-                          help="Mean over the 5 spatial cross-validation folds.")
+                          help="Spatial cross-validation: every cell scored by a model that never saw its 4 km block.")
 
         def_name = "Bathtub + defences"
         if ev_all is not None and def_name in set(ev_all["method"]):
@@ -611,7 +685,7 @@ with tab_valid:
             if {def_name, REFERENCE} <= set(cv11.index):
                 gap = cv11.loc[def_name, vmetric] - cv11.loc[REFERENCE, vmetric]
                 d4.metric("2011 flood: gain from defences", f"{gap:+.2f}",
-                          help="Mean over the 5 spatial cross-validation folds.")
+                          help="Spatial cross-validation: every cell scored by a model that never saw its 4 km block.")
 
         if ev_all is not None and not ev_all.empty:
             c1, c2 = st.columns(2)
@@ -716,7 +790,8 @@ floods it in the bathtub simulation, or the risk index (default weights).
 from a *spatial block bootstrap*: the map is cut into 4 km blocks, which are resampled 200 times, and every
 method is re-scored on each resample. The {CI}% interval is the middle {CI}% of those scores. The difference
 from the bathtub uses the same resamples, so it has its own interval. The left-out floods get intervals the
-same way. The spatial CV range is the lowest to highest score over the 5 cross-validation folds.
+same way. The spatial CV scores pool the five folds, so every cell is scored once by the model that never saw
+its block, and get their intervals from the same bootstrap.
 
 **Known biases.**
 - Radar and MODIS both miss much of the water between buildings, so the dense city looks drier than it was.
@@ -752,7 +827,38 @@ with tab_curve:
         "the elevation data: Copernicus rounds many flat areas to 0.5 m heights, so large patches "
         "switch to flooded all at once. Read the overall slope, not the individual steps."
     )
-    st.plotly_chart(level_curve_chart(get_curve(connected, use_defences), level), use_container_width=True)
+    band = dem_unc.curve(connected, use_defences) if dem_unc is not None else None
+    st.plotly_chart(level_curve_chart(get_curve(connected, use_defences), level, band), use_container_width=True)
+    if band is not None:
+        u = dem_unc.meta
+        here = dem_unc.at(connected, use_defences, level)
+        st.markdown(
+            f"**How sure is this?** The elevation data has errors, and in a city this flat a few tens of "
+            f"centimetres decide whether a street floods. The shaded bands show the middle 90% of "
+            f"**{u['runs']} simulations**, each with random errors added to the elevation (standard deviation "
+            f"{u['sigma_m']:.1f} m, similar over about {u['corr_m']:.0f} m, so neighbouring cells are wrong "
+            f"together). At {level:.1f} m: **{here['area_km2_p5']:,.0f}–{here['area_km2_p95']:,.0f} km²** "
+            f"flooded and **{fmt_people(here['people_p5'])}–{fmt_people(here['people_p95'])} people**, against "
+            f"{result.area_km2:,.0f} km² and {fmt_people(result.people)} on the elevation as it is."
+        )
+        pess = get_dem_uncertainty(C.DEM_UNCERTAINTY_PESSIMISTIC_FILE,
+                                   file_version(C.DEM_UNCERTAINTY_PESSIMISTIC_FILE))
+        if pess is not None and (p := pess.at(connected, use_defences, level)) is not None:
+            st.markdown(
+                f"**The size of the error matters more than the spread.** The band is narrow because errors average "
+                f"out over thousands of cells. But if the elevation error were {pess.meta['sigma_m']:.1f} m instead "
+                f"of {u['sigma_m']:.1f} m, the range at {level:.1f} m would be "
+                f"**{p['area_km2_p5']:,.0f}–{p['area_km2_p95']:,.0f} km²** and "
+                f"**{fmt_people(p['people_p5'])}–{fmt_people(p['people_p95'])} people**. Treat the numbers as an "
+                "order of magnitude, and the map as a district-scale picture, not a street-scale one."
+            )
+        st.caption(
+            "The single simulation can sit near the edge of the band, or outside it: the elevation data rounds "
+            "flat areas to 0.5 m steps, so at exactly 0.5, 1.0, 1.5 m… a whole plateau sits at the water line and "
+            "floods together. Add a little error and only part of it does. The error size is an estimate, not a "
+            "measured value (see Method & limitations). Tick **Chance flooded** in the sidebar to see where the "
+            "simulations disagree."
+        )
 with tab_table:
     st.dataframe(
         table.drop(columns="district_id").sort_values("risk", ascending=False),
@@ -792,13 +898,31 @@ geoBoundaries district boundaries. The study area covers greater Bangkok
 (≈ {fmt_people(area.population.sum())} people); stats in the table cover only Bangkok's 50 districts
 (≈ {fmt_people(area.population[bkk].sum())} people).
 
+**Uncertainty.** Two kinds are shown.
+- *Elevation error* (`scripts/dem_uncertainty.py`): the bathtub simulation is rerun 50 times, each time on the
+  elevation map plus a random error field with a standard deviation of {dem_unc.meta['sigma_m'] if dem_unc else 0.7:.1f} m
+  that is correlated over about {dem_unc.meta['corr_m'] if dem_unc else 300:.0f} m. Simulating plausible versions of
+  a global DEM this way follows Hawker et al. (2018, *Frontiers in Earth Science* 6:233). The size is an
+  estimate: Copernicus GLO-30 is off by 1.6 m on average in built-up areas (Hawker et al. 2022, FABDEM, *Environ.
+  Res. Lett.* 17:024016), mostly because it includes buildings. Taking the lowest value in each cell removes much of
+  that, leaving an assumed 0.7 m. Ranges are the 5th to 95th percentile over the runs. Defence crest heights are
+  kept fixed.
+- *ML model disagreement:* the standard deviation of the flood probability across the five cross-validation
+  models, each trained with a different fifth of the map held out. Every model score in the **Validation** tab
+  has a 95% interval from a spatial block bootstrap.
+
+These ranges cover the elevation error and the model's sensitivity to its training data. They don't cover the
+other limits listed below, such as static water, missing drainage or old population data, so the real
+uncertainty is larger.
+
 **Limitations — this is an exploratory model, not a forecast:**
 - Flood walls and dikes are modelled only when *Include flood defences* is on, with one crest height per
   section; real walls vary along their length and have gaps. Pumping stations, drainage tunnels and the
   capacity of the gates are not modelled, and the west bank's (Thonburi) polder dikes aren't included.
 - Water is static: no flow speed, rainfall timing, tides or duration.
 - The elevation data is a *surface* model (includes buildings). Taking the lowest value in each cell
-  reduces this, but some errors remain, and Bangkok's ground is sinking a few cm per year.
+  reduces this, but some errors remain (the ranges above show their effect), and Bangkok's ground is
+  sinking a few cm per year.
 - The elevation data rounds many flat areas to 0.5 m steps, which is why flooded area jumps at
   0.5, 1.0, 1.5 and 2.0 m.
 - Population figures are 2020 modelled estimates.
