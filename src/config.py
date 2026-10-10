@@ -24,10 +24,15 @@ WATERWAY_LINES_FILE = PROCESSED_DIR / "waterways.geojson"
 MODELS_DIR = ROOT / "models"
 FLOOD_2011_FILE = PROCESSED_DIR / "flood_2011.tif"        # 1 flooded, 0 dry, 255 unknown
 LANDCOVER_FILE = PROCESSED_DIR / "landcover_fractions.tif"
-ML_PROB_FILE = PROCESSED_DIR / "ml_susceptibility.tif"
+ML_PROB_FILE = PROCESSED_DIR / "ml_susceptibility.tif"             # trained on every flood event
+ML_PROB_2011_FILE = PROCESSED_DIR / "ml_susceptibility_2011.tif"   # trained on 2011 only (the "before" model)
 ML_REPORT_FILE = PROCESSED_DIR / "ml_report.json"
 ML_MODEL_FILE = MODELS_DIR / "flood_lgbm.txt"
 LABEL_NODATA = 255
+# Wet-season radar flood labels, one per year (scripts/build_flood_archive.py), same 1/0/255 format
+FLOOD_LABELS_DIR = PROCESSED_DIR / "flood_labels"        # radar_YYYY.tif + summary.json
+ARCHIVE_YEARS = range(2017, 2026)                        # 2017-2025
+TEST_YEARS_FROM = 2026  # floods from this year on are kept out of training: evaluate_current.py tests on them
 
 # Current flood from Sentinel-1 radar (scripts/fetch_current_flood.py, scripts/evaluate_current.py)
 RADAR_DIR = PROCESSED_DIR / "radar_flood"            # one GeoTIFF per pass date

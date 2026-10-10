@@ -2,8 +2,8 @@
 
     python scripts/evaluate_current.py
 
-Needs data/processed/radar_flood/ (scripts/fetch_current_flood.py). The ML model is included if it has
-been trained (scripts/train_model.py). A cell counts as flooded when at least half of it is flooded in the
+Needs data/processed/radar_flood/ (scripts/fetch_current_flood.py). The ML models (all floods, and 2011
+only) are included if they have been trained (scripts/train_model.py); neither is trained on these passes. A cell counts as flooded when at least half of it is flooded in the
 radar map, and as dry when under 10% is flooded, it isn't permanent water and radar saw it. Cells in
 between are left out.
 
@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from src import config as C  # noqa: E402
 from src.current_flood import DRY_PCT, FLOODED_PCT, load_pass, radar_labels  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
+from src.ml import ML_2011, ML_ALL  # noqa: E402
 from src.validation import N_BOOT, block_bootstrap  # noqa: E402
 from train_model import BLOCK_M, baseline_methods, spatial_blocks  # noqa: E402
 
@@ -39,9 +40,11 @@ def main():
     bkk = area.district_ids > 0
     blocks = spatial_blocks().reshape(bkk.shape)
     methods = baseline_methods(area)  # bathtub (with and without defences) and risk index
-    if C.ML_PROB_FILE.exists():
-        with rasterio.open(C.ML_PROB_FILE) as src:
-            methods = {"ML model (trained on 2011)": src.read(1), **methods}
+    # The ML models, if trained: neither has seen any flood from config.TEST_YEARS_FROM on
+    for name, path in [(ML_2011, C.ML_PROB_2011_FILE), (ML_ALL, C.ML_PROB_FILE)]:
+        if path.exists():
+            with rasterio.open(path) as src:
+                methods = {name: src.read(1), **methods}
 
     results = []
     for p in summary["passes"]:
@@ -77,7 +80,7 @@ def main():
             print(f"  {name:30s} ROC-AUC {m['roc_auc']:.3f} ({lo:.3f}-{hi:.3f})   PR-AUC {m['pr_auc']:.3f}")
     print("\nROC-AUC over time (greater Bangkok):")
     for rec in [r for r in results if r["scope"] == "Greater Bangkok"]:
-        print(f"  {rec['date']}  " + "  ".join(f"{n.split(' (')[0]}: {m['roc_auc']:.2f}" for n, m in rec["methods"].items()))
+        print(f"  {rec['date']}  " + "  ".join(f"{n if n.startswith('ML') else n.split(' (')[0]}: {m['roc_auc']:.2f}" for n, m in rec["methods"].items()))
     print(f"\nWrote {C.RADAR_EVAL_FILE}")
 
 

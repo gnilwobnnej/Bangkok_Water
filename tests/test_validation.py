@@ -7,7 +7,9 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 from src import config as C
 from src.current_flood import load_evaluation
-from src.validation import block_bootstrap, score_bins, validation_table, weighted_scores, wins
+from src.ml import ML_2011, ML_ALL
+from src.validation import (TEST_CV, TEST_LOEO, TEST_RADAR, block_bootstrap, loeo_table, score_bins,
+                            validation_table, weighted_scores, wins)
 
 
 @pytest.fixture
@@ -87,8 +89,51 @@ def test_validation_table_and_old_eval_files(tmp_path, monkeypatch):
                   {"fold": 2, "method": "ML model (LightGBM)", "roc_auc": 0.9, "pr_auc": 0.7}]}}
     t = validation_table(ev, report)
     assert list(t["event"]) == ["2011 flood (MODIS)", "Radar 2026-09-01"]
+    assert list(t["test"]) == [TEST_CV, TEST_RADAR]
     ml2011 = t.iloc[0]
-    assert ml2011["method"] == "ML model (trained on 2011)"
+    assert ml2011["method"] == ML_2011  # an old report's single ML model was the 2011-only one
     assert (ml2011["roc_auc"], ml2011["roc_auc_lo"], ml2011["roc_auc_hi"]) == pytest.approx((0.85, 0.8, 0.9))
     assert t.iloc[1]["random_pr_auc"] == 0.1
     assert t.iloc[1]["interval"] == ""
+
+
+def test_wins_against_another_model_ignores_the_bathtub_intervals():
+    ev = eval_frame()
+    ev.loc[ev["method"] == "Bathtub simulation", "method"] = "Other"
+    w = wins(ev, "ML", "Greater Bangkok", reference="Other")
+    assert w == {"passes": 3, "better": 2, "clearly_better": 0, "clearly_worse": 0, "has_intervals": False}
+
+
+def multi_flood_report():
+    events = [{"id": "2011", "year": 2011, "name": "2011 flood (MODIS)", "flooded_share": 0.2, "n_cells": 500},
+              {"id": "radar_2017", "year": 2017, "name": "2017 wet season (radar)", "flooded_share": 0.03,
+               "n_cells": 400}]
+    folds = [{"fold": f, "event": e["name"], "method": m, "roc_auc": a + f / 100, "pr_auc": 0.5}
+             for f in (1, 2) for e in events for m, a in [(ML_ALL, 0.8), ("Bathtub simulation", 0.6)]]
+    loeo = [{"event": "2017 wet season (radar)", "method": m, "roc_auc": a, "pr_auc": 0.1,
+             "roc_auc_ci": [a - 0.05, a + 0.05], "pr_auc_ci": [0.05, 0.15], "flooded_share": 0.03, "n_cells": 400,
+             **({"roc_auc_diff_ci": [0.1, 0.3], "pr_auc_diff_ci": [0.0, 0.1]} if m != "Bathtub simulation" else {})}
+            for m, a in [(ML_ALL, 0.85), (ML_2011, 0.8), ("Bathtub simulation", 0.65)]]
+    return {"event": {"began": "2011-08-05"}, "flooded_share": 0.2, "n_training_cells": 900, "events": events,
+            "cv": {"folds": 2, "folds_detail": [], "per_event_folds": folds}, "leave_one_event_out": loeo}
+
+
+def test_validation_table_has_every_training_flood_and_the_left_out_floods():
+    t = validation_table(None, multi_flood_report())
+    cv = t[t["test"] == TEST_CV].set_index(["event", "method"])
+    assert len(cv) == 4
+    row = cv.loc[("2017 wet season (radar)", ML_ALL)]
+    assert (row["roc_auc"], row["roc_auc_lo"], row["roc_auc_hi"]) == pytest.approx((0.815, 0.81, 0.82))
+    assert row["flooded_share"] == 0.03 and row["date"] == "2017"
+    lo = t[t["test"] == TEST_LOEO].set_index("method")
+    assert list(lo.index) == [ML_ALL, ML_2011, "Bathtub simulation"]
+    assert (lo.loc[ML_ALL, "roc_auc_lo"], lo.loc[ML_ALL, "roc_auc_hi"]) == pytest.approx((0.8, 0.9))
+    assert lo.loc[ML_ALL, "roc_auc_diff_lo"] == pytest.approx(0.1)
+    assert np.isnan(lo.loc["Bathtub simulation", "roc_auc_diff_lo"])
+
+
+def test_loeo_table_counts_wins_per_flood():
+    loeo = loeo_table(multi_flood_report())
+    assert wins(loeo, ML_ALL, "Greater Bangkok")["clearly_better"] == 1
+    assert wins(loeo, ML_ALL, "Greater Bangkok", reference=ML_2011)["better"] == 1
+    assert loeo_table(None).empty and loeo_table({"cv": {}}).empty

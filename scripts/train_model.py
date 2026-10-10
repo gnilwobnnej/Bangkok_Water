@@ -1,18 +1,33 @@
-"""Train the ML flood-susceptibility model on the 2011 flood and compare it with the existing methods.
+"""Train the ML flood-susceptibility model on several floods and compare it with the existing methods.
 
-    python scripts/train_model.py
+    python scripts/train_model.py                       # 2011 + every radar season in data/processed/flood_labels
+    python scripts/train_model.py --labels data/processed/flood_2011.tif   # one flood only
 
-Evaluation uses spatial block cross-validation (~4 km blocks): whole neighbourhoods are held out,
-so the score reflects how well the model generalises to places it hasn't seen, not how well it
-memorises neighbouring cells.
+The floods are the 2011 MODIS map (scripts/prepare_ml_data.py) and one radar map per wet season 2017-2025
+(scripts/build_flood_archive.py). Floods from config.TEST_YEARS_FROM on (2026) are never trained on, so
+scripts/evaluate_current.py stays an honest test. The events are pooled and each counts equally: the same
+number of cells is sampled from each, with weights making up for any event that has fewer.
+
+Two models are trained side by side, so the gain from the extra floods can be measured:
+    ML model (all floods)   every event
+    ML model (2011 only)    the 2011 flood only, as before
+
+Evaluation:
+    Spatial block CV (~4 km blocks, 5 folds). A block is held out of every event at once, so a model is never
+    trained on a place it is tested on, in any year. Scored per event, against the bathtub and risk index.
+    Leave-one-event-out: train on every flood but one, test on that one (all its cells), with 95% block
+    bootstrap intervals. This asks "how well does it predict a flood year it has never seen?".
 
 Outputs:
-    data/processed/ml_susceptibility.tif   flood probability 0-1 for every cell
-    data/processed/ml_report.json          CV metrics vs baselines, feature importance, per-district stats
-    models/flood_lgbm.txt                  the trained LightGBM model
+    data/processed/ml_susceptibility.tif        flood probability 0-1, all-floods model
+    data/processed/ml_susceptibility_2011.tif   the same from the 2011-only model
+    data/processed/ml_report.json               events, CV and leave-one-event-out scores, feature
+                                                importance, per-district stats
+    models/flood_lgbm.txt, models/flood_lgbm_2011.txt
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,8 +42,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import config as C  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
 from src.features import FEATURE_LABELS, build_features  # noqa: E402
+from src.ml import ML_2011, ML_ALL  # noqa: E402
 from src.risk import cell_size_m, compute_factors, risk_index  # noqa: E402
 from src.simulate import flood_mask  # noqa: E402
+from src.validation import block_bootstrap  # noqa: E402
 
 BLOCK_M = 4000
 # Left out by default: with them the model learns "dense city = dry", which mostly reflects 2011 flood
@@ -36,6 +53,7 @@ BLOCK_M = 4000
 # cost only ~0.03 ROC-AUC (0.893 -> 0.867). Pass `--exclude` with no names to use every feature.
 DEFAULT_EXCLUDE = ["log_pop_density", "built_up"]
 N_FOLDS = 5
+CELLS_PER_EVENT = 200_000  # training cells sampled from each event, so every flood counts the same
 SHAP_SAMPLE = 20000
 SEED = 42
 PARAMS = dict(
@@ -74,73 +92,190 @@ def scores(y, s) -> dict:
     return {"roc_auc": float(roc_auc_score(y, s)), "pr_auc": float(average_precision_score(y, s))}
 
 
-def cv_summary(rows: list) -> list:
-    """Mean and standard deviation over the folds, per method."""
-    summary = pd.DataFrame(rows).groupby("method", sort=False)[["roc_auc", "pr_auc"]].agg(["mean", "std"])
-    print("\nSpatial cross-validation (mean +/- std over folds):")
-    for method, r in summary.iterrows():
-        print(f"  {method:32s} ROC-AUC {r[('roc_auc', 'mean')]:.3f} +/- {r[('roc_auc', 'std')]:.3f}   "
-              f"PR-AUC {r[('pr_auc', 'mean')]:.3f} +/- {r[('pr_auc', 'std')]:.3f}")
-    return [{"method": m, "roc_auc": r[("roc_auc", "mean")], "roc_auc_std": r[("roc_auc", "std")],
-             "pr_auc": r[("pr_auc", "mean")], "pr_auc_std": r[("pr_auc", "std")]} for m, r in summary.iterrows()]
+def event_info(path: Path) -> dict:
+    """id, year, display name and source of a label file (flood_2011.tif or flood_labels/radar_YYYY.tif)."""
+    m = re.fullmatch(r"radar_(\d{4})", path.stem)
+    if m:
+        year = int(m.group(1))
+        return {"id": f"radar_{year}", "year": year, "name": f"{year} wet season (radar)",
+                "source": "Sentinel-1 radar, Aug-Nov, seasonal baseline (scripts/build_flood_archive.py)"}
+    if path.resolve() == C.FLOOD_2011_FILE.resolve():
+        return {"id": "2011", "year": 2011, "name": "2011 flood (MODIS)",
+                "source": "Global Flood Database DFO_3850 (MODIS, 250 m), 2011-08-05 to 2012-01-09"}
+    return {"id": path.stem, "year": None, "name": path.stem, "source": str(path)}
+
+
+def default_label_files() -> list:
+    radar = sorted(C.FLOOD_LABELS_DIR.glob("radar_*.tif"))
+    return [C.FLOOD_2011_FILE] + [p for p in radar if event_info(p)["year"] < C.TEST_YEARS_FROM]
+
+
+def load_events(paths) -> list:
+    """[{**event_info, labels (flat uint8)}], refusing test years."""
+    events = []
+    for p in paths:
+        info = event_info(Path(p))
+        if info["year"] is not None and info["year"] >= C.TEST_YEARS_FROM:
+            raise SystemExit(f"{p}: {info['year']} is a test year (config.TEST_YEARS_FROM = {C.TEST_YEARS_FROM})")
+        with rasterio.open(p) as src:
+            info["labels"] = src.read(1).ravel()
+        known = info["labels"] != C.LABEL_NODATA
+        info["n_cells"] = int(known.sum())
+        info["flooded_share"] = float((info["labels"][known] == 1).mean())
+        events.append(info)
+    return events
+
+
+def training_set(events, cell_ok=None, cap=CELLS_PER_EVENT, seed=SEED):
+    """Pooled (cell index, label, weight) arrays over the events, `cap` cells sampled from each.
+
+    cell_ok: optional boolean mask of usable cells (the CV training blocks). Weights make each event's
+    total weight equal (relevant only when an event has fewer than `cap` usable cells).
+    """
+    rng = np.random.default_rng(seed)
+    idx, ys, ws = [], [], []
+    for e in events:
+        ok = e["labels"] != C.LABEL_NODATA
+        if cell_ok is not None:
+            ok &= cell_ok
+        cells = np.flatnonzero(ok)
+        if len(cells) > cap:
+            cells = rng.choice(cells, size=cap, replace=False)
+        idx.append(cells)
+        ys.append(e["labels"][cells].astype(int))
+        ws.append(np.full(len(cells), cap / max(len(cells), 1)))
+    w = np.concatenate(ws)
+    return np.concatenate(idx), np.concatenate(ys), w / w.mean()
+
+
+def fit_predict(X: pd.DataFrame, cells, y, w) -> tuple:
+    """Fit on the given cells, predict every cell of the grid. Returns (model, probability per cell)."""
+    pos = np.average(y, weights=w)
+    model = lgb.LGBMClassifier(**PARAMS, scale_pos_weight=(1 - pos) / pos)
+    model.fit(X.iloc[cells], y, sample_weight=w)
+    return model, model.predict_proba(X)[:, 1].astype("float32")
+
+
+def cv_summary(rows: list, keys=("method",)) -> list:
+    """Mean and standard deviation over the folds, per method (and per event, if keyed)."""
+    df = pd.DataFrame(rows)
+    summary = df.groupby(list(keys), sort=False)[["roc_auc", "pr_auc"]].agg(["mean", "std"])
+    out = []
+    for key, r in summary.iterrows():
+        key = key if isinstance(key, tuple) else (key,)
+        out.append({**dict(zip(keys, key)), "roc_auc": r[("roc_auc", "mean")], "roc_auc_std": r[("roc_auc", "std")],
+                    "pr_auc": r[("pr_auc", "mean")], "pr_auc_std": r[("pr_auc", "std")]})
+    return out
+
+
+def print_table(title: str, rows: list):
+    print(f"\n{title}")
+    for r in rows:
+        ev = f"{r['event']:26s} " if "event" in r else ""
+        sd = f" +/- {r['roc_auc_std']:.3f}" if "roc_auc_std" in r else ""
+        print(f"  {ev}{r['method']:30s} ROC-AUC {r['roc_auc']:.3f}{sd}   PR-AUC {r['pr_auc']:.3f}")
 
 
 def rescore_baselines(labels_path: Path, report_path: Path):
-    """Re-score only the untrained methods on the same folds; the trained ML model and its scores are kept."""
+    """Re-score only the untrained methods on the 2011 folds; the trained ML models and their scores are kept."""
     area = load_study_area()
     with rasterio.open(labels_path) as src:
         labels = src.read(1).ravel()
     known = labels != C.LABEL_NODATA
     y = labels[known].astype(int)
-    groups = spatial_blocks()[known]
+    fold_of = block_folds(spatial_blocks())[known]
     baselines = {n: s.ravel()[known] for n, s in baseline_methods(area).items()}
     report = json.loads(report_path.read_text())
     rows = [r for r in report["cv"]["folds_detail"] if r["method"].startswith("ML model")]
-    for fold, (_, te) in enumerate(GroupKFold(N_FOLDS).split(np.zeros(len(y)), y, groups), start=1):
+    for fold in range(1, N_FOLDS + 1):
+        te = fold_of == fold
         rows += [{"fold": fold, "method": n, **scores(y[te], s[te])} for n, s in baselines.items()]
     rows.sort(key=lambda r: r["fold"])
     report["cv"]["folds_detail"] = rows
     report["cv"]["summary"] = cv_summary(rows)
     report_path.write_text(json.dumps(report, indent=2))
-    print(f"\nUpdated {report_path}")
+    print(f"\nUpdated {report_path} (2011 scores only)")
 
 
-def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
+def block_folds(blocks: np.ndarray) -> np.ndarray:
+    """Fold number (1..N_FOLDS) per cell, from GroupKFold over the spatial blocks of the whole grid."""
+    fold_of = np.zeros(len(blocks), dtype="int8")
+    for fold, (_, te) in enumerate(GroupKFold(N_FOLDS).split(np.zeros(len(blocks)), groups=blocks), start=1):
+        fold_of[te] = fold
+    return fold_of
+
+
+def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     area = load_study_area()
     X = build_features(area).drop(columns=list(exclude))
-    with rasterio.open(labels_path) as src:
-        labels = src.read(1).ravel()
-    known = labels != C.LABEL_NODATA
-    y = labels[known].astype(int)
-    Xk = X[known].reset_index(drop=True)
-    groups = spatial_blocks()[known]
-    pos_rate = y.mean()
-    print(f"Training cells: {len(y):,}  flooded share: {pos_rate:.1%}  features: {X.shape[1]}")
+    events = load_events(label_paths)
+    blocks = spatial_blocks()
+    fold_of = block_folds(blocks)
+    ev2011 = [e for e in events if e["id"] == "2011"]
+    compare_2011 = bool(ev2011) and len(events) > 1  # also train the 2011-only "before" model
+    print(f"{len(events)} flood events, features: {X.shape[1]}")
+    for e in events:
+        print(f"  {e['name']:26s} {e['n_cells']:>9,} labelled cells, {e['flooded_share']:5.1%} flooded")
 
-    baselines = {n: s.ravel()[known] for n, s in baseline_methods(area).items()}
+    baselines = {n: s.ravel() for n, s in baseline_methods(area).items()}
 
+    def score_all(preds: dict, ev, cells_ok) -> list:
+        """Scores of each prediction on one event's labelled cells within cells_ok."""
+        known = (ev["labels"] != C.LABEL_NODATA) & cells_ok
+        y = ev["labels"][known].astype(int)
+        if y.sum() == 0 or y.sum() == len(y):
+            return []
+        return [{"event": ev["name"], "method": n, **scores(y, p[known])} for n, p in preds.items()]
+
+    # ---- Spatial block CV: each fold's blocks are held out of every event ----
     rows = []
-    oof = np.zeros(len(y), dtype="float32")
-    for fold, (tr, te) in enumerate(GroupKFold(N_FOLDS).split(Xk, y, groups), start=1):
-        model = lgb.LGBMClassifier(**PARAMS, scale_pos_weight=(1 - y[tr].mean()) / y[tr].mean())
-        model.fit(Xk.iloc[tr], y[tr])
-        oof[te] = model.predict_proba(Xk.iloc[te])[:, 1]
-        rows.append({"fold": fold, "method": "ML model (LightGBM)", **scores(y[te], oof[te])})
-        for name, s in baselines.items():
-            rows.append({"fold": fold, "method": name, **scores(y[te], s[te])})
-        print(f"  fold {fold}: ML ROC-AUC {rows[-1 - len(baselines)]['roc_auc']:.3f}")
+    for fold in range(1, N_FOLDS + 1):
+        train_ok, test_ok = fold_of != fold, fold_of == fold
+        preds = {ML_ALL: fit_predict(X, *training_set(events, train_ok))[1]}
+        if compare_2011:
+            preds[ML_2011] = fit_predict(X, *training_set(ev2011, train_ok, cap=10 ** 9))[1]
+        preds.update(baselines)
+        for ev in events:
+            rows += [{"fold": fold, **r} for r in score_all(preds, ev, test_ok)]
+        print(f"  CV fold {fold} done")
+    per_event = cv_summary(rows, keys=("event", "method"))
+    print_table("Spatial cross-validation, per event (mean +/- std over folds):", per_event)
+    mean_over_events = (pd.DataFrame(per_event).groupby("method", sort=False)[["roc_auc", "pr_auc"]].mean()
+                        .reset_index().to_dict("records"))
+    print_table("...averaged over the events:", mean_over_events)
 
-    summary = cv_summary(rows)
-    print(f"  (PR-AUC of a random guess = flooded share = {pos_rate:.3f})")
+    # The 2011-only model on all 2011 cells: the "before" model, also tested on every radar season below
+    if compare_2011:
+        model_2011, prob_2011 = fit_predict(X, *training_set(ev2011, cap=10 ** 9))
 
-    # Final model on all labelled cells, applied everywhere
-    model = lgb.LGBMClassifier(**PARAMS, scale_pos_weight=(1 - pos_rate) / pos_rate)
-    model.fit(Xk, y)
-    prob = model.predict_proba(X)[:, 1].reshape(C.HEIGHT, C.WIDTH).astype("float32")
+    # ---- Leave one event out: train on the other floods, test on all of this one ----
+    loeo = []
+    if len(events) > 1:
+        everywhere = np.ones(len(blocks), dtype=bool)
+        for ev in events:
+            others = [e for e in events if e is not ev]
+            preds = {ML_ALL: fit_predict(X, *training_set(others))[1]}
+            if compare_2011 and ev["id"] != "2011":
+                preds[ML_2011] = prob_2011
+            preds.update(baselines)
+            known = ev["labels"] != C.LABEL_NODATA
+            y = ev["labels"][known].astype(int)
+            ci = block_bootstrap(y, {n: p[known] for n, p in preds.items()}, blocks[known])
+            for r in score_all(preds, ev, everywhere):
+                loeo.append({**r, **ci[r["method"]], "flooded_share": ev["flooded_share"],
+                             "n_cells": ev["n_cells"]})
+            print(f"  left out {ev['name']}: done")
+        print_table("Leave one event out (trained on the other floods):",
+                    [r for r in loeo if r["method"].startswith("ML") or r["method"] == "Bathtub + defences"])
+
+    # ---- Final models on all labelled cells, applied everywhere ----
+    model, prob = fit_predict(X, *training_set(events))
+    prob = prob.reshape(C.HEIGHT, C.WIDTH)
 
     import shap
     rng = np.random.default_rng(SEED)
-    sample = Xk.iloc[rng.choice(len(Xk), size=min(SHAP_SAMPLE, len(Xk)), replace=False)]
+    cells, _, _ = training_set(events)
+    sample = X.iloc[rng.choice(cells, size=min(SHAP_SAMPLE, len(cells)), replace=False)]
     shap_values = shap.TreeExplainer(model.booster_).shap_values(sample)
     if isinstance(shap_values, list):  # older shap returns one array per class
         shap_values = shap_values[1]
@@ -150,13 +285,14 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
                  for i, c in enumerate(X.columns)]
     gain = model.booster_.feature_importance("gain")
 
-    # Per-district summary
+    # Per-district summary: model score, share flooded in 2011, and in how many radar seasons
     ids = area.district_ids.ravel()
     n = int(ids.max()) + 1
     cnt = np.bincount(ids, minlength=n)
     mean_prob = np.bincount(ids, weights=prob.ravel(), minlength=n) / np.maximum(cnt, 1)
-    known_all = labels != C.LABEL_NODATA
-    obs_flooded = np.bincount(ids, weights=(labels == 1), minlength=n)
+    labels_2011 = ev2011[0]["labels"] if ev2011 else np.full(len(ids), C.LABEL_NODATA)
+    known_all = labels_2011 != C.LABEL_NODATA
+    obs_flooded = np.bincount(ids, weights=(labels_2011 == 1), minlength=n)
     obs_known = np.bincount(ids, weights=known_all, minlength=n)
     districts = [
         {"district_id": int(i), "ml_score": float(mean_prob[i]),
@@ -165,14 +301,24 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
         for i in range(1, n)
     ]
 
+    cv_2011 = [r for r in rows if r["event"] == ev2011[0]["name"]] if ev2011 else rows
     report = {
+        # 2011 kept as "event" for the app's 2011 comparisons; every event is in "events"
         "event": {"id": "DFO_3850", "source": "Global Flood Database (MODIS, 250 m)",
                   "began": "2011-08-05", "ended": "2012-01-09"},
-        "n_training_cells": int(len(y)), "flooded_share": float(pos_rate),
+        "events": [{k: e[k] for k in ("id", "year", "name", "source", "n_cells", "flooded_share")} for e in events],
+        "test_years_from": C.TEST_YEARS_FROM,
+        "cells_per_event": CELLS_PER_EVENT,
+        "n_training_cells": int(sum(min(e["n_cells"], CELLS_PER_EVENT) for e in events)),
+        "flooded_share": ev2011[0]["flooded_share"] if ev2011 else events[0]["flooded_share"],
         "excluded_features": [FEATURE_LABELS.get(c, c) for c in exclude],
         "cv": {"block_m": BLOCK_M, "folds": N_FOLDS,
-               "summary": summary,
-               "folds_detail": rows},
+               "summary": cv_summary(cv_2011),          # 2011 flood only, as before
+               "folds_detail": [{k: v for k, v in r.items() if k != "event"} for r in cv_2011],
+               "per_event": per_event,
+               "mean_over_events": mean_over_events,
+               "per_event_folds": rows},
+        "leave_one_event_out": loeo,
         "features": [
             {"feature": c, "label": FEATURE_LABELS.get(c, c), "mean_abs_shap": float(mean_abs[i]),
              "direction": direction[i], "gain": float(gain[i])}
@@ -187,6 +333,10 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
                    transform=area.transform, compress="deflate", dtype="float32")
     with rasterio.open(out_dir / C.ML_PROB_FILE.name, "w", **profile) as dst:
         dst.write(prob, 1)
+    if compare_2011:
+        with rasterio.open(out_dir / C.ML_PROB_2011_FILE.name, "w", **profile) as dst:
+            dst.write(prob_2011.reshape(C.HEIGHT, C.WIDTH), 1)
+        model_2011.booster_.save_model(str(model_path.with_name(model_path.stem + "_2011" + model_path.suffix)))
     (out_dir / C.ML_REPORT_FILE.name).write_text(json.dumps(report, indent=2))
     model.booster_.save_model(str(model_path))
 
@@ -198,18 +348,22 @@ def main(labels_path: Path, out_dir: Path, model_path: Path, exclude=()):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--labels", type=Path, default=C.FLOOD_2011_FILE)
+    ap.add_argument("--labels", type=Path, nargs="+", default=None,
+                    help="label files (default: flood_2011.tif + flood_labels/radar_YYYY.tif before the test years)")
     ap.add_argument("--out-dir", type=Path, default=C.PROCESSED_DIR)
     ap.add_argument("--model-path", type=Path, default=C.ML_MODEL_FILE)
     ap.add_argument("--exclude", nargs="*", default=DEFAULT_EXCLUDE,
                     help="feature names to leave out (default: %(default)s; give none to use all)")
     ap.add_argument("--baselines-only", action="store_true",
-                    help="re-score only the untrained methods (bathtub, risk index) in the existing report, "
-                         "e.g. after preparing flood defences; the ML model is left as it is")
+                    help="re-score only the untrained methods (bathtub, risk index) on the 2011 folds of the "
+                         "existing report, e.g. after preparing flood defences; the ML models are left as they are")
     args = ap.parse_args()
-    if not args.labels.exists():
-        raise SystemExit(f"{args.labels} not found. Run scripts/prepare_ml_data.py first.")
+    labels = args.labels or default_label_files()
+    missing = [p for p in labels if not Path(p).exists()]
+    if missing:
+        raise SystemExit(f"{missing} not found. Run scripts/prepare_ml_data.py (2011) and "
+                         "scripts/build_flood_archive.py (radar seasons) first.")
     if args.baselines_only:
-        rescore_baselines(args.labels, args.out_dir / C.ML_REPORT_FILE.name)
+        rescore_baselines(C.FLOOD_2011_FILE, args.out_dir / C.ML_REPORT_FILE.name)
     else:
-        main(args.labels, args.out_dir, args.model_path, args.exclude)
+        main(labels, args.out_dir, args.model_path, args.exclude)

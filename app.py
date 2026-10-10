@@ -20,10 +20,10 @@ from src.current_flood import (
     DRY_PCT, FLOODED_PCT, conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
 )
 from src.viz3d import city_deck, district_deck, district_view, footprint_coords
-from src.ml import load_ml
+from src.ml import ML_2011, ML_ALL, load_ml
 from src.risk import compute_factors, district_mean, district_risk, risk_index
 from src.simulate import level_curve, simulate
-from src.validation import CI, REFERENCE, validation_table, wins
+from src.validation import CI, REFERENCE, TEST_CV, TEST_RADAR, loeo_table, validation_table, wins
 from src.viz import (
     basemap_rgb, build_map, difference_chart, elevation_histogram, feature_importance_chart, flood_frame,
     flood_timeline_chart, fmt_people, level_curve_chart, model_comparison_chart, score_over_time_chart,
@@ -465,18 +465,43 @@ with tab_ml:
         )
     else:
         cv = ml.cv.set_index("method")
-        ml_auc = cv.loc["ML model (LightGBM)", "roc_auc"]
-        best_other = cv.drop(index="ML model (LightGBM)")["roc_auc"].idxmax()
-        st.markdown(
-            f"A gradient-boosted tree model (LightGBM) trained on **{ml.report['n_training_cells']:,} grid cells** "
-            f"labelled flooded or dry in the **2011 flood** "
-            f"({ml.report['flooded_share']:.0%} flooded). Instead of hand-set weights, it learns how "
-            f"{'elevation, waterways and land cover' if ml.report.get('excluded_features') else 'elevation, waterways, land cover and population'} "
-            f"relate to real flooding."
-        )
+        ml_methods = [m for m in cv.index if m.startswith("ML model")]
+        ml_name = ML_ALL if ML_ALL in cv.index else ml_methods[0]
+        ml_auc = cv.loc[ml_name, "roc_auc"]
+        best_other = cv.drop(index=ml_methods)["roc_auc"].idxmax()
+        events = ml.report.get("events", [])
+        factors = ('elevation, waterways and land cover' if ml.report.get('excluded_features')
+                   else 'elevation, waterways, land cover and population')
+        if len(events) > 1:
+            radar_years = [e["year"] for e in events if e["id"].startswith("radar")]
+            st.markdown(
+                f"A gradient-boosted tree model (LightGBM) trained on **{len(events)} floods**: the 2011 flood "
+                f"(MODIS) and the radar-mapped wet seasons of **{min(radar_years)}–{max(radar_years)}**, "
+                f"{ml.report['cells_per_event']:,} labelled cells from each so every flood counts equally "
+                f"(**{ml.report['n_training_cells']:,} cells** in all). Instead of hand-set weights, it learns how "
+                f"{factors} relate to real flooding. Floods from {ml.report['test_years_from']} on are kept out "
+                "of training, so the **Validation** tab can test on them."
+            )
+            with st.expander("The floods it was trained on"):
+                st.dataframe(
+                    pd.DataFrame({"Flood": [e["name"] for e in events], "Source": [e["source"] for e in events],
+                                  "Labelled cells": [e["n_cells"] for e in events],
+                                  "Flooded": [e["flooded_share"] * 100 for e in events]}),
+                    hide_index=True, use_container_width=True,
+                    column_config={"Flooded": st.column_config.NumberColumn("Flooded (% of labelled)",
+                                                                            format="%.1f%%")})
+                st.caption("Radar seasons: August–November passes, each compared with the same weeks of the year "
+                           "before. A cell is flooded if at least half of it was flooded on 2 or more passes, and "
+                           "dry if it was seen and always under 10% flooded.")
+        else:
+            st.markdown(
+                f"A gradient-boosted tree model (LightGBM) trained on **{ml.report['n_training_cells']:,} grid "
+                f"cells** labelled flooded or dry in the **2011 flood** ({ml.report['flooded_share']:.0%} "
+                f"flooded). Instead of hand-set weights, it learns how {factors} relate to real flooding."
+            )
         c1, c2 = st.columns(2)
         with c1:
-            st.subheader("Does it beat the existing methods?")
+            st.subheader("Does it beat the existing methods? (2011 flood)")
             st.plotly_chart(model_comparison_chart(ml.cv), use_container_width=True)
             gap = ml_auc - cv.loc[best_other, "roc_auc"]
             verdict = (f"The ML model scores **{gap:+.2f} ROC-AUC** vs the best existing method ({best_other})."
@@ -487,9 +512,10 @@ with tab_ml:
                             "canal-rich inner districts highest, but those were largely protected and stayed dry.")
             st.caption(
                 f"{verdict} Scores come from spatial cross-validation: the map is cut into "
-                f"{ml.report['cv']['block_m'] / 1000:.0f} km blocks and each model is tested on blocks it never saw. "
-                "ROC-AUC 0.5 = random, 1.0 = perfect. PR-AUC rewards finding flooded cells without false alarms; "
-                f"a random guess scores {ml.report['flooded_share']:.2f}."
+                f"{ml.report['cv']['block_m'] / 1000:.0f} km blocks and each model is tested on blocks it never saw "
+                "(held out of every flood year at once). ROC-AUC 0.5 = random, 1.0 = perfect. PR-AUC rewards "
+                f"finding flooded cells without false alarms; a random guess scores {ml.report['flooded_share']:.2f}."
+                + (" The **Validation** tab has the scores for every flood." if len(events) > 1 else "")
             )
         with c2:
             st.subheader("What drives the prediction?")
@@ -515,7 +541,11 @@ with tab_ml:
 **Read with care**
 - The 2011 map comes from MODIS satellites at 250 m. They see water poorly between buildings, so **flooding in dense
   urban areas is probably under-counted**, and the model may partly learn "built-up = dry".
-- It learned from **one river/tidal flood**. It doesn't know about cloudburst flooding.
+- It learned from the 2011 river flood and nine **ordinary wet seasons** (radar, 2017–2025). It predicts a typical
+  year's flooding well but under-rates places that flood only in an extreme year like 2011, and it doesn't know
+  about short cloudburst flooding in the city, which radar mostly misses.
+- The radar seasons compare each pass with the same weeks of the year before, so a place that floods every
+  year (like planted rice paddies) isn't counted as flooded, and a wet year can hide floods in the year after.
 - Some coastal "flooding" in the 2011 map is likely shrimp and fish ponds, which MODIS can't tell apart from floodwater.
 - Areas protected by flood walls stayed dry in 2011, so the model implicitly learns those defences.
   That's useful, but defences built since 2011 aren't included.
@@ -528,12 +558,18 @@ with tab_valid:
                 "score radar passes (`python scripts/fetch_current_flood.py`, then "
                 "`python scripts/evaluate_current.py`).")
     else:
-        radar_rows = vt[vt["event"].str.startswith("Radar")]
+        radar_rows = vt[vt["test"] == TEST_RADAR]
+        loeo = loeo_table(ml.report if ml is not None else None)
         st.markdown(
-            "How well does each method say **where** Bangkok floods? Every score here is on floods the method "
-            "never saw: the **2011 flood** (the ML model is tested on 4 km blocks held out of its training) and "
-            + (f"**{radar_rows['date'].nunique()} Sentinel-1 radar passes** from {radar_rows['date'].min()} "
-               f"to {radar_rows['date'].max()}." if not radar_rows.empty else "no radar passes yet.")
+            "How well does each method say **where** Bangkok floods? Every score here is on floods, or places, "
+            "the method never saw: the **training floods** (the ML model is tested on 4 km blocks held out of "
+            "its training)"
+            + (f", **each training flood left out in turn** ({len(loeo['event'].unique())} floods)"
+               if not loeo.empty else "")
+            + " and "
+            + (f"**{radar_rows['date'].nunique()} recent Sentinel-1 radar passes** from {radar_rows['date'].min()} "
+               f"to {radar_rows['date'].max()}, which no model was trained on." if not radar_rows.empty
+               else "no radar passes yet.")
             + " The bathtub simulation and the risk index have no training data, so every flood is new to them."
         )
         v1, v2 = st.columns(2)
@@ -542,7 +578,7 @@ with tab_valid:
         vmetric = v2.radio("Score", ["roc_auc", "pr_auc"], horizontal=True, key="valid_metric",
                            format_func={"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}.get)
         metric_name = {"roc_auc": "ROC-AUC", "pr_auc": "PR-AUC"}[vmetric]
-        ml_name = "ML model (trained on 2011)"
+        ml_name = ML_ALL if ev_all is None or ML_ALL in set(ev_all["method"]) else "ML model (trained on 2011)"
 
         if ev_all is not None and ml_name in set(ev_all["method"]):
             w = wins(ev_all, ml_name, vscope, vmetric)
@@ -553,7 +589,7 @@ with tab_valid:
                           help=f"Passes where the {CI}% interval of the difference is entirely above zero.")
                 m3.metric("Clearly worse", w["clearly_worse"],
                           help=f"Passes where the {CI}% interval of the difference is entirely below zero.")
-            cv11 = vt[vt["event"].str.startswith("2011")].set_index("method")
+            cv11 = vt[(vt["test"] == TEST_CV) & vt["event"].str.startswith("2011")].set_index("method")
             if {ml_name, REFERENCE} <= set(cv11.index):
                 gap = cv11.loc[ml_name, vmetric] - cv11.loc[REFERENCE, vmetric]
                 m4.metric(f"2011 flood: ML minus bathtub ({metric_name})", f"{gap:+.2f}",
@@ -571,7 +607,7 @@ with tab_valid:
                           help=f"Passes where the {CI}% interval of the difference is entirely above zero.")
                 d3.metric("Clearly worse", w["clearly_worse"],
                           help=f"Passes where the {CI}% interval of the difference is entirely below zero.")
-            cv11 = vt[vt["event"].str.startswith("2011")].set_index("method")
+            cv11 = vt[(vt["test"] == TEST_CV) & vt["event"].str.startswith("2011")].set_index("method")
             if {def_name, REFERENCE} <= set(cv11.index):
                 gap = cv11.loc[def_name, vmetric] - cv11.loc[REFERENCE, vmetric]
                 d4.metric("2011 flood: gain from defences", f"{gap:+.2f}",
@@ -594,15 +630,54 @@ with tab_valid:
                 st.caption(f"Above zero = better than the bathtub. A bar that doesn't cross zero is a difference "
                            f"the {CI}% interval says isn't just chance.")
 
+        if not loeo.empty:
+            st.subheader("Does training on more floods help? Leave one flood out")
+            st.markdown(
+                "Each flood in turn is predicted by a model trained on **all the other floods**, and compared "
+                "with the old model trained on **2011 only**. This asks the question a planner cares about: how "
+                "well does the model predict a flood year it has never seen?"
+            )
+            if {ML_ALL, ML_2011} <= set(loeo["method"]):
+                w_old = wins(loeo, ML_ALL, "Greater Bangkok", vmetric, reference=ML_2011)
+                w_bath = wins(loeo, ML_ALL, "Greater Bangkok", vmetric)
+                w_def = wins(loeo, ML_ALL, "Greater Bangkok", vmetric, reference="Bathtub + defences")
+                l1, l2, l3, l4 = st.columns(4)
+                l1.metric(f"Beats the 2011-only model ({metric_name})", f"{w_old['better']} of {w_old['passes']} floods",
+                          help="Radar seasons only: the 2011-only model can't be tested on 2011 without a hold-out.")
+                if ev_all is not None and {ML_ALL, ML_2011} <= set(ev_all["method"]):
+                    w_new = wins(ev_all, ML_ALL, vscope, vmetric, reference=ML_2011)
+                    l2.metric("...and on the recent passes", f"{w_new['better']} of {w_new['passes']} passes",
+                              help="The recent radar passes, which neither model was trained on.")
+                l3.metric("Beats the bathtub", f"{w_bath['better']} of {w_bath['passes']} floods",
+                          help=f"Clearly better on {w_bath['clearly_better']}, clearly worse on "
+                               f"{w_bath['clearly_worse']} ({CI}% interval of the difference).")
+                l4.metric("Beats bathtub + defences", f"{w_def['better']} of {w_def['passes']} floods")
+                old_2011 = vt[(vt["test"] == TEST_CV) & vt["event"].str.startswith("2011")].set_index("method")
+                if {ML_ALL, ML_2011} <= set(old_2011.index):
+                    a, b = old_2011.loc[ML_ALL, vmetric], old_2011.loc[ML_2011, vmetric]
+                    if a < b:
+                        st.caption(
+                            f"**The trade-off:** on the extreme 2011 flood the 2011-only model is still better "
+                            f"({metric_name} {b:.3f} vs {a:.3f} in spatial CV). Nine of the ten training floods are "
+                            "ordinary wet seasons, where 2–5% of the land floods; in 2011 about 21% did, including "
+                            "places that rarely flood. The new model is the better guide to a typical year, and "
+                            "the 2011 map (\"Observed flood (2011)\" layer) remains the guide to a rare, extreme one.")
+            st.plotly_chart(score_over_time_chart(loeo, "Greater Bangkok", vmetric, intervals=True),
+                            use_container_width=True)
+            st.caption(f"One point per left-out flood (Greater Bangkok), shading = {CI}% block bootstrap interval. "
+                       "The model is tested on every cell of the left-out year, including places it saw flood in "
+                       "other years: features describe the place, not the weather, so this measures how well "
+                       "past floods predict the next one.")
+
         st.subheader("All results")
 
         def with_interval(v, lo, hi):
             return f"{v:.3f}" if pd.isna(lo) else f"{v:.3f} ({lo:.3f}–{hi:.3f})"
 
-        shown = vt[(vt["scope"] == vscope) | vt["event"].str.startswith("2011")]
+        shown = vt[(vt["scope"] == vscope) | (vt["test"] != TEST_RADAR)]
         st.dataframe(
             pd.DataFrame({
-                "Flood event": shown["event"], "Area": shown["scope"], "Method": shown["method"],
+                "Test": shown["test"], "Flood event": shown["event"], "Area": shown["scope"], "Method": shown["method"],
                 "ROC-AUC": [with_interval(*r) for r in shown[["roc_auc", "roc_auc_lo", "roc_auc_hi"]].values],
                 "PR-AUC": [with_interval(*r) for r in shown[["pr_auc", "pr_auc_lo", "pr_auc_hi"]].values],
                 "Random PR-AUC": shown["random_pr_auc"], "Cells tested": shown["n_cells"],
@@ -622,7 +697,14 @@ with tab_valid:
             st.markdown(f"""
 **Labels.** A ~65 m grid cell counts as *flooded* when at least {FLOODED_PCT}% of it is flooded on the radar map,
 and as *dry* when under {DRY_PCT}% is, radar saw it, and it isn't permanent water (JRC Global Surface Water).
-Cells in between are left out. The 2011 labels come from the Global Flood Database's MODIS map (250 m).
+Cells in between are left out. The 2011 labels come from the Global Flood Database's MODIS map (250 m). Each
+radar wet season (August–November, 2017 on) combines all its passes: flooded if flooded on at least 2 passes,
+dry if seen and dry on every pass.
+
+**Three kinds of test.**
+- *Spatial CV:* the floods the ML model trains on, scored on 4 km blocks held out of training in every year.
+- *Left-out flood:* each training flood predicted by a model trained on all the others.
+- *Recent radar passes:* floods from the current year, which no model was trained on.
 
 **Scores.** Each method gives every cell a score: the ML model's flood probability, how low a water level
 floods it in the bathtub simulation, or the risk index (default weights).
@@ -633,8 +715,8 @@ floods it in the bathtub simulation, or the risk index (default weights).
 **Intervals.** Neighbouring cells flood together, so they aren't independent tests. The radar intervals come
 from a *spatial block bootstrap*: the map is cut into 4 km blocks, which are resampled 200 times, and every
 method is re-scored on each resample. The {CI}% interval is the middle {CI}% of those scores. The difference
-from the bathtub uses the same resamples, so it has its own interval. The 2011 range is the lowest to highest
-score over the 5 cross-validation folds.
+from the bathtub uses the same resamples, so it has its own interval. The left-out floods get intervals the
+same way. The spatial CV range is the lowest to highest score over the 5 cross-validation folds.
 
 **Known biases.**
 - Radar and MODIS both miss much of the water between buildings, so the dense city looks drier than it was.

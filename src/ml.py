@@ -8,6 +8,10 @@ import rasterio
 
 from src import config as C
 
+# Method names used in the report, the radar evaluation and the app
+ML_ALL = "ML model (all floods)"   # 2011 + every radar wet season before config.TEST_YEARS_FROM
+ML_2011 = "ML model (2011 only)"   # the original model, kept for the before/after comparison
+
 
 @dataclass
 class MLResult:

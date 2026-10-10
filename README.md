@@ -93,33 +93,52 @@ cross-validation folds. Results for the radar passes are in the Validation tab. 
 retraining the ML model, run `python scripts/train_model.py --baselines-only`.
 
 ## Machine-learning model (optional)
-A LightGBM model learns flood susceptibility from where Bangkok **actually flooded in 2011**
-(Global Flood Database event DFO_3850, MODIS 250 m) instead of hand-set weights. It's evaluated with spatial
-block cross-validation against the hand-weighted risk index and the bathtub simulation.
+A LightGBM model learns flood susceptibility from where Bangkok **actually flooded**, instead of hand-set
+weights: the **2011 flood** (Global Flood Database event DFO_3850, MODIS 250 m) and **nine wet seasons,
+2017-2025**, mapped from Sentinel-1 radar. Every flood counts equally (200,000 labelled cells sampled from each).
+Floods from 2026 on (`TEST_YEARS_FROM` in `src/config.py`) are never trained on, so the recent radar passes stay an
+honest test. A second model trained on 2011 only, as before, is kept for comparison.
 
 ```bash
-# 1. Labels: download event 3850's map from global-flood-database.cloudtostreet.ai (no account) ...
+# 1. 2011 labels: download event 3850's map from global-flood-database.cloudtostreet.ai (no account) ...
 python scripts/prepare_ml_data.py --label-file data/raw/gfd_dfo_3850.tif
 #    ... or fetch it with a free Google Earth Engine login (run `earthengine authenticate` once)
 python scripts/prepare_ml_data.py --gee-project YOUR_CLOUD_PROJECT_ID
-# 2. Train + evaluate (~2 min); prints scores vs the existing methods
+# 2. Wet-season radar labels 2017-2025 (~10 min per year; passes are cached in data/raw/flood_archive/)
+python scripts/build_flood_archive.py --gee-project YOUR_CLOUD_PROJECT_ID
+# 3. Train + evaluate (~7 min); prints scores per flood vs the existing methods
 python scripts/train_model.py
 ```
-**Results (spatial 5-fold CV on 4 km blocks, 846k labelled cells, 21% flooded):**
+Each radar season combines its August-November passes, each compared with the same weeks of the year before:
+a cell is **flooded** if at least half of it was flooded on 2 or more passes, **dry** if radar saw it and it was
+always under 10% flooded, and unknown otherwise. The labels are in `data/processed/flood_labels/` (radar_YYYY.tif,
+same 1/0/255 format as flood_2011.tif; `summary.json` lists the passes used). In those seasons 2-5% of the
+land flooded, against 21% in 2011.
 
-| Method | ROC-AUC | PR-AUC |
-|---|---|---|
-| ML model (terrain + land cover) | 0.867 | 0.669 |
-| Bathtub simulation | 0.668 | 0.288 |
-| Hand-weighted risk index (default weights) | 0.448 | 0.181 |
-| Random guess | 0.5 | 0.211 |
+Evaluation: **spatial 5-fold CV** on 4 km blocks, held out of every flood year at once, and **leave one flood
+out** (train on the other nine, test on all of the tenth, with 95% block-bootstrap intervals).
 
-Population density and built-up land are excluded by default: with them the model scores 0.893, but its top
-factor becomes "dense city = dry", which mostly reflects flood defences and MODIS missing urban floodwater.
+**Results (ROC-AUC; PR-AUC in brackets):**
 
-The app then gains "ML flood susceptibility" and "Observed flood (2011)" layers and a **ML model** tab.
-Caveats: MODIS under-detects flooding between buildings, the model learned from one river/tidal flood, and
-it implicitly learns 2011-era flood defences.
+| Test | ML, all floods | ML, 2011 only | Bathtub + defences | Bathtub | Risk index |
+|---|---|---|---|---|---|
+| 2011 flood, spatial CV | 0.853 (0.58) | **0.872 (0.68)** | 0.721 (0.33) | 0.667 (0.29) | 0.449 (0.18) |
+| 2017-2025 seasons, spatial CV (mean) | **0.975 (0.58)** | 0.918 (0.27) | 0.795 (0.09) | 0.749 (0.07) | 0.421 (0.03) |
+| Each season left out (range) | **0.972-0.987** | 0.901-0.931 | 0.769-0.807 | | |
+| 2026 radar passes, never trained on (8) | **0.91-0.96** | 0.82-0.91 | 0.75-0.86 | 0.70-0.85 | 0.39-0.57 |
+
+On the latest 2026 pass (27 September) the 95% intervals don't overlap: 0.955-0.968 for the new model against
+0.892-0.923 for the 2011-only model. **The trade-off:** the new model is slightly worse on the extreme 2011 flood
+(0.853 vs 0.872), because nine of its ten floods are ordinary seasons. It is the better guide to a typical year;
+the 2011 map stays the guide to a rare, extreme one.
+
+Population density and built-up land are excluded by default: with them the 2011 model scores 0.893, but its top
+factor becomes "dense city = dry", which mostly reflects flood defences and satellites missing urban floodwater.
+
+The app then gains "ML flood susceptibility" and "Observed flood (2011)" layers and a **ML model** tab listing the
+floods it was trained on. Caveats: radar and MODIS both under-detect flooding between buildings; the seasonal
+baseline hides places that flood every year and can hide a flood in the year after a wet one; the model doesn't
+know about short cloudburst flooding.
 
 ## Current flood from satellite radar (optional)
 Maps where Bangkok is flooding **now** from Sentinel-1 radar (sees through cloud; a new pass every few days),
@@ -144,8 +163,10 @@ river data.
 
 ## Validation
 The **Validation** tab gathers every test of the methods (ML model, bathtub with and without defences, risk index) on
-floods they never saw: the 2011 flood (spatial cross-validation) and every radar pass. It shows:
+floods (or places) they never saw: every training flood (spatial cross-validation), each training flood left out in
+turn, and every recent radar pass. It shows:
 - how often the ML model beats the bathtub, and on how many passes the difference is clear of noise;
+- whether training on more floods helped: the all-floods model against the 2011-only model, flood by flood;
 - ROC-AUC or PR-AUC over time with shaded 95% intervals, and each method's difference from the bathtub;
 - a table of every method x event with the random-guess baseline, cells tested and flooded share, as a CSV
   download;
@@ -154,7 +175,8 @@ floods they never saw: the 2011 flood (spatial cross-validation) and every radar
 The intervals come from a **spatial block bootstrap** in `evaluate_current.py` (`src/validation.py`): 4 km blocks
 are resampled 200 times and every method is re-scored on each resample, so neighbouring cells, which flood
 together, aren't counted as independent evidence. Each method's difference from the bathtub uses the same
-resamples and gets its own interval. For 2011 the range shown is the spread over the 5 cross-validation folds.
+resamples and gets its own interval. `train_model.py` does the same for the left-out floods. For spatial CV the
+range shown is the spread over the 5 folds.
 
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
@@ -191,7 +213,8 @@ buildings).
 app.py                          Streamlit UI
 scripts/prepare_data.py         Download + align all data onto a ~65 m grid
 scripts/prepare_ml_data.py      2011 flood labels + land cover for the ML model
-scripts/train_model.py          Train + evaluate the LightGBM flood model
+scripts/build_flood_archive.py  Wet-season radar flood labels, 2017-2025
+scripts/train_model.py          Train + evaluate the LightGBM flood models
 scripts/fetch_current_flood.py  Sentinel-1 radar flood maps, rainfall and river flow
 scripts/evaluate_current.py     Score every method against the radar maps
 scripts/prepare_buildings.py    Building footprints, heights and facilities per district
@@ -219,8 +242,8 @@ pip install -r requirements-dev.txt
 pytest                      # ~30 s
 ```
 Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
-pocket and high ground. They cover the flood simulation, risk index, radar labels, per-pass weather, the alert rules and the
-bootstrap scores (checked against scikit-learn).
+pocket and high ground. They cover the flood simulation, risk index, radar labels, per-pass weather, the alert rules,
+the bootstrap scores (checked against scikit-learn), the wet-season labels and the multi-flood training sets.
 `tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
 `data/processed/` is missing. GitHub Actions (`.github/workflows/ci.yml`) runs everything on every push, on
 Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).

@@ -16,6 +16,7 @@ from PIL import Image
 
 from src import config as C
 from src.data_loader import StudyArea
+from src.ml import ML_2011, ML_ALL
 
 MAX_DEPTH_M = 3.0
 WATER_CMAP = LinearSegmentedColormap.from_list("water", ["#8fd3ff", "#2b7bd6", "#0a2f6b"])
@@ -291,8 +292,7 @@ def elevation_histogram(dem: np.ndarray, cell_area_km2: np.ndarray, level: float
 
 def model_comparison_chart(cv: pd.DataFrame) -> go.Figure:
     """Spatial cross-validation scores of the ML model vs the existing methods."""
-    order = ["ML model (LightGBM)", "ML model (trained on 2011)", "Bathtub + defences", "Bathtub simulation",
-             "Risk index (default weights)"]
+    order = [ML_ALL, ML_2011, "Bathtub + defences", "Bathtub simulation", "Risk index (default weights)"]
     known = [m for m in order if m in set(cv["method"])]
     cv = cv.set_index("method").reindex(known + [m for m in cv["method"] if m not in known]).reset_index()
     fig = go.Figure()
@@ -374,7 +374,7 @@ def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.Dat
     return fig
 
 
-METHOD_COLORS = {"ML model (trained on 2011)": "#2b7bd6", "Bathtub simulation": "#f28e2b",
+METHOD_COLORS = {ML_ALL: "#2b7bd6", ML_2011: "#9467bd", "Bathtub simulation": "#f28e2b",
                  "Bathtub + defences": "#59a14f", "Risk index (default weights)": "#8a94a3"}
 
 

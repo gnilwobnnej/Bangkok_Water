@@ -9,9 +9,15 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from src.ml import ML_2011
+
 N_BOOT = 200
 CI = 95
 REFERENCE = "Bathtub simulation"   # the physics baseline every other method is compared with
+# How a row of the validation table was tested
+TEST_CV = "Spatial CV (training flood, unseen blocks)"
+TEST_LOEO = "Left-out flood"
+TEST_RADAR = "Recent radar pass (never trained on)"
 
 
 def score_bins(s: np.ndarray) -> np.ndarray:
@@ -78,52 +84,85 @@ def block_bootstrap(y: np.ndarray, scores: dict, blocks: np.ndarray, n_boot: int
 
 
 def cv_table(report: dict) -> pd.DataFrame:
-    """The 2011 cross-validation scores in the same shape as the radar results (spread = fold min-max)."""
-    folds = pd.DataFrame(report["cv"]["folds_detail"])
+    """The cross-validation scores of every training event, in the same shape as the radar results
+    (spread = fold min-max). Reports from before multi-flood training have only the 2011 folds."""
+    if "per_event_folds" in report["cv"]:
+        folds = pd.DataFrame(report["cv"]["per_event_folds"])
+        events = {e["name"]: e for e in report["events"]}
+    else:
+        folds = pd.DataFrame(report["cv"]["folds_detail"]).assign(event="2011 flood (MODIS)")
+        folds["method"] = folds["method"].where(~folds["method"].str.startswith("ML model"), ML_2011)
+        events = {"2011 flood (MODIS)": {"year": 2011, "flooded_share": report["flooded_share"],
+                                         "n_cells": report["n_training_cells"]}}
     rows = []
-    for m, g in folds.groupby("method", sort=False):
+    for (event, m), g in folds.groupby(["event", "method"], sort=False):
+        e = events[event]
         rows.append({
-            "event": "2011 flood (MODIS)", "date": report["event"]["began"][:4], "scope": "Greater Bangkok",
-            "method": "ML model (trained on 2011)" if m.startswith("ML model") else m,
+            "event": event, "date": str(e["year"]), "scope": "Greater Bangkok", "method": m,
             "roc_auc": g["roc_auc"].mean(), "roc_auc_lo": g["roc_auc"].min(), "roc_auc_hi": g["roc_auc"].max(),
             "pr_auc": g["pr_auc"].mean(), "pr_auc_lo": g["pr_auc"].min(), "pr_auc_hi": g["pr_auc"].max(),
-            "flooded_share": report["flooded_share"], "n_cells": report["n_training_cells"],
+            "flooded_share": e["flooded_share"], "n_cells": e["n_cells"],
             "interval": f"range over {report['cv']['folds']} CV folds",
         })
     return pd.DataFrame(rows)
+
+
+def loeo_table(report: dict | None) -> pd.DataFrame:
+    """Leave-one-event-out scores: each flood predicted by a model trained on the other floods, with 95% block
+    bootstrap intervals. Empty for a report without multi-flood training."""
+    rows = (report or {}).get("leave_one_event_out", [])
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    for key in ("roc_auc", "pr_auc"):
+        for suffix, col in (("", f"{key}_ci"), ("_diff", f"{key}_diff_ci")):
+            vals = df[col] if col in df else pd.Series([None] * len(df))
+            lohi = [v if isinstance(v, (list, tuple)) else (np.nan, np.nan) for v in vals]
+            df[f"{key}{suffix}_lo"] = [v[0] for v in lohi]
+            df[f"{key}{suffix}_hi"] = [v[1] for v in lohi]
+    year = {e["name"]: e["year"] for e in report["events"]}
+    df["date"] = df["event"].map(year).astype(str)
+    df["scope"] = "Greater Bangkok"
+    df["random_pr_auc"] = df["flooded_share"]
+    return df.drop(columns=[c for c in df if c.endswith("_ci")])
 
 
 def validation_table(radar_eval: pd.DataFrame | None, report: dict | None) -> pd.DataFrame:
     """Every method x every flood event: scores, 95% intervals, random-guess PR-AUC, cells, flooded share."""
     parts = []
     if report is not None:
-        parts.append(cv_table(report))
+        parts.append(cv_table(report).assign(test=TEST_CV))
+        loeo = loeo_table(report)
+        if not loeo.empty:
+            parts.append(loeo.assign(interval=f"{CI}% block bootstrap", test=TEST_LOEO))
     if radar_eval is not None and not radar_eval.empty:
         ev = radar_eval.copy()
         ev["event"] = "Radar " + ev["date"]
         ev["interval"] = np.where(ev["roc_auc_lo"].notna(), f"{CI}% block bootstrap", "")
-        parts.append(ev)
+        parts.append(ev.assign(test=TEST_RADAR))
     if not parts:
         return pd.DataFrame()
     df = pd.concat(parts, ignore_index=True)
     df["random_pr_auc"] = df["flooded_share"]
-    cols = ["event", "date", "scope", "method", "roc_auc", "roc_auc_lo", "roc_auc_hi", "pr_auc", "pr_auc_lo",
-            "pr_auc_hi", "random_pr_auc", "flooded_share", "n_cells", "interval",
+    cols = ["test", "event", "date", "scope", "method", "roc_auc", "roc_auc_lo", "roc_auc_hi", "pr_auc",
+            "pr_auc_lo", "pr_auc_hi", "random_pr_auc", "flooded_share", "n_cells", "interval",
             "roc_auc_diff_lo", "roc_auc_diff_hi"]
     return df.reindex(columns=cols)
 
 
 def wins(radar_eval: pd.DataFrame, method: str, scope: str, metric: str = "roc_auc",
          reference: str = REFERENCE) -> dict:
-    """How often `method` beats `reference` on the radar passes: in total, and clearly (interval of the
-    difference above zero) or clearly worse (below zero)."""
+    """How often `method` beats `reference` on the radar passes (or any table with date/scope/method rows): in
+    total, and clearly (interval of the difference above zero) or clearly worse (below zero). The stored
+    difference intervals are against REFERENCE, so for any other reference only the total is counted."""
     ev = radar_eval[radar_eval["scope"] == scope]
     a = ev[ev["method"] == method].set_index("date")
     b = ev[ev["method"] == reference].set_index("date")[metric]
     dates = a.index.intersection(b.index)
     diff = a.loc[dates, metric] - b.loc[dates]
-    lo = a.loc[dates].get(f"{metric}_diff_lo", pd.Series(np.nan, index=dates))
-    hi = a.loc[dates].get(f"{metric}_diff_hi", pd.Series(np.nan, index=dates))
+    none = pd.Series(np.nan, index=dates)
+    lo = a.loc[dates].get(f"{metric}_diff_lo", none) if reference == REFERENCE else none
+    hi = a.loc[dates].get(f"{metric}_diff_hi", none) if reference == REFERENCE else none
     return {"passes": len(dates), "better": int((diff > 0).sum()),
             "clearly_better": int((lo > 0).sum()), "clearly_worse": int((hi < 0).sum()),
             "has_intervals": bool(lo.notna().any())}

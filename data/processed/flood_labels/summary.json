@@ -1,0 +1,1232 @@
+{
+  "generated": "2026-10-10T01:01:33Z",
+  "method": {
+    "season": "August-November",
+    "baseline": "seasonal (same weeks of the year before)",
+    "flooded_pct_at_least": 50,
+    "dry_pct_below": 10,
+    "min_flood_passes": 2,
+    "seen_rule": "radar data on >= 50% of the cell and < 50% permanent water"
+  },
+  "years": [
+    {
+      "year": 2017,
+      "file": "radar_2017.tif",
+      "n_passes": 19,
+      "flooded_cells": 25759,
+      "dry_cells": 733710,
+      "unknown_cells": 179492,
+      "flooded_share": 0.03391711840772961,
+      "passes": [
+        {
+          "date": "2017-08-02",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-08-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-08-14",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-08-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-08-26",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-08-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-09-07",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-09-11",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-09-19",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-09-23",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-10-05",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-10-13",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-10-17",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-10-25",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-11-06",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-11-10",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-11-18",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2017-11-22",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2017-11-30",
+          "direction": "ASCENDING",
+          "orbit": 172
+        }
+      ]
+    },
+    {
+      "year": 2018,
+      "file": "radar_2018.tif",
+      "n_passes": 30,
+      "flooded_cells": 32130,
+      "dry_cells": 717135,
+      "unknown_cells": 189696,
+      "flooded_share": 0.04288202438389622,
+      "passes": [
+        {
+          "date": "2018-08-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-08-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-08-09",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-08-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-08-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-08-21",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-08-31",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-09-02",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-09-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-09-12",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-09-14",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-09-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-09-24",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-09-26",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-09-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-10-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-10-08",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-10-12",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-10-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-10-20",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-10-24",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-10-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-11-01",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-11-05",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-11-11",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-11-13",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-11-17",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-11-23",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2018-11-25",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2018-11-29",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "file": "radar_2019.tif",
+      "n_passes": 30,
+      "flooded_cells": 19945,
+      "dry_cells": 731640,
+      "unknown_cells": 187376,
+      "flooded_share": 0.026537251275637486,
+      "passes": [
+        {
+          "date": "2019-08-02",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-08-04",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-08-08",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-08-14",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-08-16",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-08-20",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-08-28",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-09-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-09-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-09-09",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-09-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-09-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-09-21",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-09-25",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-03",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-10-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-15",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-10-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-25",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-10-27",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-10-31",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-11-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-11-08",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-11-12",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-11-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-11-20",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2019-11-24",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2019-11-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    },
+    {
+      "year": 2020,
+      "file": "radar_2020.tif",
+      "n_passes": 29,
+      "flooded_cells": 31566,
+      "dry_cells": 726624,
+      "unknown_cells": 180771,
+      "flooded_share": 0.041633363668737385,
+      "passes": [
+        {
+          "date": "2020-08-08",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-08-10",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-08-14",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-08-20",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-08-22",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-08-26",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-03",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-09-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-15",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-09-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-25",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-09-27",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-10-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-10-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-10-09",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-10-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-10-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-10-21",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-10-25",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-10-31",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-11-02",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-11-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-11-12",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-11-14",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2020-11-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-11-24",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2020-11-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    },
+    {
+      "year": 2021,
+      "file": "radar_2021.tif",
+      "n_passes": 30,
+      "flooded_cells": 38222,
+      "dry_cells": 717072,
+      "unknown_cells": 183667,
+      "flooded_share": 0.05060545959586598,
+      "passes": [
+        {
+          "date": "2021-08-03",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-08-05",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-08-09",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-08-17",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-08-21",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-08-27",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-08-29",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-09-02",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-09-08",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-09-10",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-09-14",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-09-20",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-09-22",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-09-26",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-02",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-04",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-10-08",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-10",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-10-14",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-16",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-10-20",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-26",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-10-28",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-11-01",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-11-07",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-11-09",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-11-13",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-11-19",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2021-11-21",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2021-11-25",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "file": "radar_2022.tif",
+      "n_passes": 19,
+      "flooded_cells": 25493,
+      "dry_cells": 735326,
+      "unknown_cells": 178142,
+      "flooded_share": 0.033507312514540255,
+      "passes": [
+        {
+          "date": "2022-08-04",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-08-12",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-08-16",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-08-24",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-08-28",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-09-05",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-09-09",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-09-17",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-09-21",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-09-29",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-10-03",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-10-11",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-10-23",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-10-27",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-11-04",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-11-08",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-11-16",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2022-11-20",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2022-11-28",
+          "direction": "ASCENDING",
+          "orbit": 172
+        }
+      ]
+    },
+    {
+      "year": 2023,
+      "file": "radar_2023.tif",
+      "n_passes": 20,
+      "flooded_cells": 17009,
+      "dry_cells": 742998,
+      "unknown_cells": 178954,
+      "flooded_share": 0.022380057025790552,
+      "passes": [
+        {
+          "date": "2023-08-07",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-08-11",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-08-19",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-08-23",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-08-31",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-09-04",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-09-12",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-09-16",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-09-24",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-09-28",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-10-06",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-10-10",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-10-18",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-10-22",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-10-30",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-11-03",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-11-11",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-11-15",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2023-11-23",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2023-11-27",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "file": "radar_2024.tif",
+      "n_passes": 20,
+      "flooded_cells": 21285,
+      "dry_cells": 738067,
+      "unknown_cells": 179609,
+      "flooded_share": 0.02803047861861166,
+      "passes": [
+        {
+          "date": "2024-08-01",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-08-13",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-08-17",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-08-25",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-08-29",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-09-06",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-09-10",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-09-18",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-09-22",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-09-30",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-10-04",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-10-12",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-10-16",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-10-24",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-10-28",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-11-05",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-11-09",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-11-17",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2024-11-21",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2024-11-29",
+          "direction": "ASCENDING",
+          "orbit": 172
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "file": "radar_2025.tif",
+      "n_passes": 27,
+      "flooded_cells": 34395,
+      "dry_cells": 721013,
+      "unknown_cells": 183553,
+      "flooded_share": 0.04553168618812615,
+      "passes": [
+        {
+          "date": "2025-08-06",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-08-08",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-08-12",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-08-18",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-08-20",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-08-24",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-08-30",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-09-01",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-09-05",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-09-11",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-09-13",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-09-17",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-09-23",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-09-25",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-09-29",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-10-05",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-10-07",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-10-11",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-10-19",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-10-23",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-10-31",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-11-04",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-11-10",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-11-12",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-11-22",
+          "direction": "DESCENDING",
+          "orbit": 62
+        },
+        {
+          "date": "2025-11-24",
+          "direction": "ASCENDING",
+          "orbit": 172
+        },
+        {
+          "date": "2025-11-28",
+          "direction": "DESCENDING",
+          "orbit": 62
+        }
+      ]
+    }
+  ]
+}
