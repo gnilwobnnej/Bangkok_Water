@@ -6,6 +6,7 @@ import io
 
 import branca.colormap as bcm
 import folium
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -13,6 +14,7 @@ from plotly.subplots import make_subplots
 from matplotlib import colormaps
 from matplotlib.colors import LightSource, LinearSegmentedColormap
 from PIL import Image
+from shapely.ops import unary_union
 
 from src import config as C
 from src.data_loader import StudyArea
@@ -198,10 +200,19 @@ def build_map(
         districts["now_label"] = districts["flooded_now_pct"].map("{:.1f}%".format)
         fields.append("now_label")
         aliases.append("Flooded now (radar)")
+    # Bangkok's outer border, bold. Added before the districts so their polygons stay on top for hovering.
+    border = unary_union(list(area.districts.geometry)).boundary.simplify(0.0002)
+    border_color = "#ffffff" if dark else "#222222"
+    folium.GeoJson(
+        gpd.GeoSeries([border], crs=area.districts.crs).to_json(),
+        name="Bangkok border",
+        style_function=lambda f: {"color": border_color, "weight": 3, "opacity": 0.9},
+    ).add_to(m)
+    district_color = "#d0d0d0" if dark else "#555555"
     folium.GeoJson(
         districts[fields + ["geometry"]].to_json(),
         name="Districts",
-        style_function=lambda f: {"color": "#bbbbbb", "weight": 1, "fillOpacity": 0},
+        style_function=lambda f: {"color": district_color, "weight": 0.8, "opacity": 0.6, "fillOpacity": 0},
         highlight_function=lambda f: {"color": "#ffffff", "weight": 3, "fillOpacity": 0.1},
         tooltip=folium.GeoJsonTooltip(fields=fields, aliases=aliases),
     ).add_to(m)
