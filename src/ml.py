@@ -13,6 +13,7 @@ from src import config as C
 # Method names used in the report, the radar evaluation and the app
 ML_ALL = "ML model (all floods)"   # 2011 + every radar wet season before config.TEST_YEARS_FROM
 ML_2011 = "ML model (2011 only)"   # the original model, kept for the before/after comparison
+ML_STREET = "ML street flooding"   # Traffy Fondue street-flood reports (train_model.py --kind street)
 
 
 @dataclass
@@ -64,3 +65,26 @@ def cv_2011(report: dict) -> pd.DataFrame:
         df[f"{key}_lo"] = [v[0] for v in df[f"{key}_ci"]]
         df[f"{key}_hi"] = [v[1] for v in df[f"{key}_ci"]]
     return df[["method", "roc_auc", "roc_auc_lo", "roc_auc_hi", "pr_auc", "pr_auc_lo", "pr_auc_hi"]]
+
+
+@dataclass
+class StreetResult:
+    prob: np.ndarray            # street-flood probability 0-1 per cell, NaN outside Bangkok's 50 districts
+    report: dict
+    features: pd.DataFrame      # feature, label, mean_abs_shap, direction, gain
+    disagreement: np.ndarray | None = None
+
+
+def load_street():
+    """StreetResult, or None if the street-flood model hasn't been trained (train_model.py --kind street)."""
+    if not (C.ML_STREET_PROB_FILE.exists() and C.ML_STREET_REPORT_FILE.exists()):
+        return None
+    with rasterio.open(C.ML_STREET_PROB_FILE) as src:
+        prob = src.read(1)
+    disagreement = None
+    if C.ML_STREET_DISAGREEMENT_FILE.exists():
+        with rasterio.open(C.ML_STREET_DISAGREEMENT_FILE) as src:
+            disagreement = src.read(1)
+    report = json.loads(C.ML_STREET_REPORT_FILE.read_text(encoding="utf-8"))
+    return StreetResult(prob=prob, report=report, disagreement=disagreement,
+                        features=pd.DataFrame(report["features"]).sort_values("mean_abs_shap", ascending=False))

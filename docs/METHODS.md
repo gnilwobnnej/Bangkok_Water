@@ -58,6 +58,17 @@ everything; this file explains what the numbers mean. All results below are as o
     always under 10% flooded. Anything else is unknown.
   - **Result:** 2.2–5.1% of about 755,000 labelled cells flooded per season.
 - **Current passes (2026):** the same rule applied to each pass on its own.
+- **Street flooding, Traffy Fondue 2022–2026** (`scripts/fetch_traffy.py`, `scripts/build_traffy_labels.py`):
+  - **Reports:** every report in BMA's complaint app tagged flood (น้ำท่วม), 44,442 to 14 Oct 2026, with point,
+    Bangkok-local time and photo; plus every report of any kind on every third day (about 475,000 reports
+    on 582 days, scaled ×3) to measure where people use the app at all.
+  - **Storm days:** at least 15 flood reports, at least 3× the 61-day rolling median, and at least 10 mm of rain
+    (ERA5, wettest of 12 points over Bangkok) that day or the day before. 164 days hold 62% of flood reports.
+  - **Labels (case-control):** *flooded* = a flood report on a storm day in the year; *dry* = no flood report
+    all year and at least 5 (estimated) reports of other problems; anything else unknown. Taking dry cells where
+    people do report puts both classes in the same busy, built-up places, so reporting density alone can't
+    separate them. 6–36% of 14,600–26,000 labelled cells flooded per year.
+  - **Bias:** reports still follow population and app use; a flood nobody reports is unknown, never dry.
 
 ## 6. ML susceptibility model (`scripts/train_model.py`)
 **Features** (static, describing the place, not the weather):
@@ -78,6 +89,13 @@ which mostly reflects flood defences and satellites missing water between buildi
 - A second model trained on 2011 alone is kept for comparison.
 
 **Output:** the flood probability per cell, the SHAP importance of each feature, and per-district means.
+
+### Street-flood model (`train_model.py --kind street`)
+The same LightGBM set-up, trained only on the Traffy labels for 2022–2025, inside Bangkok's 50 districts. It
+keeps population density and built-up land (the case-control labels remove the "dense = dry" shortcut; leaving
+them out changes the scores by under 0.01), and adds elevation relative to the 300 m neighbourhood, log building
+count and mean building height (`buildings_grid.tif`). Spatial CV: mean ROC-AUC 0.676 (bathtub 0.538); each year
+left out: 0.713–0.741.
 
 ## 7. Validation (`src/validation.py`, `scripts/evaluate_current.py`)
 **Scores:**
@@ -120,6 +138,13 @@ Each method is scored on cells it has not seen:
 - 2011's August–November rain was 107% of normal.
 - But the Chao Phraya was at or above 130% of normal for 122 days, against 0–55 days in 2017–2025.
 - So 2011 was a river flood from upstream, not a local-rain flood.
+
+### Street flooding (`scripts/evaluate_street.py`)
+Every method is scored on the 2026 Traffy labels, which no model was trained on: the year as a whole, and each of
+its 25 storm days (that day's and the next day's reports against the year's dry cells; at least 20 cells of each
+class). Two areas: Bangkok's 50 districts, and the **dense city** (WorldCover built-up ≥ 90%), which radar can't
+test. Same 4 km block bootstrap. 2026, dense city: street model 0.792 (0.752–0.821), all-floods ML 0.669, bathtub
++ defences 0.562, risk index 0.576; the street model scores best on all 25 storm days there.
 
 ## 8. Uncertainty
 ### Elevation error (`scripts/dem_uncertainty.py`, `src/uncertainty.py`)
@@ -165,7 +190,8 @@ Each method is scored on cells it has not seen:
 - **Elevation:** the DEM is a surface model, ground subsidence is ignored, and the elevation-error size is assumed.
 - **Labels:** MODIS and radar both under-detect water between buildings, so the dense city looks drier than it was.
   Flooded fields and aquaculture can look like floods. The seasonal baseline hides land that floods every year, and
-  a wet year can hide floods in the year after.
+  a wet year can hide floods in the year after. The Traffy labels fill the dense-city gap but follow where
+  people live and use the app, and "flooded" means reported, not measured depth.
 - **ML model:** it learns *where* floods happen, not *when*. It knows nothing about short cloudbursts in the city,
   and it under-rates places that flood only in extreme years.
 - **Tests aren't independent:** passes a few days apart see the same flood, so a run of wins is a trend, not

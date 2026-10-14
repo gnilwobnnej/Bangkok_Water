@@ -29,6 +29,11 @@ ML_PROB_2011_FILE = PROCESSED_DIR / "ml_susceptibility_2011.tif"   # trained on 
 ML_REPORT_FILE = PROCESSED_DIR / "ml_report.json"
 ML_MODEL_FILE = MODELS_DIR / "flood_lgbm.txt"
 ML_DISAGREEMENT_FILE = PROCESSED_DIR / "ml_disagreement.tif"  # std of the CV fold models' probabilities
+# Street-flood model (train_model.py --kind street), from Traffy Fondue reports; Bangkok's 50 districts, NaN elsewhere
+ML_STREET_PROB_FILE = PROCESSED_DIR / "ml_street_susceptibility.tif"
+ML_STREET_DISAGREEMENT_FILE = PROCESSED_DIR / "ml_street_disagreement.tif"
+ML_STREET_REPORT_FILE = PROCESSED_DIR / "ml_street_report.json"
+ML_STREET_MODEL_FILE = MODELS_DIR / "flood_street_lgbm.txt"
 
 # Elevation uncertainty (scripts/dem_uncertainty.py)
 DEM_UNCERTAINTY_DIR = PROCESSED_DIR / "dem_uncertainty"
@@ -57,6 +62,20 @@ ALERT_RAIN_3DAY_MM = 100     # rain over the last 3 days >= this
 # Flood defences (scripts/prepare_defences.py): river walls and dikes as crest heights (m above mean sea level)
 DEFENCES_FILE = PROCESSED_DIR / "defences.tif"          # float32 crest height, NaN = no defence
 DEFENCE_LINES_FILE = PROCESSED_DIR / "defences.geojson"  # the lines, with name, crest_m, source and note
+
+# Street flooding from Traffy Fondue citizen reports (scripts/fetch_traffy.py, scripts/build_traffy_labels.py)
+TRAFFY_DIR = PROCESSED_DIR / "traffy"
+TRAFFY_FLOOD_FILE = TRAFFY_DIR / "flood_reports.parquet"  # every flood report: point, time, district, text
+TRAFFY_OTHER_FILE = TRAFFY_DIR / "other_counts.tif"       # reports of anything else per cell, one band per year
+TRAFFY_STORMS_FILE = TRAFFY_DIR / "summary.json"          # storm days and their rain, label counts per year
+TRAFFY_YEARS = range(2022, 2027)          # reports start in 2022; 2026 (TEST_YEARS_FROM) is a test year
+TRAFFY_STORM_MIN_REPORTS = 15   # a storm day has >= this many flood reports...
+TRAFFY_STORM_SPIKE = 3.0        # ...and >= this x the typical daily count for the time of year...
+TRAFFY_STORM_MIN_RAIN_MM = 10   # ...and >= this much rain (wettest point in the city) that day or the day before
+TRAFFY_MIN_STORM_REPORTS = 1    # label flooded: >= this many flood reports on storm days in the year
+TRAFFY_MIN_OTHER_REPORTS = 5    # label dry: no flood report, and >= this many reports of other problems
+TRAFFY_EVAL_FILE = TRAFFY_DIR / "evaluation.json"  # every method scored on the test years' reports
+DENSE_BUILT_UP_PCT = 90  # "dense city": cells at least this % built-up (ESA WorldCover), ~30% of Bangkok
 
 # Buildings (scripts/prepare_buildings.py)
 BUILDINGS_DIR = PROCESSED_DIR / "buildings"              # one GeoParquet per district

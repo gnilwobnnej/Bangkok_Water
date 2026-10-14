@@ -18,7 +18,7 @@ from shapely.ops import unary_union
 
 from src import config as C
 from src.data_loader import StudyArea
-from src.ml import ML_2011, ML_ALL
+from src.ml import ML_2011, ML_ALL, ML_STREET
 
 MAX_DEPTH_M = 3.0
 WATER_CMAP = LinearSegmentedColormap.from_list("water", ["#8fd3ff", "#2b7bd6", "#0a2f6b"])
@@ -27,6 +27,9 @@ RISK_CMAP = colormaps["YlOrRd"]
 ELEV_COLORS = ["#3b0f70", "#8c2981", "#de4968", "#fe9f6d", "#fcfdbf"]
 ELEV_CMAP = LinearSegmentedColormap.from_list("elevation", ELEV_COLORS)
 ML_CMAP = colormaps["RdPu"]
+STREET_CMAP = colormaps["YlGn"]  # street-flood model: green, so it can't be mistaken for the river-flood model
+REPORT_COLOR = "#00e5ff"         # residents' flood reports (Traffy Fondue)
+MAX_REPORT_MARKERS = 3000        # keep the page light: the most recent reports of the chosen period
 # Chance flooded (elevation uncertainty): pale yellow-green (rarely) to deep blue (almost always)
 CHANCE_COLORS = ["#edf8b1", "#7fcdbb", "#2c7fb8", "#253494"]
 CHANCE_CMAP = LinearSegmentedColormap.from_list("chance", CHANCE_COLORS)
@@ -74,9 +77,11 @@ def elevation_rgba(dem: np.ndarray, vmin: float, vmax: float, alpha: int = 225) 
     return rgba
 
 
-def probability_rgba(prob: np.ndarray, alpha: int = 170) -> np.ndarray:
-    rgba = (ML_CMAP(np.clip(prob, 0, 1)) * 255).astype("uint8")
-    rgba[..., 3] = alpha
+def probability_rgba(prob: np.ndarray, alpha: int = 170, cmap=ML_CMAP) -> np.ndarray:
+    """Probability 0-1 coloured by `cmap`; NaN (no prediction) transparent."""
+    ok = np.isfinite(prob)
+    rgba = (cmap(np.clip(np.nan_to_num(prob), 0, 1)) * 255).astype("uint8")
+    rgba[..., 3] = np.where(ok, alpha, 0)
     return rgba
 
 
@@ -149,6 +154,8 @@ def build_map(
     defences: "gpd.GeoDataFrame | None" = None, level: float | None = None,
     chance: np.ndarray | None = None, chance_label: str = "Chance flooded",
     disagreement: np.ndarray | None = None,
+    street_prob: np.ndarray | None = None,
+    reports: pd.DataFrame | None = None, reports_label: str = "Reported street flooding",
 ) -> folium.Map:
     m = folium.Map(
         location=CENTER, zoom_start=11, control_scale=True,
@@ -180,8 +187,13 @@ def build_map(
             to_data_url(probability_rgba(ml_prob)), bounds=BOUNDS,
             name="ML flood susceptibility", interactive=False, zindex=2,
         ).add_to(m)
+    if street_prob is not None:
+        folium.raster_layers.ImageOverlay(
+            to_data_url(probability_rgba(street_prob, cmap=STREET_CMAP)), bounds=BOUNDS,
+            name="ML street-flood susceptibility", interactive=False, zindex=2,
+        ).add_to(m)
     if disagreement is not None:
-        vmax = float(np.percentile(disagreement, 99))
+        vmax = float(np.nanpercentile(disagreement, 99))
         folium.raster_layers.ImageOverlay(
             to_data_url(disagreement_rgba(disagreement, vmax)), bounds=BOUNDS,
             name="ML model disagreement", interactive=False, zindex=2,
@@ -275,6 +287,21 @@ def build_map(
                                           aliases=["Defence", "Crest", "At this water level", "Source"],
                                           style="max-width:420px;white-space:normal"),
         ).add_to(m)
+    if reports is not None and not reports.empty:
+        r = reports.sort_values("time").tail(MAX_REPORT_MARKERS)
+        pts = gpd.GeoDataFrame({
+            "when": r["time"].dt.strftime("%d %b %Y %H:%M"),
+            "district": r["district"].fillna(""),
+            "text": r["description"].fillna("").str.slice(0, 160),
+        }, geometry=gpd.points_from_xy(r["lon"], r["lat"]), crs="EPSG:4326")
+        folium.GeoJson(
+            pts.to_json(), name=reports_label,
+            marker=folium.CircleMarker(radius=4, weight=1, color="#003b44", fill=True, fill_color=REPORT_COLOR,
+                                       fill_opacity=0.9),
+            tooltip=folium.GeoJsonTooltip(fields=["when", "district", "text"],
+                                          aliases=["Reported", "District", "Report"],
+                                          style="max-width:360px;white-space:normal"),
+        ).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
     return m
 
@@ -362,7 +389,7 @@ def elevation_histogram(dem: np.ndarray, cell_area_km2: np.ndarray, level: float
 
 def model_comparison_chart(cv: pd.DataFrame) -> go.Figure:
     """Spatial cross-validation scores of the ML model vs the existing methods."""
-    order = [ML_ALL, ML_2011, "Bathtub + defences", "Bathtub simulation", "Risk index (default weights)"]
+    order = [ML_STREET, ML_ALL, ML_2011, "Bathtub + defences", "Bathtub simulation", "Risk index (default weights)"]
     known = [m for m in order if m in set(cv["method"])]
     cv = cv.set_index("method").reindex(known + [m for m in cv["method"] if m not in known]).reset_index()
     fig = go.Figure()
@@ -448,7 +475,7 @@ def flood_timeline_chart(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.Dat
     return fig
 
 
-METHOD_COLORS = {ML_ALL: "#2b7bd6", ML_2011: "#9467bd", "Bathtub simulation": "#f28e2b",
+METHOD_COLORS = {ML_ALL: "#2b7bd6", ML_2011: "#9467bd", ML_STREET: "#17becf", "Bathtub simulation": "#f28e2b",
                  "Bathtub + defences": "#59a14f", "Risk index (default weights)": "#8a94a3"}
 
 

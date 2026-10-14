@@ -82,15 +82,18 @@ def conditions_alert(passes: pd.DataFrame, rain: pd.DataFrame, river: pd.DataFra
     return alerts
 
 
-def load_evaluation():
-    """Per-date scores of each method against the radar maps, or None."""
-    if not C.RADAR_EVAL_FILE.exists():
+def load_evaluation(path=None):
+    """Per-date scores of each method against the radar maps (or another evaluation file of the same layout,
+    such as the street-flood reports' C.TRAFFY_EVAL_FILE), or None."""
+    path = path or C.RADAR_EVAL_FILE
+    if not path.exists():
         return None
-    ev = json.loads(C.RADAR_EVAL_FILE.read_text())
+    ev = json.loads(path.read_text(encoding="utf-8"))
     rows = []
     for r in ev["results"]:
         for m, sc in r["methods"].items():
-            row = {"date": r["date"], "scope": r["scope"], "flooded_share": r["flooded_share"],
+            row = {"date": r["date"], "kind": r.get("kind", "pass"), "scope": r["scope"],
+                   "flooded_share": r["flooded_share"],
                    "n_cells": r["n_cells"], "method": m, "roc_auc": sc["roc_auc"], "pr_auc": sc["pr_auc"]}
             # 95% intervals (missing in files written before the bootstrap was added)
             for key in ("roc_auc", "pr_auc"):

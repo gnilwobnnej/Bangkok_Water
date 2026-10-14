@@ -194,6 +194,46 @@ together, aren't counted as independent evidence. Each method's difference from 
 resamples and gets its own interval. `train_model.py` does the same for the left-out floods and for spatial CV, where the five folds are pooled
 so every cell is scored once by the model that never saw its block (out-of-fold).
 
+## Street flooding from residents' reports (optional)
+Radar and MODIS can't see water between buildings, so neither the ML model above nor the Validation tab knows
+much about the streets of the dense city. **Traffy Fondue**, Bangkok's complaint app, fills the gap: residents
+have filed 44,000+ flood reports since 2022, each with a point, a time and almost always a photo. A second
+LightGBM model learns from them (`docs/URBAN_FLOOD_DATA.md` ranks this source against the alternatives).
+
+```bash
+python scripts/fetch_traffy.py --all        # flood reports + every report on every 3rd day (~1-2 h first time; cached)
+python scripts/build_traffy_labels.py       # storm days (with ERA5 rain) -> flood_labels/traffy_YYYY.tif
+python scripts/train_model.py --kind street # trains on 2022-2025
+python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
+```
+- **Storm days:** at least 15 flood reports, at least 3x the usual count for the time of year, and at least 10 mm
+  of rain that day or the day before. 164 storm days hold 62% of all flood reports; the rest are mostly
+  long-running drain complaints.
+- **Labels (case-control):** *flooded* = a flood report on a storm day; *dry* = no flood report all year but at
+  least 5 reports of other problems, so people there use the app; everything else unknown. Both classes come
+  from busy, built-up places, so population and built-up land can stay in this model.
+- **Extra factors:** small dips in the ground (300 m), building count and mean height per cell.
+
+**Results (ROC-AUC; PR-AUC in brackets):**
+
+| Test | ML street | ML, all floods | ML, 2011 only | Bathtub + defences | Risk index |
+|---|---|---|---|---|---|
+| 2022-2025, spatial CV (mean) | **0.676 (0.27)** | | | 0.538 (0.17) | 0.519 (0.16) |
+| Each year left out (range) | **0.713-0.741** | | | 0.522-0.561 | |
+| 2026, never trained on: Bangkok | **0.783 (0.65)** | 0.671 (0.49) | 0.667 (0.49) | 0.596 (0.43) | 0.591 (0.41) |
+| 2026, never trained on: dense city (>= 90% built-up) | **0.792 (0.63)** | 0.669 (0.45) | 0.667 (0.44) | 0.562 (0.36) | 0.576 (0.36) |
+
+In the dense city the street model's 95% interval (0.752-0.821) is clear of every other method's. It scores
+best on all 25 storm days of 2026 in the dense city (24 of 25 across Bangkok), and best of all in the 25-29
+September storm (0.81-0.82, against 0.54-0.61 for the bathtub). Adding population and built-up land changes
+its scores by under 0.01; its top factors are distance to the Chao Phraya, building count, ground elevation and
+local dips.
+
+The app gains "ML street-flood susceptibility" and "Reported street flooding" layers (by year or storm; hover a dot for its
+time, district and description), a section in the **ML model** tab, and dense-city scores in the **Validation**
+tab. **Caveats:** reports follow people and app use (little use before mid-2022); a flooded soi nobody reports
+counts as unknown, not dry; the scores measure *where* streets flood in a storm, not how deep or how long.
+
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
 the ML model or the 2011 flood, with hospitals, schools, police and fire stations highlighted.
@@ -222,6 +262,7 @@ buildings).
 | River flow | GloFAS via the Open-Meteo Flood API, Chao Phraya at Nonthaburi, daily; normal = 1996-2025 median |
 | Buildings | Google Open Buildings v3 footprints + 2.5D Temporal heights* |
 | Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
+| Street-flood reports | Traffy Fondue public API (BMA), 2022 on; rain from Open-Meteo archive (ERA5) |
 | Flood defences | Routes: Royal Development Projects Board, OpenStreetMap roads; crests: BMA, JICA, Airports of Thailand |
 
 ## Uncertainty
@@ -286,6 +327,9 @@ scripts/prepare_buildings.py    Building footprints, heights and facilities per 
 scripts/prepare_defences.py     River walls, King's Dike and airport dike -> crest-height grid
 scripts/dem_uncertainty.py      Elevation-error ensemble: flood ranges and chance-flooded maps
 scripts/event_context.py        Rainfall and river peaks for each training flood
+scripts/fetch_traffy.py         Traffy Fondue reports (floods, and all reports on every 3rd day)
+scripts/build_traffy_labels.py  Storm days + street-flood labels from the reports
+scripts/evaluate_street.py      Score every method against 2026 street-flood reports
 scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
 scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF
 src/config.py                   Study area, grid, file paths
@@ -297,6 +341,7 @@ src/features.py                 ML features
 src/ml.py                       Load the ML model outputs
 src/current_flood.py            Load radar passes, rainfall and river flow
 src/validation.py               Block-bootstrap intervals and the Validation tab's tables
+src/traffy.py                   Grid the reports, storm days, case-control labels
 src/uncertainty.py              Elevation-error model, load the uncertainty results
 src/buildings.py                Load buildings, flood impact per building
 src/viz.py                      Map layers, animation frames, charts
@@ -312,7 +357,7 @@ pytest                      # ~30 s
 Unit tests use a tiny synthetic 20×20 study area (`tests/conftest.py`): river, lowland, a ridge, a sealed
 pocket and high ground. They cover the flood simulation, risk index, radar labels, per-pass weather, the alert rules,
 the bootstrap scores (checked against scikit-learn), the wet-season labels, the multi-flood training sets, the
-elevation-error noise (spread and correlation distance), the uncertainty statistics and the event context.
+elevation-error noise (spread and correlation distance), the uncertainty statistics, the event context and the street-flood reports (gridding, storm days, labels).
 `tests/test_app_smoke.py` runs the whole app headlessly on the real data, and skips itself if
 `data/processed/` is missing. GitHub Actions (`.github/workflows/ci.yml`) runs everything on every push, on
 Python 3.9 (local development) and 3.14 (what Streamlit Community Cloud runs, with newer pandas and numpy).

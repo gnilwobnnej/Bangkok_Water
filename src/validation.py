@@ -18,6 +18,8 @@ REFERENCE = "Bathtub simulation"   # the physics baseline every other method is 
 TEST_CV = "Spatial CV (training flood, unseen blocks)"
 TEST_LOEO = "Left-out flood"
 TEST_RADAR = "Recent radar pass (never trained on)"
+TEST_STREET = "Residents' flood reports (never trained on)"
+STREET_SCOPE = "Bangkok (50 districts)"  # the street-flood model's training and CV labels are all in Bangkok
 
 
 def score_bins(s: np.ndarray) -> np.ndarray:
@@ -142,19 +144,33 @@ def _with_intervals(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop(columns=[c for c in df if c.endswith("_ci")])
 
 
-def validation_table(radar_eval: pd.DataFrame | None, report: dict | None) -> pd.DataFrame:
-    """Every method x every flood event: scores, 95% intervals, random-guess PR-AUC, cells, flooded share."""
+def validation_table(radar_eval: pd.DataFrame | None, report: dict | None, street_eval: pd.DataFrame | None = None,
+                     street_report: dict | None = None) -> pd.DataFrame:
+    """Every method x every flood event: scores, 95% intervals, random-guess PR-AUC, cells, flooded share.
+
+    street_report / street_eval: the street-flood model's report (its training years' CV and left-out years)
+    and the scores on the test years' residents' reports (scripts/evaluate_street.py)."""
     parts = []
-    if report is not None:
-        parts.append(cv_table(report).assign(test=TEST_CV))
-        loeo = loeo_table(report)
+    for rep, scope in ((report, None), (street_report, STREET_SCOPE)):
+        if rep is None:
+            continue
+        cv = cv_table(rep)
+        parts.append((cv.assign(scope=scope) if scope else cv).assign(test=TEST_CV))
+        loeo = loeo_table(rep)
         if not loeo.empty:
+            loeo = loeo.assign(scope=scope) if scope else loeo
             parts.append(loeo.assign(interval=f"{CI}% block bootstrap", test=TEST_LOEO))
     if radar_eval is not None and not radar_eval.empty:
         ev = radar_eval.copy()
         ev["event"] = "Radar " + ev["date"]
         ev["interval"] = np.where(ev["roc_auc_lo"].notna(), f"{CI}% block bootstrap", "")
         parts.append(ev.assign(test=TEST_RADAR))
+    if street_eval is not None and not street_eval.empty:
+        ev = street_eval.copy()
+        ev["event"] = np.where(ev["kind"] == "year", "Street flooding " + ev["date"] + " (every storm)",
+                               "Storm " + ev["date"])
+        ev["interval"] = f"{CI}% block bootstrap"
+        parts.append(ev.assign(test=TEST_STREET))
     if not parts:
         return pd.DataFrame()
     df = pd.concat(parts, ignore_index=True)

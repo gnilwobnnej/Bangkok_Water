@@ -20,11 +20,14 @@ from src.current_flood import (
     DRY_PCT, FLOODED_PCT, conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
 )
 from src.viz3d import city_deck, district_deck, district_view, footprint_coords
-from src.ml import ML_2011, ML_ALL, load_ml
+from src.ml import ML_2011, ML_ALL, ML_STREET, load_ml, load_street
 from src.risk import compute_factors, district_mean, district_risk, risk_index
 from src.simulate import level_curve, simulate
+from src.traffy import load_reports, load_summary as load_traffy_summary, reports_in
 from src.uncertainty import load_dem_uncertainty, load_flood_chance
-from src.validation import CI, REFERENCE, TEST_CV, TEST_RADAR, loeo_table, validation_table, wins
+from src.validation import (
+    CI, REFERENCE, TEST_CV, TEST_RADAR, TEST_STREET, cv_table, loeo_table, validation_table, wins,
+)
 from src.viz import (
     basemap_rgb, build_map, difference_chart, elevation_histogram, feature_importance_chart, flood_frame,
     flood_timeline_chart, fmt_people, level_curve_chart, model_comparison_chart, score_over_time_chart,
@@ -74,6 +77,23 @@ def file_version(*paths) -> tuple:
 @st.cache_resource(max_entries=1)
 def get_ml(version: tuple):
     return load_ml()
+
+
+@st.cache_resource(max_entries=1)
+def get_street(version: tuple):
+    return load_street()
+
+
+@st.cache_resource(max_entries=1)
+def get_traffy(version: tuple):
+    """(flood reports, storm-day summary), or None."""
+    reports, summary = load_reports(), load_traffy_summary()
+    return None if reports is None or summary is None else (reports, summary)
+
+
+@st.cache_resource(max_entries=1)
+def get_street_eval(version: tuple):
+    return load_evaluation(C.TRAFFY_EVAL_FILE)
 
 
 @st.cache_resource(max_entries=1)
@@ -130,6 +150,8 @@ def get_flood_chance(connected: bool, defences: bool, level: float, version: tup
 area = get_area()
 factors = get_factors()
 ml = get_ml(file_version(C.ML_PROB_FILE, C.ML_REPORT_FILE))
+street = get_street(file_version(C.ML_STREET_PROB_FILE, C.ML_STREET_REPORT_FILE))
+traffy = get_traffy(file_version(C.TRAFFY_FLOOD_FILE, C.TRAFFY_STORMS_FILE))
 radar_version = file_version(C.RADAR_SUMMARY_FILE)
 radar = get_radar(radar_version)
 unc_version = file_version(C.DEM_UNCERTAINTY_FILE)
@@ -190,6 +212,27 @@ with st.sidebar:
                      "the prediction depends on which places it learned from, so trust it less.")
         show_obs = st.checkbox("Observed flood (2011)", value=False,
                                help="Satellite-mapped flood extent, Aug 2011 – Jan 2012 (MODIS, 250 m).")
+    show_street = street is not None and st.checkbox(
+        "ML street-flood susceptibility", value=False,
+        help="Chance that a street floods in a downpour, learned from where Bangkok residents reported flooding "
+             "after storms (Traffy Fondue, 2022–2025). Satellites can't see this water between buildings. Bangkok's "
+             "50 districts only.")
+    show_reports, report_period = False, None
+    if traffy is not None:
+        show_reports = st.checkbox(
+            "Reported street flooding", value=False,
+            help="Flood reports from residents on Traffy Fondue, Bangkok's complaint app, on storm days: days "
+                 "with far more flood reports than usual, after rain. Hover a dot for the report.")
+        storm_dates = [s["date"] for s in traffy[1]["storms"]]
+        years = sorted({d[:4] for d in storm_dates}, reverse=True)
+        n_storm = {d: s["flood_reports"] for d, s in zip(storm_dates, traffy[1]["storms"])}
+        report_period = st.selectbox(
+            "Reports from", years + storm_dates[::-1],
+            format_func=lambda v: (f"{v}: every storm day" if len(v) == 4
+                                   else f"Storm {v} ({n_storm[v]:,} flood reports)"),
+            disabled=not show_reports,
+            help="A year shows the flood reports of all its storm days; a storm shows that day's and the next "
+                 "day's reports.")
     show_radar, radar_date = False, None
     if radar is not None:
         radar_passes = radar[0].set_index("date")
@@ -292,6 +335,10 @@ fmap = build_map(
     radar_label=f"Radar flood {radar_date}",
     defences=get_defence_lines() if show_defences else None, level=level,
     disagreement=ml.disagreement if show_disagree else None,
+    street_prob=street.prob if show_street else None,
+    reports=(reports_in(traffy[0], report_period, [s["date"] for s in traffy[1]["storms"]])
+             if show_reports else None),
+    reports_label=f"Reported street flooding {report_period}",
     chance=chance[0] if chance else None,
     chance_label=f"Chance flooded at {chance[1]:.1f} m" if chance else "",
 )
@@ -624,9 +671,54 @@ with tab_ml:
 - Tick **ML model disagreement** in the sidebar to see where the prediction is least stable: five versions of the
   model, each trained without a different fifth of the map, give different answers there.
 """)
+    if street is not None:
+        st.divider()
+        st.subheader("Street flooding: a second model, trained on residents' reports")
+        s_events = street.report["events"]
+        s_years = [e["year"] for e in s_events]
+        st.markdown(
+            "Satellites can't see water between buildings, so the model above knows little about the streets of "
+            "the dense city. This one learns from where Bangkok residents **reported flooding on Traffy Fondue**, "
+            "the city's complaint app, on **storm days** (days with far more flood reports than usual, after rain), "
+            f"in **{min(s_years)}–{max(s_years)}**. Its *dry* cells are places where people report other problems "
+            "all year but never a flood, so both classes come from busy, built-up places, and population and "
+            "built-up land can stay in as factors. It also uses small dips in the ground (300 m) and building "
+            "density and height. Bangkok's 50 districts only."
+        )
+        s_cv = cv_table(street.report)
+        sc1, sc2 = st.columns(2)
+        with sc1:
+            st.markdown("**Does it beat the existing methods?** (spatial CV, every training year)")
+            pooled = (s_cv.groupby("method", sort=False)[["roc_auc", "pr_auc"]].mean().reset_index())
+            st.plotly_chart(model_comparison_chart(pooled), use_container_width=True)
+            st.caption("Mean over the training years of the out-of-fold scores (4 km blocks held out). The "
+                       "**Validation** tab tests it on the reports of "
+                       f"{street.report['test_years_from']}, which it never saw, including the dense city alone.")
+        with sc2:
+            st.markdown("**What drives street flooding?**")
+            st.plotly_chart(feature_importance_chart(street.features), use_container_width=True)
+        with st.expander("The years it was trained on"):
+            st.dataframe(pd.DataFrame({
+                "Year": [e["name"] for e in s_events],
+                "Flooded": [e["flooded_share"] * 100 for e in s_events],
+                "Labelled cells": [e["n_cells"] for e in s_events],
+            }), hide_index=True, use_container_width=True,
+                column_config={"Flooded": st.column_config.NumberColumn("Flooded (% of labelled)", format="%.1f%%")})
+        st.markdown("""
+**Read with care**
+- Reports follow people: a flooded soi nobody reports looks unknown, not flooded, and the app was little used
+  before mid-2022. Choosing dry cells among places where people *do* report keeps this bias the same for both
+  classes, but doesn't remove it.
+- Some flood reports are about blocked drains or long-running problems rather than a flood that day; counting
+  only storm days removes most of them.
+- Rain comes from a weather-model archive (ERA5, ~25 km), which smooths out cloudbursts; it only rules out dry days.
+- It predicts where streets flood **in a storm**, not how deep or for how long, and not river flooding.
+""")
 with tab_valid:
     ev_all = get_radar_eval(file_version(C.RADAR_EVAL_FILE))
-    vt = validation_table(ev_all, ml.report if ml is not None else None)
+    ev_street = get_street_eval(file_version(C.TRAFFY_EVAL_FILE))
+    vt = validation_table(ev_all, ml.report if ml is not None else None, ev_street,
+                          street.report if street is not None else None)
     if vt.empty:
         st.info("Nothing to validate yet. Train the ML model (`python scripts/train_model.py`) and/or fetch and "
                 "score radar passes (`python scripts/fetch_current_flood.py`, then "
@@ -743,12 +835,41 @@ with tab_valid:
                        "other years: features describe the place, not the weather, so this measures how well "
                        "past floods predict the next one.")
 
+        if ev_street is not None and not ev_street.empty:
+            st.subheader("Street flooding in the dense city: residents' reports")
+            st.markdown(
+                "Radar can't test anything between buildings. Flood reports from residents (Traffy Fondue) can: "
+                "each method is scored on where streets were reported flooded after storms, in a year **no model "
+                "was trained on**, against places where people report other problems but never a flood. "
+                f"*Dense city* = cells at least {C.DENSE_BUILT_UP_PCT}% built-up."
+            )
+            s_scope = st.radio("Area", ["Dense city", "Bangkok (50 districts)"], horizontal=True,
+                               key="street_scope")
+            yr = ev_street[(ev_street["kind"] == "year") & (ev_street["scope"] == s_scope)]
+            if not yr.empty:
+                for y, g in yr.groupby("date"):
+                    g = g.set_index("method")
+                    cols = st.columns(min(len(g), 4))
+                    shown_methods = [m for m in [ML_STREET, ML_ALL, "Bathtub + defences", REFERENCE] if m in g.index]
+                    for col, m in zip(cols, shown_methods):
+                        col.metric(f"{y}: {m}", f"{g.loc[m, vmetric]:.3f}",
+                                   help=f"{metric_name} on every {y} storm, {s_scope.lower()}; {CI}% interval "
+                                        f"{g.loc[m, vmetric + '_lo']:.3f}–{g.loc[m, vmetric + '_hi']:.3f}. "
+                                        f"{int(g.loc[m, 'n_cells']):,} cells, {g.loc[m, 'flooded_share']:.1%} "
+                                        "flooded.")
+            storms_ev = ev_street[ev_street["kind"] == "storm"]
+            if storms_ev["date"].nunique() > 1:
+                st.plotly_chart(score_over_time_chart(storms_ev, s_scope, vmetric, intervals=True),
+                                use_container_width=True)
+                st.caption(f"One point per storm day (that day's and the next day's reports); shading = {CI}% "
+                           "interval. Storms with fewer than 20 flooded cells in the area aren't scored.")
+
         st.subheader("All results")
 
         def with_interval(v, lo, hi):
             return f"{v:.3f}" if pd.isna(lo) else f"{v:.3f} ({lo:.3f}–{hi:.3f})"
 
-        shown = vt[(vt["scope"] == vscope) | (vt["test"] != TEST_RADAR)]
+        shown = vt[(vt["scope"] == vscope) | ~vt["test"].isin([TEST_RADAR])]
         st.dataframe(
             pd.DataFrame({
                 "Test": shown["test"], "Flood event": shown["event"], "Area": shown["scope"], "Method": shown["method"],
@@ -793,8 +914,14 @@ from the bathtub uses the same resamples, so it has its own interval. The left-o
 same way. The spatial CV scores pool the five folds, so every cell is scored once by the model that never saw
 its block, and get their intervals from the same bootstrap.
 
+**Residents' reports.** A cell counts as *flooded* when someone reported a flood there (Traffy Fondue) on a storm
+day: a day with far more flood reports than usual for the time of year, after rain. It counts as *dry* when
+nobody reported a flood there all year, but people reported at least {C.TRAFFY_MIN_OTHER_REPORTS} other problems
+(estimated from every third day), so a flood would likely have been reported. Everything else is left out.
+
 **Known biases.**
 - Radar and MODIS both miss much of the water between buildings, so the dense city looks drier than it was.
+  The residents' reports fill this gap, with their own bias: they follow where people live and use the app.
 - Most detected flooding is in the eastern and western farmland, so the scores mostly reflect the rural fringe.
   The "Bangkok (50 districts)" area includes less of it.
 - Flooded rice fields can be normal farming rather than a flood. Comparing each pass with the same weeks last

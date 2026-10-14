@@ -2,6 +2,7 @@
 
     python scripts/train_model.py                       # 2011 + every radar season in data/processed/flood_labels
     python scripts/train_model.py --labels data/processed/flood_2011.tif   # one flood only
+    python scripts/train_model.py --kind street         # street-flood model from Traffy Fondue reports
 
 The floods are the 2011 MODIS map (scripts/prepare_ml_data.py) and one radar map per wet season 2017-2025
 (scripts/build_flood_archive.py). Floods from config.TEST_YEARS_FROM on (2026) are never trained on, so
@@ -19,6 +20,14 @@ Evaluation:
     intervals. How much the 5 fold models disagree on each cell is saved as a map.
     Leave-one-event-out: train on every flood but one, test on that one (all its cells), with 95% block
     bootstrap intervals. This asks "how well does it predict a flood year it has never seen?".
+
+Street-flood model (--kind street): a separate model trained on the Traffy Fondue labels
+(flood_labels/traffy_YYYY.tif, scripts/build_traffy_labels.py): where streets flooded in storms, from residents'
+reports, which satellites can't see between buildings. Same evaluation; it adds local dips and building density
+and height to the features, and keeps population and built-up land (its "dry" cells are busy, built-up places
+too, so "dense = dry" isn't a shortcut it can learn). Writes ml_street_susceptibility.tif (Bangkok's 50
+districts only, NaN elsewhere: the reports and building data cover Bangkok), ml_street_disagreement.tif,
+ml_street_report.json and models/flood_street_lgbm.txt.
 
 Outputs:
     data/processed/ml_susceptibility.tif        flood probability 0-1, all-floods model
@@ -45,7 +54,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import config as C  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
 from src.features import FEATURE_LABELS, build_features  # noqa: E402
-from src.ml import ML_2011, ML_ALL  # noqa: E402
+from src.ml import ML_2011, ML_ALL, ML_STREET  # noqa: E402
 from src.risk import cell_size_m, compute_factors, risk_index  # noqa: E402
 from src.simulate import flood_mask  # noqa: E402
 from src.validation import block_bootstrap  # noqa: E402
@@ -55,6 +64,14 @@ BLOCK_M = 4000
 # defences and MODIS missing water between buildings, not lower physical susceptibility. Dropping them
 # cost only ~0.03 ROC-AUC (0.893 -> 0.867). Pass `--exclude` with no names to use every feature.
 DEFAULT_EXCLUDE = ["log_pop_density", "built_up"]
+STREET_EXCLUDE = []  # the street model keeps them (see the docstring)
+# Output files per model kind
+OUTPUTS = {
+    "river": {"prob": C.ML_PROB_FILE, "disagreement": C.ML_DISAGREEMENT_FILE, "report": C.ML_REPORT_FILE,
+              "model": C.ML_MODEL_FILE, "name": ML_ALL},
+    "street": {"prob": C.ML_STREET_PROB_FILE, "disagreement": C.ML_STREET_DISAGREEMENT_FILE,
+               "report": C.ML_STREET_REPORT_FILE, "model": C.ML_STREET_MODEL_FILE, "name": ML_STREET},
+}
 N_FOLDS = 5
 CELLS_PER_EVENT = 200_000  # training cells sampled from each event, so every flood counts the same
 SHAP_SAMPLE = 20000
@@ -96,7 +113,14 @@ def scores(y, s) -> dict:
 
 
 def event_info(path: Path) -> dict:
-    """id, year, display name and source of a label file (flood_2011.tif or flood_labels/radar_YYYY.tif)."""
+    """id, year, display name and source of a label file (flood_2011.tif or flood_labels/radar_YYYY.tif
+    or traffy_YYYY.tif)."""
+    m = re.fullmatch(r"traffy_(\d{4})", path.stem)
+    if m:
+        year = int(m.group(1))
+        return {"id": f"traffy_{year}", "year": year, "name": f"{year} street flooding (reports)",
+                "source": "Traffy Fondue flood reports on storm days vs. other reports "
+                          "(scripts/build_traffy_labels.py)"}
     m = re.fullmatch(r"radar_(\d{4})", path.stem)
     if m:
         year = int(m.group(1))
@@ -111,6 +135,11 @@ def event_info(path: Path) -> dict:
 def default_label_files() -> list:
     radar = sorted(C.FLOOD_LABELS_DIR.glob("radar_*.tif"))
     return [C.FLOOD_2011_FILE] + [p for p in radar if event_info(p)["year"] < C.TEST_YEARS_FROM]
+
+
+def street_label_files() -> list:
+    traffy = sorted(C.FLOOD_LABELS_DIR.glob("traffy_*.tif"))
+    return [p for p in traffy if event_info(p)["year"] < C.TEST_YEARS_FROM]
 
 
 def load_events(paths) -> list:
@@ -218,9 +247,10 @@ def block_folds(blocks: np.ndarray) -> np.ndarray:
     return fold_of
 
 
-def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
+def main(label_paths, out_dir: Path, model_path: Path, exclude=(), kind: str = "river"):
     area = load_study_area()
-    X = build_features(area).drop(columns=list(exclude))
+    X = build_features(area, street=kind == "street").drop(columns=list(exclude))
+    ml_name = OUTPUTS[kind]["name"]
     events = load_events(label_paths)
     blocks = spatial_blocks()
     fold_of = block_folds(blocks)
@@ -243,13 +273,13 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     # ---- Spatial block CV: each fold's blocks are held out of every event ----
     rows = []
     fold_probs = []  # each fold model's prediction everywhere, for the disagreement map
-    oof = {m: np.zeros(len(blocks), dtype="float32") for m in ([ML_ALL, ML_2011] if compare_2011 else [ML_ALL])}
+    oof = {m: np.zeros(len(blocks), dtype="float32") for m in ([ml_name, ML_2011] if compare_2011 else [ml_name])}
     for fold in range(1, N_FOLDS + 1):
         train_ok, test_ok = fold_of != fold, fold_of == fold
-        preds = {ML_ALL: fit_predict(X, *training_set(events, train_ok))[1]}
+        preds = {ml_name: fit_predict(X, *training_set(events, train_ok))[1]}
         if compare_2011:
             preds[ML_2011] = fit_predict(X, *training_set(ev2011, train_ok, cap=10 ** 9))[1]
-        fold_probs.append(preds[ML_ALL])
+        fold_probs.append(preds[ml_name])
         for m in oof:
             oof[m][test_ok] = preds[m][test_ok]  # out-of-fold: each cell predicted by the model that never saw it
         preds.update(baselines)
@@ -285,7 +315,7 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
         everywhere = np.ones(len(blocks), dtype=bool)
         for ev in events:
             others = [e for e in events if e is not ev]
-            preds = {ML_ALL: fit_predict(X, *training_set(others))[1]}
+            preds = {ml_name: fit_predict(X, *training_set(others))[1]}
             if compare_2011 and ev["id"] != "2011":
                 preds[ML_2011] = prob_2011
             preds.update(baselines)
@@ -302,6 +332,10 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     # ---- Final models on all labelled cells, applied everywhere ----
     model, prob = fit_predict(X, *training_set(events))
     prob = prob.reshape(C.HEIGHT, C.WIDTH)
+    if kind == "street":  # reports and buildings cover Bangkok's 50 districts only
+        outside = area.district_ids == 0
+        prob[outside] = np.nan
+        disagreement[outside] = np.nan
 
     import shap
     rng = np.random.default_rng(SEED)
@@ -320,7 +354,7 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     ids = area.district_ids.ravel()
     n = int(ids.max()) + 1
     cnt = np.bincount(ids, minlength=n)
-    mean_prob = np.bincount(ids, weights=prob.ravel(), minlength=n) / np.maximum(cnt, 1)
+    mean_prob = np.bincount(ids, weights=np.nan_to_num(prob.ravel()), minlength=n) / np.maximum(cnt, 1)
     labels_2011 = ev2011[0]["labels"] if ev2011 else np.full(len(ids), C.LABEL_NODATA)
     known_all = labels_2011 != C.LABEL_NODATA
     obs_flooded = np.bincount(ids, weights=(labels_2011 == 1), minlength=n)
@@ -336,8 +370,9 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     context, context_meta = load_context()
     report = {
         # 2011 kept as "event" for the app's 2011 comparisons; every event is in "events"
+        "kind": kind,
         "event": {"id": "DFO_3850", "source": "Global Flood Database (MODIS, 250 m)",
-                  "began": "2011-08-05", "ended": "2012-01-09"},
+                  "began": "2011-08-05", "ended": "2012-01-09"} if ev2011 else None,
         "events": [{**{k: e[k] for k in ("id", "year", "name", "source", "n_cells", "flooded_share")},
                     **({"context": context[e["year"]]} if e["year"] in context else {})} for e in events],
         "event_context": context_meta,
@@ -366,21 +401,22 @@ def main(label_paths, out_dir: Path, model_path: Path, exclude=()):
     model_path.parent.mkdir(parents=True, exist_ok=True)
     profile = dict(driver="GTiff", height=C.HEIGHT, width=C.WIDTH, count=1, crs=C.CRS,
                    transform=area.transform, compress="deflate", dtype="float32")
-    with rasterio.open(out_dir / C.ML_PROB_FILE.name, "w", **profile) as dst:
+    files = OUTPUTS[kind]
+    with rasterio.open(out_dir / files["prob"].name, "w", **profile) as dst:
         dst.write(prob, 1)
-    with rasterio.open(out_dir / C.ML_DISAGREEMENT_FILE.name, "w", **profile) as dst:
+    with rasterio.open(out_dir / files["disagreement"].name, "w", **profile) as dst:
         dst.write(disagreement, 1)
     if compare_2011:
         with rasterio.open(out_dir / C.ML_PROB_2011_FILE.name, "w", **profile) as dst:
             dst.write(prob_2011.reshape(C.HEIGHT, C.WIDTH), 1)
         model_2011.booster_.save_model(str(model_path.with_name(model_path.stem + "_2011" + model_path.suffix)))
-    (out_dir / C.ML_REPORT_FILE.name).write_text(json.dumps(report, indent=2))
+    (out_dir / files["report"].name).write_text(json.dumps(report, indent=2))
     model.booster_.save_model(str(model_path))
 
     print("\nTop features (mean |SHAP|):")
     for f in sorted(report["features"], key=lambda f: -f["mean_abs_shap"])[:6]:
         print(f"  {f['label']:36s} {f['mean_abs_shap']:.3f}  ({'+' if f['direction'] > 0 else '-'} flood)")
-    print(f"\nWrote {out_dir / C.ML_PROB_FILE.name}, {out_dir / C.ML_REPORT_FILE.name}, {model_path}")
+    print(f"\nWrote {out_dir / files['prob'].name}, {out_dir / files['report'].name}, {model_path}")
 
 
 if __name__ == "__main__":
@@ -388,14 +424,22 @@ if __name__ == "__main__":
     ap.add_argument("--labels", type=Path, nargs="+", default=None,
                     help="label files (default: flood_2011.tif + flood_labels/radar_YYYY.tif before the test years)")
     ap.add_argument("--out-dir", type=Path, default=C.PROCESSED_DIR)
-    ap.add_argument("--model-path", type=Path, default=C.ML_MODEL_FILE)
-    ap.add_argument("--exclude", nargs="*", default=DEFAULT_EXCLUDE,
-                    help="feature names to leave out (default: %(default)s; give none to use all)")
+    ap.add_argument("--kind", choices=list(OUTPUTS), default="river",
+                    help="river: 2011 + radar floods (default); street: Traffy Fondue street-flood reports")
+    ap.add_argument("--model-path", type=Path, default=None, help="default: models/flood_lgbm.txt, or "
+                    "models/flood_street_lgbm.txt with --kind street")
+    ap.add_argument("--exclude", nargs="*", default=None,
+                    help=f"feature names to leave out (default: {DEFAULT_EXCLUDE}, or {STREET_EXCLUDE} with "
+                         f"--kind street; give none to use all)")
     ap.add_argument("--baselines-only", action="store_true",
                     help="re-score only the untrained methods (bathtub, risk index) on the 2011 folds of the "
                          "existing report, e.g. after preparing flood defences; the ML models are left as they are")
     args = ap.parse_args()
-    labels = args.labels or default_label_files()
+    street = args.kind == "street"
+    labels = args.labels or (street_label_files() if street else default_label_files())
+    if not labels:
+        raise SystemExit("No street-flood labels: run scripts/fetch_traffy.py --all and "
+                         "scripts/build_traffy_labels.py first.")
     missing = [p for p in labels if not Path(p).exists()]
     if missing:
         raise SystemExit(f"{missing} not found. Run scripts/prepare_ml_data.py (2011) and "
@@ -403,4 +447,5 @@ if __name__ == "__main__":
     if args.baselines_only:
         rescore_baselines(C.FLOOD_2011_FILE, args.out_dir / C.ML_REPORT_FILE.name)
     else:
-        main(labels, args.out_dir, args.model_path, args.exclude)
+        exclude = args.exclude if args.exclude is not None else (STREET_EXCLUDE if street else DEFAULT_EXCLUDE)
+        main(labels, args.out_dir, args.model_path or OUTPUTS[args.kind]["model"], exclude, args.kind)

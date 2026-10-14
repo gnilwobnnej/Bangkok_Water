@@ -1,0 +1,2444 @@
+{
+  "kind": "street",
+  "event": null,
+  "events": [
+    {
+      "id": "traffy_2022",
+      "year": 2022,
+      "name": "2022 street flooding (reports)",
+      "source": "Traffy Fondue flood reports on storm days vs. other reports (scripts/build_traffy_labels.py)",
+      "n_cells": 14651,
+      "flooded_share": 0.29649853252337727,
+      "context": {
+        "rain_total_mm": 1033.0,
+        "rain_pct_normal": 149.0,
+        "rain_max_3day_mm": 76.0,
+        "river_peak_m3s": 6137.0,
+        "river_peak_date": "2022-10-06",
+        "river_peak_pct_normal": 135.0,
+        "river_days_above_alert": 11
+      }
+    },
+    {
+      "id": "traffy_2023",
+      "year": 2023,
+      "name": "2023 street flooding (reports)",
+      "source": "Traffy Fondue flood reports on storm days vs. other reports (scripts/build_traffy_labels.py)",
+      "n_cells": 17632,
+      "flooded_share": 0.11257940108892922,
+      "context": {
+        "rain_total_mm": 1029.0,
+        "rain_pct_normal": 148.0,
+        "rain_max_3day_mm": 88.0,
+        "river_peak_m3s": 5635.0,
+        "river_peak_date": "2023-10-13",
+        "river_peak_pct_normal": 140.0,
+        "river_days_above_alert": 3
+      }
+    },
+    {
+      "id": "traffy_2024",
+      "year": 2024,
+      "name": "2024 street flooding (reports)",
+      "source": "Traffy Fondue flood reports on storm days vs. other reports (scripts/build_traffy_labels.py)",
+      "n_cells": 18749,
+      "flooded_share": 0.06283001760093872,
+      "context": {
+        "rain_total_mm": 870.0,
+        "rain_pct_normal": 125.0,
+        "rain_max_3day_mm": 69.0,
+        "river_peak_m3s": 5308.0,
+        "river_peak_date": "2024-10-07",
+        "river_peak_pct_normal": 118.0,
+        "river_days_above_alert": 0
+      }
+    },
+    {
+      "id": "traffy_2025",
+      "year": 2025,
+      "name": "2025 street flooding (reports)",
+      "source": "Traffy Fondue flood reports on storm days vs. other reports (scripts/build_traffy_labels.py)",
+      "n_cells": 24358,
+      "flooded_share": 0.12402496099843993,
+      "context": {
+        "rain_total_mm": 864.0,
+        "rain_pct_normal": 124.0,
+        "rain_max_3day_mm": 78.0,
+        "river_peak_m3s": 5057.0,
+        "river_peak_date": "2025-10-02",
+        "river_peak_pct_normal": 112.0,
+        "river_days_above_alert": 24
+      }
+    }
+  ],
+  "event_context": {
+    "season": "August-November",
+    "rain_source": "Open-Meteo historical weather archive (ERA5 reanalysis) at 13.8N 100.75E",
+    "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E)",
+    "normal_years": [
+      1996,
+      2025
+    ],
+    "rain_normal_mm": 694.0,
+    "alert_river_pct": 130
+  },
+  "test_years_from": 2026,
+  "cells_per_event": 200000,
+  "n_training_cells": 75390,
+  "flooded_share": 0.29649853252337727,
+  "excluded_features": [],
+  "cv": {
+    "block_m": 4000,
+    "folds": 5,
+    "summary": [
+      {
+        "method": "ML street flooding",
+        "roc_auc": 0.6755613748057059,
+        "roc_auc_std": 0.04416324532160008,
+        "pr_auc": 0.2681066298845913,
+        "pr_auc_std": 0.16059132034196016
+      },
+      {
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.518752627395717,
+        "roc_auc_std": 0.03770272107025902,
+        "pr_auc": 0.15800916581088503,
+        "pr_auc_std": 0.10755064674054764
+      },
+      {
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5395355634407053,
+        "roc_auc_std": 0.034555825384686274,
+        "pr_auc": 0.1667114536375522,
+        "pr_auc_std": 0.11165026358643139
+      },
+      {
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5382591764034407,
+        "roc_auc_std": 0.0291114082281805,
+        "pr_auc": 0.1670172194044995,
+        "pr_auc_std": 0.1079537566993521
+      }
+    ],
+    "folds_detail": [
+      {
+        "fold": 1,
+        "method": "ML street flooding",
+        "roc_auc": 0.6954838169791441,
+        "pr_auc": 0.49571098735397034
+      },
+      {
+        "fold": 1,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5452711877945522,
+        "pr_auc": 0.3417146038279044
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5698192081369652,
+        "pr_auc": 0.356912591394129
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5573545353919186,
+        "pr_auc": 0.33548013984457625
+      },
+      {
+        "fold": 1,
+        "method": "ML street flooding",
+        "roc_auc": 0.6131628446031957,
+        "pr_auc": 0.20088578076188524
+      },
+      {
+        "fold": 1,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5305381129709498,
+        "pr_auc": 0.14942720785364216
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5474949176372238,
+        "pr_auc": 0.1521200583698402
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.544855176410237,
+        "pr_auc": 0.1511773359903862
+      },
+      {
+        "fold": 1,
+        "method": "ML street flooding",
+        "roc_auc": 0.6387111336832008,
+        "pr_auc": 0.14284127308785485
+      },
+      {
+        "fold": 1,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5387421703064161,
+        "pr_auc": 0.08328281300093389
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5745455351600603,
+        "pr_auc": 0.0909528444322284
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5719187082315574,
+        "pr_auc": 0.09009711265771764
+      },
+      {
+        "fold": 1,
+        "method": "ML street flooding",
+        "roc_auc": 0.668909889283372,
+        "pr_auc": 0.2443409385757866
+      },
+      {
+        "fold": 1,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5487133803300627,
+        "pr_auc": 0.1515378068837307
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5729873917186498,
+        "pr_auc": 0.1650023574752127
+      },
+      {
+        "fold": 1,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5648653787960962,
+        "pr_auc": 0.15417191613639775
+      },
+      {
+        "fold": 2,
+        "method": "ML street flooding",
+        "roc_auc": 0.7787780718428423,
+        "pr_auc": 0.658308809523942
+      },
+      {
+        "fold": 2,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.6085034227282122,
+        "pr_auc": 0.42755522371250465
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6220643874147358,
+        "pr_auc": 0.4407751606092785
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.6020498372734899,
+        "pr_auc": 0.406796145546752
+      },
+      {
+        "fold": 2,
+        "method": "ML street flooding",
+        "roc_auc": 0.6426515207708582,
+        "pr_auc": 0.20331262205014777
+      },
+      {
+        "fold": 2,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5531369099970683,
+        "pr_auc": 0.1334911961017175
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5627766121654605,
+        "pr_auc": 0.13681669548272646
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5530207902851512,
+        "pr_auc": 0.12722123896894724
+      },
+      {
+        "fold": 2,
+        "method": "ML street flooding",
+        "roc_auc": 0.599813533281683,
+        "pr_auc": 0.09515330487946991
+      },
+      {
+        "fold": 2,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5096253594736911,
+        "pr_auc": 0.06416601991849835
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5215303402361037,
+        "pr_auc": 0.06819438665728798
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5258998332304703,
+        "pr_auc": 0.07044607201036288
+      },
+      {
+        "fold": 2,
+        "method": "ML street flooding",
+        "roc_auc": 0.710154146925081,
+        "pr_auc": 0.3302023342960998
+      },
+      {
+        "fold": 2,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5759978802630381,
+        "pr_auc": 0.18095604092707002
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5901003804544935,
+        "pr_auc": 0.1886036494501597
+      },
+      {
+        "fold": 2,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5781208683552315,
+        "pr_auc": 0.17793493599661997
+      },
+      {
+        "fold": 3,
+        "method": "ML street flooding",
+        "roc_auc": 0.7042888640879768,
+        "pr_auc": 0.4675151645873056
+      },
+      {
+        "fold": 3,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5271998257887144,
+        "pr_auc": 0.29996746490527
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5507409423741733,
+        "pr_auc": 0.315344883213302
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5520769251708088,
+        "pr_auc": 0.32712140906223486
+      },
+      {
+        "fold": 3,
+        "method": "ML street flooding",
+        "roc_auc": 0.6081239898026022,
+        "pr_auc": 0.14806822850354162
+      },
+      {
+        "fold": 3,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.483610180433625,
+        "pr_auc": 0.08803561234099784
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.49855002803813186,
+        "pr_auc": 0.08872512676447802
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.49756987149582255,
+        "pr_auc": 0.08959683389151701
+      },
+      {
+        "fold": 3,
+        "method": "ML street flooding",
+        "roc_auc": 0.6609980895038499,
+        "pr_auc": 0.09279424626872579
+      },
+      {
+        "fold": 3,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.48984600243154053,
+        "pr_auc": 0.05756244435206275
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5090569096277427,
+        "pr_auc": 0.05844701726740022
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5092265385283391,
+        "pr_auc": 0.05935010785824874
+      },
+      {
+        "fold": 3,
+        "method": "ML street flooding",
+        "roc_auc": 0.6795581327069876,
+        "pr_auc": 0.18429652171562683
+      },
+      {
+        "fold": 3,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5202318140996857,
+        "pr_auc": 0.10778376594054749
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5292027909225934,
+        "pr_auc": 0.10923029776766958
+      },
+      {
+        "fold": 3,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5313387275050948,
+        "pr_auc": 0.1131516596647785
+      },
+      {
+        "fold": 4,
+        "method": "ML street flooding",
+        "roc_auc": 0.7083828992212986,
+        "pr_auc": 0.4790560954017181
+      },
+      {
+        "fold": 4,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5066229757048086,
+        "pr_auc": 0.2713739943049671
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5406938981046977,
+        "pr_auc": 0.29857715153767717
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5442836239171526,
+        "pr_auc": 0.30921693883844553
+      },
+      {
+        "fold": 4,
+        "method": "ML street flooding",
+        "roc_auc": 0.6552139259423257,
+        "pr_auc": 0.19837005337873043
+      },
+      {
+        "fold": 4,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4765257444512094,
+        "pr_auc": 0.0922666539701143
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.49474092959539495,
+        "pr_auc": 0.10302526724264356
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.48775175388830466,
+        "pr_auc": 0.09864764884360645
+      },
+      {
+        "fold": 4,
+        "method": "ML street flooding",
+        "roc_auc": 0.672931746064666,
+        "pr_auc": 0.10967012899706421
+      },
+      {
+        "fold": 4,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4920930377252836,
+        "pr_auc": 0.052011349290372474
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5314703579650331,
+        "pr_auc": 0.060777263029009224
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5310127911317585,
+        "pr_auc": 0.061038433621883284
+      },
+      {
+        "fold": 4,
+        "method": "ML street flooding",
+        "roc_auc": 0.6980928418507202,
+        "pr_auc": 0.26369362178050415
+      },
+      {
+        "fold": 4,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5028054640091696,
+        "pr_auc": 0.12461043609697264
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5270063426639189,
+        "pr_auc": 0.13090313524822292
+      },
+      {
+        "fold": 4,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5319457386387998,
+        "pr_auc": 0.1393644849078499
+      },
+      {
+        "fold": 5,
+        "method": "ML street flooding",
+        "roc_auc": 0.7267950675347052,
+        "pr_auc": 0.46239091445224956
+      },
+      {
+        "fold": 5,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5219104649060297,
+        "pr_auc": 0.2771953615924068
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5191170256688928,
+        "pr_auc": 0.2871967256270803
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5271705235595513,
+        "pr_auc": 0.3164668666716485
+      },
+      {
+        "fold": 5,
+        "method": "ML street flooding",
+        "roc_auc": 0.7206497491046059,
+        "pr_auc": 0.2564914150152967
+      },
+      {
+        "fold": 5,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.45249698451375786,
+        "pr_auc": 0.10253297198503833
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.4984225797759462,
+        "pr_auc": 0.11511447969926793
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5071469625987188,
+        "pr_auc": 0.12636393900495096
+      },
+      {
+        "fold": 5,
+        "method": "ML street flooding",
+        "roc_auc": 0.6735784392887262,
+        "pr_auc": 0.1376934062228297
+      },
+      {
+        "fold": 5,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5252480666056594,
+        "pr_auc": 0.06593011118962291
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5347858462973928,
+        "pr_auc": 0.06895010067840554
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5449695860472626,
+        "pr_auc": 0.08036369212353134
+      },
+      {
+        "fold": 5,
+        "method": "ML street flooding",
+        "roc_auc": 0.6549487936362755,
+        "pr_auc": 0.19133675083907636
+      },
+      {
+        "fold": 5,
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4659335633808672,
+        "pr_auc": 0.08878223802332666
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub simulation",
+        "roc_auc": 0.4956048448564975,
+        "pr_auc": 0.09855988080502429
+      },
+      {
+        "fold": 5,
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5026053576130489,
+        "pr_auc": 0.10633747644953521
+      }
+    ],
+    "per_event": [
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7227457439331934,
+        "roc_auc_std": 0.033339837940858645,
+        "pr_auc": 0.5125963942638372,
+        "pr_auc_std": 0.08245466034049441
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5419015753844635,
+        "roc_auc_std": 0.0397099669229547,
+        "pr_auc": 0.32356132966861056,
+        "pr_auc_std": 0.06437053437634896
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.560487092339893,
+        "roc_auc_std": 0.038977852838290424,
+        "pr_auc": 0.33976130247629344,
+        "pr_auc_std": 0.06235642870617199
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5565870890625841,
+        "roc_auc_std": 0.0278590272966698,
+        "pr_auc": 0.3390162999927314,
+        "pr_auc_std": 0.03919368313412962
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6479604060447175,
+        "roc_auc_std": 0.04517285896842735,
+        "pr_auc": 0.20142561994192035,
+        "pr_auc_std": 0.03838112067960722
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4992615864733221,
+        "roc_auc_std": 0.04132065045003385,
+        "pr_auc": 0.11315072845030202,
+        "pr_auc_std": 0.026969278626859626
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5203970134424314,
+        "roc_auc_std": 0.03220530990481119,
+        "pr_auc": 0.11916032551179123,
+        "pr_auc_std": 0.025500498461306864
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5180689109356468,
+        "roc_auc_std": 0.02914518602188331,
+        "pr_auc": 0.11860139933988156,
+        "pr_auc_std": 0.024673707066715476
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6492065883644251,
+        "roc_auc_std": 0.03100700801379881,
+        "pr_auc": 0.11563047189118889,
+        "pr_auc_std": 0.023470907683812457
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5111109273085181,
+        "roc_auc_std": 0.021091635564431287,
+        "pr_auc": 0.06459054755029807,
+        "pr_auc_std": 0.011821652862000265
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5342777978572666,
+        "roc_auc_std": 0.02463849314762523,
+        "pr_auc": 0.06946432241286628,
+        "pr_auc_std": 0.012849900318670483
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5366054914338776,
+        "roc_auc_std": 0.02351849185079051,
+        "pr_auc": 0.07225908365434877,
+        "pr_auc_std": 0.013035639720017268
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6823327608804872,
+        "roc_auc_std": 0.022136866191245903,
+        "pr_auc": 0.24277403344141874,
+        "pr_auc_std": 0.059475216639931
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5227364204165647,
+        "roc_auc_std": 0.04225418971788159,
+        "pr_auc": 0.1307340575743295,
+        "pr_auc_std": 0.036329097796824146
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5429803501232306,
+        "roc_auc_std": 0.03811216457656205,
+        "pr_auc": 0.13845986414925784,
+        "pr_auc_std": 0.03782321882676971
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5417752141816543,
+        "roc_auc_std": 0.02997490111088767,
+        "pr_auc": 0.13819209463103627,
+        "pr_auc_std": 0.02948712734780608
+      }
+    ],
+    "mean_over_events": [
+      {
+        "method": "ML street flooding",
+        "roc_auc": 0.6755613748057058,
+        "pr_auc": 0.2681066298845913
+      },
+      {
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.518752627395717,
+        "pr_auc": 0.15800916581088503
+      },
+      {
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5395355634407054,
+        "pr_auc": 0.1667114536375522
+      },
+      {
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5382591764034407,
+        "pr_auc": 0.1670172194044995
+      }
+    ],
+    "per_event_folds": [
+      {
+        "fold": 1,
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6954838169791441,
+        "pr_auc": 0.49571098735397034
+      },
+      {
+        "fold": 1,
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5452711877945522,
+        "pr_auc": 0.3417146038279044
+      },
+      {
+        "fold": 1,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5698192081369652,
+        "pr_auc": 0.356912591394129
+      },
+      {
+        "fold": 1,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5573545353919186,
+        "pr_auc": 0.33548013984457625
+      },
+      {
+        "fold": 1,
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6131628446031957,
+        "pr_auc": 0.20088578076188524
+      },
+      {
+        "fold": 1,
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5305381129709498,
+        "pr_auc": 0.14942720785364216
+      },
+      {
+        "fold": 1,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5474949176372238,
+        "pr_auc": 0.1521200583698402
+      },
+      {
+        "fold": 1,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.544855176410237,
+        "pr_auc": 0.1511773359903862
+      },
+      {
+        "fold": 1,
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6387111336832008,
+        "pr_auc": 0.14284127308785485
+      },
+      {
+        "fold": 1,
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5387421703064161,
+        "pr_auc": 0.08328281300093389
+      },
+      {
+        "fold": 1,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5745455351600603,
+        "pr_auc": 0.0909528444322284
+      },
+      {
+        "fold": 1,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5719187082315574,
+        "pr_auc": 0.09009711265771764
+      },
+      {
+        "fold": 1,
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.668909889283372,
+        "pr_auc": 0.2443409385757866
+      },
+      {
+        "fold": 1,
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5487133803300627,
+        "pr_auc": 0.1515378068837307
+      },
+      {
+        "fold": 1,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5729873917186498,
+        "pr_auc": 0.1650023574752127
+      },
+      {
+        "fold": 1,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5648653787960962,
+        "pr_auc": 0.15417191613639775
+      },
+      {
+        "fold": 2,
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7787780718428423,
+        "pr_auc": 0.658308809523942
+      },
+      {
+        "fold": 2,
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.6085034227282122,
+        "pr_auc": 0.42755522371250465
+      },
+      {
+        "fold": 2,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.6220643874147358,
+        "pr_auc": 0.4407751606092785
+      },
+      {
+        "fold": 2,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.6020498372734899,
+        "pr_auc": 0.406796145546752
+      },
+      {
+        "fold": 2,
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6426515207708582,
+        "pr_auc": 0.20331262205014777
+      },
+      {
+        "fold": 2,
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5531369099970683,
+        "pr_auc": 0.1334911961017175
+      },
+      {
+        "fold": 2,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5627766121654605,
+        "pr_auc": 0.13681669548272646
+      },
+      {
+        "fold": 2,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5530207902851512,
+        "pr_auc": 0.12722123896894724
+      },
+      {
+        "fold": 2,
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.599813533281683,
+        "pr_auc": 0.09515330487946991
+      },
+      {
+        "fold": 2,
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5096253594736911,
+        "pr_auc": 0.06416601991849835
+      },
+      {
+        "fold": 2,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5215303402361037,
+        "pr_auc": 0.06819438665728798
+      },
+      {
+        "fold": 2,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5258998332304703,
+        "pr_auc": 0.07044607201036288
+      },
+      {
+        "fold": 2,
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.710154146925081,
+        "pr_auc": 0.3302023342960998
+      },
+      {
+        "fold": 2,
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5759978802630381,
+        "pr_auc": 0.18095604092707002
+      },
+      {
+        "fold": 2,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5901003804544935,
+        "pr_auc": 0.1886036494501597
+      },
+      {
+        "fold": 2,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5781208683552315,
+        "pr_auc": 0.17793493599661997
+      },
+      {
+        "fold": 3,
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7042888640879768,
+        "pr_auc": 0.4675151645873056
+      },
+      {
+        "fold": 3,
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5271998257887144,
+        "pr_auc": 0.29996746490527
+      },
+      {
+        "fold": 3,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5507409423741733,
+        "pr_auc": 0.315344883213302
+      },
+      {
+        "fold": 3,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5520769251708088,
+        "pr_auc": 0.32712140906223486
+      },
+      {
+        "fold": 3,
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6081239898026022,
+        "pr_auc": 0.14806822850354162
+      },
+      {
+        "fold": 3,
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.483610180433625,
+        "pr_auc": 0.08803561234099784
+      },
+      {
+        "fold": 3,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.49855002803813186,
+        "pr_auc": 0.08872512676447802
+      },
+      {
+        "fold": 3,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.49756987149582255,
+        "pr_auc": 0.08959683389151701
+      },
+      {
+        "fold": 3,
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6609980895038499,
+        "pr_auc": 0.09279424626872579
+      },
+      {
+        "fold": 3,
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.48984600243154053,
+        "pr_auc": 0.05756244435206275
+      },
+      {
+        "fold": 3,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5090569096277427,
+        "pr_auc": 0.05844701726740022
+      },
+      {
+        "fold": 3,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5092265385283391,
+        "pr_auc": 0.05935010785824874
+      },
+      {
+        "fold": 3,
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6795581327069876,
+        "pr_auc": 0.18429652171562683
+      },
+      {
+        "fold": 3,
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5202318140996857,
+        "pr_auc": 0.10778376594054749
+      },
+      {
+        "fold": 3,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5292027909225934,
+        "pr_auc": 0.10923029776766958
+      },
+      {
+        "fold": 3,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5313387275050948,
+        "pr_auc": 0.1131516596647785
+      },
+      {
+        "fold": 4,
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7083828992212986,
+        "pr_auc": 0.4790560954017181
+      },
+      {
+        "fold": 4,
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5066229757048086,
+        "pr_auc": 0.2713739943049671
+      },
+      {
+        "fold": 4,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5406938981046977,
+        "pr_auc": 0.29857715153767717
+      },
+      {
+        "fold": 4,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5442836239171526,
+        "pr_auc": 0.30921693883844553
+      },
+      {
+        "fold": 4,
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6552139259423257,
+        "pr_auc": 0.19837005337873043
+      },
+      {
+        "fold": 4,
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4765257444512094,
+        "pr_auc": 0.0922666539701143
+      },
+      {
+        "fold": 4,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.49474092959539495,
+        "pr_auc": 0.10302526724264356
+      },
+      {
+        "fold": 4,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.48775175388830466,
+        "pr_auc": 0.09864764884360645
+      },
+      {
+        "fold": 4,
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.672931746064666,
+        "pr_auc": 0.10967012899706421
+      },
+      {
+        "fold": 4,
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4920930377252836,
+        "pr_auc": 0.052011349290372474
+      },
+      {
+        "fold": 4,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5314703579650331,
+        "pr_auc": 0.060777263029009224
+      },
+      {
+        "fold": 4,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5310127911317585,
+        "pr_auc": 0.061038433621883284
+      },
+      {
+        "fold": 4,
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6980928418507202,
+        "pr_auc": 0.26369362178050415
+      },
+      {
+        "fold": 4,
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5028054640091696,
+        "pr_auc": 0.12461043609697264
+      },
+      {
+        "fold": 4,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5270063426639189,
+        "pr_auc": 0.13090313524822292
+      },
+      {
+        "fold": 4,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5319457386387998,
+        "pr_auc": 0.1393644849078499
+      },
+      {
+        "fold": 5,
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7267950675347052,
+        "pr_auc": 0.46239091445224956
+      },
+      {
+        "fold": 5,
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5219104649060297,
+        "pr_auc": 0.2771953615924068
+      },
+      {
+        "fold": 5,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5191170256688928,
+        "pr_auc": 0.2871967256270803
+      },
+      {
+        "fold": 5,
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5271705235595513,
+        "pr_auc": 0.3164668666716485
+      },
+      {
+        "fold": 5,
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7206497491046059,
+        "pr_auc": 0.2564914150152967
+      },
+      {
+        "fold": 5,
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.45249698451375786,
+        "pr_auc": 0.10253297198503833
+      },
+      {
+        "fold": 5,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.4984225797759462,
+        "pr_auc": 0.11511447969926793
+      },
+      {
+        "fold": 5,
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5071469625987188,
+        "pr_auc": 0.12636393900495096
+      },
+      {
+        "fold": 5,
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6735784392887262,
+        "pr_auc": 0.1376934062228297
+      },
+      {
+        "fold": 5,
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5252480666056594,
+        "pr_auc": 0.06593011118962291
+      },
+      {
+        "fold": 5,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5347858462973928,
+        "pr_auc": 0.06895010067840554
+      },
+      {
+        "fold": 5,
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5449695860472626,
+        "pr_auc": 0.08036369212353134
+      },
+      {
+        "fold": 5,
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6549487936362755,
+        "pr_auc": 0.19133675083907636
+      },
+      {
+        "fold": 5,
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.4659335633808672,
+        "pr_auc": 0.08878223802332666
+      },
+      {
+        "fold": 5,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.4956048448564975,
+        "pr_auc": 0.09855988080502429
+      },
+      {
+        "fold": 5,
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5026053576130489,
+        "pr_auc": 0.10633747644953521
+      }
+    ],
+    "pooled": [
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.7235846617498416,
+        "pr_auc": 0.5226627310416727,
+        "roc_auc_ci": [
+          0.6907207407730208,
+          0.7558755314001095
+        ],
+        "pr_auc_ci": [
+          0.45387886785933407,
+          0.5888847155958739
+        ],
+        "roc_auc_diff_ci": [
+          0.13051834985953056,
+          0.1869505142270673
+        ],
+        "pr_auc_diff_ci": [
+          0.14328796750914052,
+          0.20883248783359054
+        ],
+        "flooded_share": 0.29649853252337727,
+        "n_cells": 14651
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5450640810541783,
+        "pr_auc": 0.3240448117780518,
+        "roc_auc_ci": [
+          0.5097336392792157,
+          0.5845971982684282
+        ],
+        "pr_auc_ci": [
+          0.2629661742320496,
+          0.39671014773625285
+        ],
+        "roc_auc_diff_ci": [
+          -0.040178760418334375,
+          -0.00897790101303314
+        ],
+        "pr_auc_diff_ci": [
+          -0.03441535811343129,
+          -0.008438957637842227
+        ],
+        "flooded_share": 0.29649853252337727,
+        "n_cells": 14651
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5661011058121561,
+        "pr_auc": 0.3437551119361295,
+        "roc_auc_ci": [
+          0.5256606923015185,
+          0.6052475536449398
+        ],
+        "pr_auc_ci": [
+          0.2829727766663312,
+          0.4110835217095945
+        ],
+        "flooded_share": 0.29649853252337727,
+        "n_cells": 14651
+      },
+      {
+        "event": "2022 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5613241733835701,
+        "pr_auc": 0.3364443095276027,
+        "roc_auc_ci": [
+          0.5237341001072217,
+          0.5964932138402571
+        ],
+        "pr_auc_ci": [
+          0.2845607600607577,
+          0.39557578658804227
+        ],
+        "roc_auc_diff_ci": [
+          -0.01109075783209854,
+          0.0010126407147443902
+        ],
+        "pr_auc_diff_ci": [
+          -0.021750054401802086,
+          0.008921509071140546
+        ],
+        "flooded_share": 0.29649853252337727,
+        "n_cells": 14651
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.648924001655543,
+        "pr_auc": 0.1965865869581743,
+        "roc_auc_ci": [
+          0.6187147012199106,
+          0.6761285919646745
+        ],
+        "pr_auc_ci": [
+          0.1569108565430548,
+          0.22975647716521064
+        ],
+        "roc_auc_diff_ci": [
+          0.09221410091809136,
+          0.15711782038734348
+        ],
+        "pr_auc_diff_ci": [
+          0.05172192149799365,
+          0.10619066888730476
+        ],
+        "flooded_share": 0.11257940108892922,
+        "n_cells": 17632
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5036048950885716,
+        "pr_auc": 0.11184205813106039,
+        "roc_auc_ci": [
+          0.46930689944501974,
+          0.5351010002119062
+        ],
+        "pr_auc_ci": [
+          0.09179740284144167,
+          0.13543648099527267
+        ],
+        "roc_auc_diff_ci": [
+          -0.0364138025573786,
+          -0.0018980676753935692
+        ],
+        "pr_auc_diff_ci": [
+          -0.010926590131942027,
+          0.0002623328283907049
+        ],
+        "flooded_share": 0.11257940108892922,
+        "n_cells": 17632
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5238510886998562,
+        "pr_auc": 0.11797802272297424,
+        "roc_auc_ci": [
+          0.49477569851318715,
+          0.5522106108036035
+        ],
+        "pr_auc_ci": [
+          0.09792102454962014,
+          0.13929173365036698
+        ],
+        "flooded_share": 0.11257940108892922,
+        "n_cells": 17632
+      },
+      {
+        "event": "2023 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5215556244917987,
+        "pr_auc": 0.11751370343437531,
+        "roc_auc_ci": [
+          0.4907630513287361,
+          0.5501592531077328
+        ],
+        "pr_auc_ci": [
+          0.097953984832785,
+          0.13955807763418918
+        ],
+        "roc_auc_diff_ci": [
+          -0.006943933137517122,
+          0.0016284298560961595
+        ],
+        "pr_auc_diff_ci": [
+          -0.004711263614140741,
+          0.0034531088235761637
+        ],
+        "flooded_share": 0.11257940108892922,
+        "n_cells": 17632
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6482526048332262,
+        "pr_auc": 0.11061244477518001,
+        "roc_auc_ci": [
+          0.617249471719111,
+          0.6720575395273389
+        ],
+        "pr_auc_ci": [
+          0.09022379021726182,
+          0.12674250473457496
+        ],
+        "roc_auc_diff_ci": [
+          0.07926311674800399,
+          0.14424673087134782
+        ],
+        "pr_auc_diff_ci": [
+          0.029282356251209344,
+          0.05541531027746744
+        ],
+        "flooded_share": 0.06283001760093872,
+        "n_cells": 18749
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5119571394021192,
+        "pr_auc": 0.06354703795941605,
+        "roc_auc_ci": [
+          0.4795435193149096,
+          0.5387881626233987
+        ],
+        "pr_auc_ci": [
+          0.05038396746301893,
+          0.07532830155831317
+        ],
+        "roc_auc_diff_ci": [
+          -0.04215381326450354,
+          -0.009326124473903479
+        ],
+        "pr_auc_diff_ci": [
+          -0.008969714160161636,
+          -0.0016302501987473367
+        ],
+        "flooded_share": 0.06283001760093872,
+        "n_cells": 18749
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5361801100149681,
+        "pr_auc": 0.06852414828395834,
+        "roc_auc_ci": [
+          0.5077468516940947,
+          0.5616502955437163
+        ],
+        "pr_auc_ci": [
+          0.05375029361073719,
+          0.08136308911156909
+        ],
+        "flooded_share": 0.06283001760093872,
+        "n_cells": 18749
+      },
+      {
+        "event": "2024 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5381103094802663,
+        "pr_auc": 0.0703469355556608,
+        "roc_auc_ci": [
+          0.5094045216715563,
+          0.5638964816986257
+        ],
+        "pr_auc_ci": [
+          0.056172386694962745,
+          0.08432082679729634
+        ],
+        "roc_auc_diff_ci": [
+          -0.003123710733807178,
+          0.004963255539414614
+        ],
+        "pr_auc_diff_ci": [
+          -0.0017411750712456628,
+          0.004888343804514577
+        ],
+        "flooded_share": 0.06283001760093872,
+        "n_cells": 18749
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "ML street flooding",
+        "roc_auc": 0.6878994947445494,
+        "pr_auc": 0.2483259142889973,
+        "roc_auc_ci": [
+          0.6573480664084035,
+          0.7165844918217122
+        ],
+        "pr_auc_ci": [
+          0.1972799661635749,
+          0.29664867909471687
+        ],
+        "roc_auc_diff_ci": [
+          0.10901051119929775,
+          0.16265204250495832
+        ],
+        "pr_auc_diff_ci": [
+          0.0817181051760242,
+          0.13591348555642968
+        ],
+        "flooded_share": 0.12402496099843993,
+        "n_cells": 24358
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Risk index (default weights)",
+        "roc_auc": 0.5329672654170956,
+        "pr_auc": 0.1320719908461759,
+        "roc_auc_ci": [
+          0.5022564231804273,
+          0.5642932854476004
+        ],
+        "pr_auc_ci": [
+          0.10783555164380892,
+          0.16536195503032977
+        ],
+        "roc_auc_diff_ci": [
+          -0.03557946838918741,
+          -0.008308008324602578
+        ],
+        "pr_auc_diff_ci": [
+          -0.014194872332885028,
+          -0.0033974212245617887
+        ],
+        "flooded_share": 0.12402496099843993,
+        "n_cells": 24358
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub simulation",
+        "roc_auc": 0.5527727848166364,
+        "pr_auc": 0.14040328648341543,
+        "roc_auc_ci": [
+          0.5216650040866129,
+          0.5822219443441344
+        ],
+        "pr_auc_ci": [
+          0.11422869767512234,
+          0.17276350249200814
+        ],
+        "flooded_share": 0.12402496099843993,
+        "n_cells": 24358
+      },
+      {
+        "event": "2025 street flooding (reports)",
+        "method": "Bathtub + defences",
+        "roc_auc": 0.5503921115718117,
+        "pr_auc": 0.13923389769108965,
+        "roc_auc_ci": [
+          0.5208563268988202,
+          0.5795352503041198
+        ],
+        "pr_auc_ci": [
+          0.1166134324254695,
+          0.16591429183852846
+        ],
+        "roc_auc_diff_ci": [
+          -0.008862969339050017,
+          0.0030908046903843044
+        ],
+        "pr_auc_diff_ci": [
+          -0.008891764581377925,
+          0.004359005233499253
+        ],
+        "flooded_share": 0.12402496099843993,
+        "n_cells": 24358
+      }
+    ]
+  },
+  "leave_one_event_out": [
+    {
+      "event": "2022 street flooding (reports)",
+      "method": "ML street flooding",
+      "roc_auc": 0.7412133170058577,
+      "pr_auc": 0.5584225466450738,
+      "roc_auc_ci": [
+        0.7143799883810026,
+        0.7670851014270952
+      ],
+      "pr_auc_ci": [
+        0.49896973960187135,
+        0.6257422368822548
+      ],
+      "roc_auc_diff_ci": [
+        0.1431097188729836,
+        0.2098546939618953
+      ],
+      "pr_auc_diff_ci": [
+        0.17625477208651652,
+        0.24620153256260444
+      ],
+      "flooded_share": 0.29649853252337727,
+      "n_cells": 14651
+    },
+    {
+      "event": "2022 street flooding (reports)",
+      "method": "Risk index (default weights)",
+      "roc_auc": 0.5450640810541783,
+      "pr_auc": 0.3240448117780518,
+      "roc_auc_ci": [
+        0.5097336392792157,
+        0.5845971982684282
+      ],
+      "pr_auc_ci": [
+        0.2629661742320496,
+        0.39671014773625285
+      ],
+      "roc_auc_diff_ci": [
+        -0.040178760418334375,
+        -0.00897790101303314
+      ],
+      "pr_auc_diff_ci": [
+        -0.03441535811343129,
+        -0.008438957637842227
+      ],
+      "flooded_share": 0.29649853252337727,
+      "n_cells": 14651
+    },
+    {
+      "event": "2022 street flooding (reports)",
+      "method": "Bathtub simulation",
+      "roc_auc": 0.5661011058121561,
+      "pr_auc": 0.3437551119361295,
+      "roc_auc_ci": [
+        0.5256606923015185,
+        0.6052475536449398
+      ],
+      "pr_auc_ci": [
+        0.2829727766663312,
+        0.4110835217095945
+      ],
+      "flooded_share": 0.29649853252337727,
+      "n_cells": 14651
+    },
+    {
+      "event": "2022 street flooding (reports)",
+      "method": "Bathtub + defences",
+      "roc_auc": 0.5613241733835701,
+      "pr_auc": 0.3364443095276027,
+      "roc_auc_ci": [
+        0.5237341001072217,
+        0.5964932138402571
+      ],
+      "pr_auc_ci": [
+        0.2845607600607577,
+        0.39557578658804227
+      ],
+      "roc_auc_diff_ci": [
+        -0.01109075783209854,
+        0.0010126407147443902
+      ],
+      "pr_auc_diff_ci": [
+        -0.021750054401802086,
+        0.008921509071140546
+      ],
+      "flooded_share": 0.29649853252337727,
+      "n_cells": 14651
+    },
+    {
+      "event": "2023 street flooding (reports)",
+      "method": "ML street flooding",
+      "roc_auc": 0.7125171707857504,
+      "pr_auc": 0.2615911417989101,
+      "roc_auc_ci": [
+        0.6860292690682865,
+        0.7342274904255793
+      ],
+      "pr_auc_ci": [
+        0.20867922109755138,
+        0.3030723225113216
+      ],
+      "roc_auc_diff_ci": [
+        0.1583231070191897,
+        0.22085139169807744
+      ],
+      "pr_auc_diff_ci": [
+        0.10896779268597236,
+        0.17096884564946158
+      ],
+      "flooded_share": 0.11257940108892922,
+      "n_cells": 17632
+    },
+    {
+      "event": "2023 street flooding (reports)",
+      "method": "Risk index (default weights)",
+      "roc_auc": 0.5036048950885716,
+      "pr_auc": 0.11184205813106039,
+      "roc_auc_ci": [
+        0.46930689944501974,
+        0.5351010002119062
+      ],
+      "pr_auc_ci": [
+        0.09179740284144167,
+        0.13543648099527267
+      ],
+      "roc_auc_diff_ci": [
+        -0.0364138025573786,
+        -0.0018980676753935692
+      ],
+      "pr_auc_diff_ci": [
+        -0.010926590131942027,
+        0.0002623328283907049
+      ],
+      "flooded_share": 0.11257940108892922,
+      "n_cells": 17632
+    },
+    {
+      "event": "2023 street flooding (reports)",
+      "method": "Bathtub simulation",
+      "roc_auc": 0.5238510886998562,
+      "pr_auc": 0.11797802272297424,
+      "roc_auc_ci": [
+        0.49477569851318715,
+        0.5522106108036035
+      ],
+      "pr_auc_ci": [
+        0.09792102454962014,
+        0.13929173365036698
+      ],
+      "flooded_share": 0.11257940108892922,
+      "n_cells": 17632
+    },
+    {
+      "event": "2023 street flooding (reports)",
+      "method": "Bathtub + defences",
+      "roc_auc": 0.5215556244917987,
+      "pr_auc": 0.11751370343437531,
+      "roc_auc_ci": [
+        0.4907630513287361,
+        0.5501592531077328
+      ],
+      "pr_auc_ci": [
+        0.097953984832785,
+        0.13955807763418918
+      ],
+      "roc_auc_diff_ci": [
+        -0.006943933137517122,
+        0.0016284298560961595
+      ],
+      "pr_auc_diff_ci": [
+        -0.004711263614140741,
+        0.0034531088235761637
+      ],
+      "flooded_share": 0.11257940108892922,
+      "n_cells": 17632
+    },
+    {
+      "event": "2024 street flooding (reports)",
+      "method": "ML street flooding",
+      "roc_auc": 0.7156729104591326,
+      "pr_auc": 0.1690163671260744,
+      "roc_auc_ci": [
+        0.6881884793486742,
+        0.7366172461308526
+      ],
+      "pr_auc_ci": [
+        0.13766907837107106,
+        0.19928757264848782
+      ],
+      "roc_auc_diff_ci": [
+        0.14184599520246982,
+        0.21721213201921305
+      ],
+      "pr_auc_diff_ci": [
+        0.0751702108726359,
+        0.1280481837317135
+      ],
+      "flooded_share": 0.06283001760093872,
+      "n_cells": 18749
+    },
+    {
+      "event": "2024 street flooding (reports)",
+      "method": "Risk index (default weights)",
+      "roc_auc": 0.5119571394021192,
+      "pr_auc": 0.06354703795941605,
+      "roc_auc_ci": [
+        0.4795435193149096,
+        0.5387881626233987
+      ],
+      "pr_auc_ci": [
+        0.05038396746301893,
+        0.07532830155831317
+      ],
+      "roc_auc_diff_ci": [
+        -0.04215381326450354,
+        -0.009326124473903479
+      ],
+      "pr_auc_diff_ci": [
+        -0.008969714160161636,
+        -0.0016302501987473367
+      ],
+      "flooded_share": 0.06283001760093872,
+      "n_cells": 18749
+    },
+    {
+      "event": "2024 street flooding (reports)",
+      "method": "Bathtub simulation",
+      "roc_auc": 0.5361801100149681,
+      "pr_auc": 0.06852414828395834,
+      "roc_auc_ci": [
+        0.5077468516940947,
+        0.5616502955437163
+      ],
+      "pr_auc_ci": [
+        0.05375029361073719,
+        0.08136308911156909
+      ],
+      "flooded_share": 0.06283001760093872,
+      "n_cells": 18749
+    },
+    {
+      "event": "2024 street flooding (reports)",
+      "method": "Bathtub + defences",
+      "roc_auc": 0.5381103094802663,
+      "pr_auc": 0.0703469355556608,
+      "roc_auc_ci": [
+        0.5094045216715563,
+        0.5638964816986257
+      ],
+      "pr_auc_ci": [
+        0.056172386694962745,
+        0.08432082679729634
+      ],
+      "roc_auc_diff_ci": [
+        -0.003123710733807178,
+        0.004963255539414614
+      ],
+      "pr_auc_diff_ci": [
+        -0.0017411750712456628,
+        0.004888343804514577
+      ],
+      "flooded_share": 0.06283001760093872,
+      "n_cells": 18749
+    },
+    {
+      "event": "2025 street flooding (reports)",
+      "method": "ML street flooding",
+      "roc_auc": 0.7327888592013193,
+      "pr_auc": 0.32099483582214783,
+      "roc_auc_ci": [
+        0.7084688998177849,
+        0.7571452479868498
+      ],
+      "pr_auc_ci": [
+        0.2634431741234712,
+        0.3718053790307504
+      ],
+      "roc_auc_diff_ci": [
+        0.1552127516418988,
+        0.2040069449477007
+      ],
+      "pr_auc_diff_ci": [
+        0.14391084707994556,
+        0.2146521151193297
+      ],
+      "flooded_share": 0.12402496099843993,
+      "n_cells": 24358
+    },
+    {
+      "event": "2025 street flooding (reports)",
+      "method": "Risk index (default weights)",
+      "roc_auc": 0.5329672654170956,
+      "pr_auc": 0.1320719908461759,
+      "roc_auc_ci": [
+        0.5022564231804273,
+        0.5642932854476004
+      ],
+      "pr_auc_ci": [
+        0.10783555164380892,
+        0.16536195503032977
+      ],
+      "roc_auc_diff_ci": [
+        -0.03557946838918741,
+        -0.008308008324602578
+      ],
+      "pr_auc_diff_ci": [
+        -0.014194872332885028,
+        -0.0033974212245617887
+      ],
+      "flooded_share": 0.12402496099843993,
+      "n_cells": 24358
+    },
+    {
+      "event": "2025 street flooding (reports)",
+      "method": "Bathtub simulation",
+      "roc_auc": 0.5527727848166364,
+      "pr_auc": 0.14040328648341543,
+      "roc_auc_ci": [
+        0.5216650040866129,
+        0.5822219443441344
+      ],
+      "pr_auc_ci": [
+        0.11422869767512234,
+        0.17276350249200814
+      ],
+      "flooded_share": 0.12402496099843993,
+      "n_cells": 24358
+    },
+    {
+      "event": "2025 street flooding (reports)",
+      "method": "Bathtub + defences",
+      "roc_auc": 0.5503921115718117,
+      "pr_auc": 0.13923389769108965,
+      "roc_auc_ci": [
+        0.5208563268988202,
+        0.5795352503041198
+      ],
+      "pr_auc_ci": [
+        0.1166134324254695,
+        0.16591429183852846
+      ],
+      "roc_auc_diff_ci": [
+        -0.008862969339050017,
+        0.0030908046903843044
+      ],
+      "pr_auc_diff_ci": [
+        -0.008891764581377925,
+        0.004359005233499253
+      ],
+      "flooded_share": 0.12402496099843993,
+      "n_cells": 24358
+    }
+  ],
+  "features": [
+    {
+      "feature": "elevation",
+      "label": "Ground elevation",
+      "mean_abs_shap": 0.28408281079601194,
+      "direction": -0.8856250347193747,
+      "gain": 44172.75136613846
+    },
+    {
+      "feature": "hand",
+      "label": "Height above nearest waterway",
+      "mean_abs_shap": 0.06290170218325383,
+      "direction": -0.17422340808052328,
+      "gain": 24301.367190361023
+    },
+    {
+      "feature": "relative_elevation",
+      "label": "Elevation vs. surroundings (1 km)",
+      "mean_abs_shap": 0.18765562303007524,
+      "direction": 0.8658297651266814,
+      "gain": 31617.47425556183
+    },
+    {
+      "feature": "slope",
+      "label": "Slope",
+      "mean_abs_shap": 0.05387217083430589,
+      "direction": -0.07496964733205098,
+      "gain": 23466.471501350403
+    },
+    {
+      "feature": "dist_waterway_m",
+      "label": "Distance to any river/canal",
+      "mean_abs_shap": 0.16565273232690528,
+      "direction": 0.7044743122814041,
+      "gain": 30385.320805311203
+    },
+    {
+      "feature": "dist_main_river_m",
+      "label": "Distance to Chao Phraya",
+      "mean_abs_shap": 0.3203936819020736,
+      "direction": 0.30689020624566354,
+      "gain": 84247.81205272675
+    },
+    {
+      "feature": "log_pop_density",
+      "label": "Population density (log)",
+      "mean_abs_shap": 0.16847959666557386,
+      "direction": -0.3060655468459195,
+      "gain": 52636.77064180374
+    },
+    {
+      "feature": "built_up",
+      "label": "Built-up land (%)",
+      "mean_abs_shap": 0.053528834292111915,
+      "direction": -0.8259411864570161,
+      "gain": 15330.938510417938
+    },
+    {
+      "feature": "cropland",
+      "label": "Cropland (%)",
+      "mean_abs_shap": 0.010951598629643337,
+      "direction": -0.16079322417793504,
+      "gain": 1287.333417892456
+    },
+    {
+      "feature": "water",
+      "label": "Open water (%)",
+      "mean_abs_shap": 0.00341394765167104,
+      "direction": 0.19130309460129338,
+      "gain": 1239.8021817207336
+    },
+    {
+      "feature": "tree",
+      "label": "Tree cover (%)",
+      "mean_abs_shap": 0.06079312397630604,
+      "direction": 0.665401579878533,
+      "gain": 14867.708656787872
+    },
+    {
+      "feature": "grassland",
+      "label": "Grassland (%)",
+      "mean_abs_shap": 0.012694767686240381,
+      "direction": 0.6151286028182003,
+      "gain": 3142.9896512031555
+    },
+    {
+      "feature": "wetland",
+      "label": "Wetland (%)",
+      "mean_abs_shap": 0.0,
+      "direction": NaN,
+      "gain": 0.0
+    },
+    {
+      "feature": "relative_elevation_300m",
+      "label": "Elevation vs. surroundings (300 m)",
+      "mean_abs_shap": 0.05959466817979229,
+      "direction": 0.43227556716172283,
+      "gain": 23889.849415302277
+    },
+    {
+      "feature": "log_buildings",
+      "label": "Buildings per cell (log)",
+      "mean_abs_shap": 0.30899299301916877,
+      "direction": 0.9178302520733346,
+      "gain": 42219.79116630554
+    },
+    {
+      "feature": "building_height_m",
+      "label": "Mean building height",
+      "mean_abs_shap": 0.15161285625466606,
+      "direction": -0.3900565191558363,
+      "gain": 35680.16877031326
+    }
+  ],
+  "districts": [
+    {
+      "district_id": 1,
+      "ml_score": 0.5880663588029663,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 2,
+      "ml_score": 0.572070272082363,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 3,
+      "ml_score": 0.6076585701409638,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 4,
+      "ml_score": 0.5471176573355901,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 5,
+      "ml_score": 0.2610466150115413,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 6,
+      "ml_score": 0.5949228470255982,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 7,
+      "ml_score": 0.5240219990583023,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 8,
+      "ml_score": 0.295527088934388,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 9,
+      "ml_score": 0.22617700662645432,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 10,
+      "ml_score": 0.34887933424985235,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 11,
+      "ml_score": 0.3048250673545437,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 12,
+      "ml_score": 0.3183044241895237,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 13,
+      "ml_score": 0.5297238365017042,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 14,
+      "ml_score": 0.43652758991109725,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 15,
+      "ml_score": 0.442983544263706,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 16,
+      "ml_score": 0.38921044857856096,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 17,
+      "ml_score": 0.5517422220855605,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 18,
+      "ml_score": 0.26566650508929474,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 19,
+      "ml_score": 0.4917297950876762,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 20,
+      "ml_score": 0.5130866611538182,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 21,
+      "ml_score": 0.5056039939937336,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 22,
+      "ml_score": 0.21845182367168473,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 23,
+      "ml_score": 0.34549365397342036,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 24,
+      "ml_score": 0.5317695448689732,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 25,
+      "ml_score": 0.5655198477899289,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 26,
+      "ml_score": 0.5700017196307493,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 27,
+      "ml_score": 0.5610541892250237,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 28,
+      "ml_score": 0.46713417658423756,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 29,
+      "ml_score": 0.5523923407892479,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 30,
+      "ml_score": 0.2604579372085643,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 31,
+      "ml_score": 0.48792956295369067,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 32,
+      "ml_score": 0.31263677710628324,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 33,
+      "ml_score": 0.5157287051021471,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 34,
+      "ml_score": 0.21194199110932496,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 35,
+      "ml_score": 0.18579629633393496,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 36,
+      "ml_score": 0.690966555767811,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 37,
+      "ml_score": 0.35760109941372803,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 38,
+      "ml_score": 0.2582928426255136,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 39,
+      "ml_score": 0.547764520233791,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 40,
+      "ml_score": 0.22155331422067331,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 41,
+      "ml_score": 0.6171099989754814,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 42,
+      "ml_score": 0.25507788545490023,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 43,
+      "ml_score": 0.6119355446450758,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 44,
+      "ml_score": 0.5584245910344477,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 45,
+      "ml_score": 0.5753336912063225,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 46,
+      "ml_score": 0.2565370459089729,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 47,
+      "ml_score": 0.5618815138343877,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 48,
+      "ml_score": 0.37304740542932957,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 49,
+      "ml_score": 0.5278592789835149,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    },
+    {
+      "district_id": 50,
+      "ml_score": 0.26230459987842425,
+      "observed_2011_pct": null,
+      "observed_known_pct": 0.0
+    }
+  ]
+}

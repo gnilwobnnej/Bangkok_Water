@@ -1,0 +1,1049 @@
+{
+  "source": "Traffy Fondue public API (publicapi.traffy.in.th), category 'น้ำท่วม' (flood)",
+  "rain_source": "Open-Meteo historical weather archive (ERA5), daily, wettest of 12 points over Bangkok",
+  "rules": {
+    "storm_min_reports": 15,
+    "storm_spike": 3.0,
+    "storm_min_rain_mm": 10,
+    "flooded_min_storm_reports": 1,
+    "dry_min_other_reports": 5
+  },
+  "storms": [
+    {
+      "date": "2022-06-08",
+      "flood_reports": 130,
+      "rain_mm": 0.7,
+      "rain_day_before_mm": 10.1
+    },
+    {
+      "date": "2022-06-24",
+      "flood_reports": 130,
+      "rain_mm": 22.2,
+      "rain_day_before_mm": 18.7
+    },
+    {
+      "date": "2022-06-28",
+      "flood_reports": 215,
+      "rain_mm": 13.3,
+      "rain_day_before_mm": 10.3
+    },
+    {
+      "date": "2022-07-01",
+      "flood_reports": 194,
+      "rain_mm": 17.0,
+      "rain_day_before_mm": 16.3
+    },
+    {
+      "date": "2022-07-20",
+      "flood_reports": 383,
+      "rain_mm": 39.5,
+      "rain_day_before_mm": 7.1
+    },
+    {
+      "date": "2022-07-21",
+      "flood_reports": 730,
+      "rain_mm": 38.0,
+      "rain_day_before_mm": 39.5
+    },
+    {
+      "date": "2022-07-22",
+      "flood_reports": 119,
+      "rain_mm": 18.4,
+      "rain_day_before_mm": 38.0
+    },
+    {
+      "date": "2022-07-28",
+      "flood_reports": 111,
+      "rain_mm": 12.8,
+      "rain_day_before_mm": 2.0
+    },
+    {
+      "date": "2022-08-01",
+      "flood_reports": 252,
+      "rain_mm": 38.5,
+      "rain_day_before_mm": 30.9
+    },
+    {
+      "date": "2022-08-02",
+      "flood_reports": 315,
+      "rain_mm": 18.8,
+      "rain_day_before_mm": 38.5
+    },
+    {
+      "date": "2022-08-15",
+      "flood_reports": 149,
+      "rain_mm": 41.5,
+      "rain_day_before_mm": 6.6
+    },
+    {
+      "date": "2022-08-16",
+      "flood_reports": 226,
+      "rain_mm": 27.3,
+      "rain_day_before_mm": 41.5
+    },
+    {
+      "date": "2022-08-17",
+      "flood_reports": 98,
+      "rain_mm": 18.8,
+      "rain_day_before_mm": 27.3
+    },
+    {
+      "date": "2022-09-04",
+      "flood_reports": 115,
+      "rain_mm": 39.3,
+      "rain_day_before_mm": 14.2
+    },
+    {
+      "date": "2022-09-06",
+      "flood_reports": 107,
+      "rain_mm": 30.1,
+      "rain_day_before_mm": 18.2
+    },
+    {
+      "date": "2022-09-07",
+      "flood_reports": 174,
+      "rain_mm": 43.1,
+      "rain_day_before_mm": 30.1
+    },
+    {
+      "date": "2022-09-08",
+      "flood_reports": 214,
+      "rain_mm": 28.3,
+      "rain_day_before_mm": 43.1
+    },
+    {
+      "date": "2022-09-09",
+      "flood_reports": 134,
+      "rain_mm": 20.4,
+      "rain_day_before_mm": 28.3
+    },
+    {
+      "date": "2022-09-10",
+      "flood_reports": 413,
+      "rain_mm": 25.7,
+      "rain_day_before_mm": 20.4
+    },
+    {
+      "date": "2022-09-11",
+      "flood_reports": 476,
+      "rain_mm": 10.4,
+      "rain_day_before_mm": 25.7
+    },
+    {
+      "date": "2022-09-12",
+      "flood_reports": 294,
+      "rain_mm": 21.0,
+      "rain_day_before_mm": 10.4
+    },
+    {
+      "date": "2022-09-13",
+      "flood_reports": 229,
+      "rain_mm": 29.6,
+      "rain_day_before_mm": 21.0
+    },
+    {
+      "date": "2022-09-14",
+      "flood_reports": 191,
+      "rain_mm": 16.3,
+      "rain_day_before_mm": 29.6
+    },
+    {
+      "date": "2022-09-22",
+      "flood_reports": 92,
+      "rain_mm": 28.5,
+      "rain_day_before_mm": 24.2
+    },
+    {
+      "date": "2022-10-03",
+      "flood_reports": 172,
+      "rain_mm": 29.9,
+      "rain_day_before_mm": 10.9
+    },
+    {
+      "date": "2022-10-07",
+      "flood_reports": 72,
+      "rain_mm": 36.9,
+      "rain_day_before_mm": 31.9
+    },
+    {
+      "date": "2022-10-09",
+      "flood_reports": 109,
+      "rain_mm": 23.3,
+      "rain_day_before_mm": 21.1
+    },
+    {
+      "date": "2022-11-25",
+      "flood_reports": 30,
+      "rain_mm": 26.6,
+      "rain_day_before_mm": 33.9
+    },
+    {
+      "date": "2022-11-26",
+      "flood_reports": 25,
+      "rain_mm": 10.3,
+      "rain_day_before_mm": 26.6
+    },
+    {
+      "date": "2023-02-15",
+      "flood_reports": 59,
+      "rain_mm": 60.4,
+      "rain_day_before_mm": 1.1
+    },
+    {
+      "date": "2023-04-26",
+      "flood_reports": 29,
+      "rain_mm": 28.6,
+      "rain_day_before_mm": 31.8
+    },
+    {
+      "date": "2023-04-30",
+      "flood_reports": 46,
+      "rain_mm": 15.3,
+      "rain_day_before_mm": 1.5
+    },
+    {
+      "date": "2023-05-11",
+      "flood_reports": 29,
+      "rain_mm": 12.3,
+      "rain_day_before_mm": 13.6
+    },
+    {
+      "date": "2023-05-28",
+      "flood_reports": 25,
+      "rain_mm": 26.5,
+      "rain_day_before_mm": 17.5
+    },
+    {
+      "date": "2023-05-29",
+      "flood_reports": 102,
+      "rain_mm": 32.7,
+      "rain_day_before_mm": 26.5
+    },
+    {
+      "date": "2023-05-30",
+      "flood_reports": 91,
+      "rain_mm": 11.7,
+      "rain_day_before_mm": 32.7
+    },
+    {
+      "date": "2023-05-31",
+      "flood_reports": 34,
+      "rain_mm": 15.8,
+      "rain_day_before_mm": 11.7
+    },
+    {
+      "date": "2023-07-01",
+      "flood_reports": 47,
+      "rain_mm": 23.1,
+      "rain_day_before_mm": 20.8
+    },
+    {
+      "date": "2023-07-09",
+      "flood_reports": 51,
+      "rain_mm": 15.0,
+      "rain_day_before_mm": 30.8
+    },
+    {
+      "date": "2023-07-10",
+      "flood_reports": 35,
+      "rain_mm": 26.4,
+      "rain_day_before_mm": 15.0
+    },
+    {
+      "date": "2023-07-11",
+      "flood_reports": 30,
+      "rain_mm": 8.8,
+      "rain_day_before_mm": 26.4
+    },
+    {
+      "date": "2023-07-20",
+      "flood_reports": 25,
+      "rain_mm": 15.6,
+      "rain_day_before_mm": 1.4
+    },
+    {
+      "date": "2023-07-22",
+      "flood_reports": 408,
+      "rain_mm": 25.0,
+      "rain_day_before_mm": 39.5
+    },
+    {
+      "date": "2023-07-23",
+      "flood_reports": 93,
+      "rain_mm": 34.8,
+      "rain_day_before_mm": 25.0
+    },
+    {
+      "date": "2023-07-24",
+      "flood_reports": 39,
+      "rain_mm": 7.4,
+      "rain_day_before_mm": 34.8
+    },
+    {
+      "date": "2023-08-20",
+      "flood_reports": 34,
+      "rain_mm": 17.8,
+      "rain_day_before_mm": 37.8
+    },
+    {
+      "date": "2023-08-23",
+      "flood_reports": 37,
+      "rain_mm": 22.5,
+      "rain_day_before_mm": 17.1
+    },
+    {
+      "date": "2023-08-24",
+      "flood_reports": 34,
+      "rain_mm": 11.8,
+      "rain_day_before_mm": 22.5
+    },
+    {
+      "date": "2023-09-21",
+      "flood_reports": 210,
+      "rain_mm": 37.3,
+      "rain_day_before_mm": 9.9
+    },
+    {
+      "date": "2023-09-22",
+      "flood_reports": 113,
+      "rain_mm": 5.7,
+      "rain_day_before_mm": 37.3
+    },
+    {
+      "date": "2023-09-23",
+      "flood_reports": 86,
+      "rain_mm": 10.6,
+      "rain_day_before_mm": 5.7
+    },
+    {
+      "date": "2023-09-24",
+      "flood_reports": 88,
+      "rain_mm": 15.2,
+      "rain_day_before_mm": 10.6
+    },
+    {
+      "date": "2023-09-25",
+      "flood_reports": 80,
+      "rain_mm": 12.4,
+      "rain_day_before_mm": 15.2
+    },
+    {
+      "date": "2023-09-26",
+      "flood_reports": 176,
+      "rain_mm": 22.0,
+      "rain_day_before_mm": 12.4
+    },
+    {
+      "date": "2023-09-27",
+      "flood_reports": 82,
+      "rain_mm": 37.6,
+      "rain_day_before_mm": 22.0
+    },
+    {
+      "date": "2023-09-28",
+      "flood_reports": 71,
+      "rain_mm": 59.9,
+      "rain_day_before_mm": 37.6
+    },
+    {
+      "date": "2023-10-03",
+      "flood_reports": 179,
+      "rain_mm": 16.8,
+      "rain_day_before_mm": 16.3
+    },
+    {
+      "date": "2023-10-04",
+      "flood_reports": 116,
+      "rain_mm": 24.7,
+      "rain_day_before_mm": 16.8
+    },
+    {
+      "date": "2023-11-05",
+      "flood_reports": 46,
+      "rain_mm": 22.3,
+      "rain_day_before_mm": 10.4
+    },
+    {
+      "date": "2023-11-07",
+      "flood_reports": 35,
+      "rain_mm": 15.7,
+      "rain_day_before_mm": 7.4
+    },
+    {
+      "date": "2023-11-10",
+      "flood_reports": 32,
+      "rain_mm": 16.7,
+      "rain_day_before_mm": 12.3
+    },
+    {
+      "date": "2024-03-20",
+      "flood_reports": 90,
+      "rain_mm": 44.7,
+      "rain_day_before_mm": 10.5
+    },
+    {
+      "date": "2024-05-11",
+      "flood_reports": 26,
+      "rain_mm": 16.8,
+      "rain_day_before_mm": 25.7
+    },
+    {
+      "date": "2024-05-12",
+      "flood_reports": 19,
+      "rain_mm": 2.3,
+      "rain_day_before_mm": 16.8
+    },
+    {
+      "date": "2024-05-13",
+      "flood_reports": 35,
+      "rain_mm": 41.1,
+      "rain_day_before_mm": 2.3
+    },
+    {
+      "date": "2024-05-16",
+      "flood_reports": 39,
+      "rain_mm": 18.6,
+      "rain_day_before_mm": 12.3
+    },
+    {
+      "date": "2024-05-19",
+      "flood_reports": 20,
+      "rain_mm": 53.3,
+      "rain_day_before_mm": 5.4
+    },
+    {
+      "date": "2024-05-20",
+      "flood_reports": 32,
+      "rain_mm": 24.2,
+      "rain_day_before_mm": 53.3
+    },
+    {
+      "date": "2024-05-21",
+      "flood_reports": 53,
+      "rain_mm": 58.9,
+      "rain_day_before_mm": 24.2
+    },
+    {
+      "date": "2024-05-22",
+      "flood_reports": 22,
+      "rain_mm": 10.3,
+      "rain_day_before_mm": 58.9
+    },
+    {
+      "date": "2024-05-23",
+      "flood_reports": 40,
+      "rain_mm": 20.4,
+      "rain_day_before_mm": 10.3
+    },
+    {
+      "date": "2024-05-24",
+      "flood_reports": 51,
+      "rain_mm": 10.6,
+      "rain_day_before_mm": 20.4
+    },
+    {
+      "date": "2024-05-30",
+      "flood_reports": 142,
+      "rain_mm": 37.3,
+      "rain_day_before_mm": 11.1
+    },
+    {
+      "date": "2024-05-31",
+      "flood_reports": 41,
+      "rain_mm": 23.6,
+      "rain_day_before_mm": 37.3
+    },
+    {
+      "date": "2024-06-17",
+      "flood_reports": 20,
+      "rain_mm": 12.1,
+      "rain_day_before_mm": 17.9
+    },
+    {
+      "date": "2024-06-26",
+      "flood_reports": 25,
+      "rain_mm": 23.7,
+      "rain_day_before_mm": 34.0
+    },
+    {
+      "date": "2024-06-30",
+      "flood_reports": 20,
+      "rain_mm": 19.5,
+      "rain_day_before_mm": 22.7
+    },
+    {
+      "date": "2024-07-04",
+      "flood_reports": 59,
+      "rain_mm": 13.0,
+      "rain_day_before_mm": 3.0
+    },
+    {
+      "date": "2024-07-05",
+      "flood_reports": 19,
+      "rain_mm": 29.8,
+      "rain_day_before_mm": 13.0
+    },
+    {
+      "date": "2024-07-21",
+      "flood_reports": 15,
+      "rain_mm": 29.6,
+      "rain_day_before_mm": 30.4
+    },
+    {
+      "date": "2024-07-27",
+      "flood_reports": 21,
+      "rain_mm": 30.5,
+      "rain_day_before_mm": 9.1
+    },
+    {
+      "date": "2024-07-29",
+      "flood_reports": 42,
+      "rain_mm": 42.4,
+      "rain_day_before_mm": 36.1
+    },
+    {
+      "date": "2024-07-30",
+      "flood_reports": 26,
+      "rain_mm": 14.2,
+      "rain_day_before_mm": 42.4
+    },
+    {
+      "date": "2024-08-20",
+      "flood_reports": 141,
+      "rain_mm": 8.9,
+      "rain_day_before_mm": 16.2
+    },
+    {
+      "date": "2024-09-03",
+      "flood_reports": 30,
+      "rain_mm": 23.1,
+      "rain_day_before_mm": 27.2
+    },
+    {
+      "date": "2024-09-21",
+      "flood_reports": 62,
+      "rain_mm": 22.1,
+      "rain_day_before_mm": 14.5
+    },
+    {
+      "date": "2024-10-03",
+      "flood_reports": 82,
+      "rain_mm": 35.9,
+      "rain_day_before_mm": 12.0
+    },
+    {
+      "date": "2024-10-10",
+      "flood_reports": 43,
+      "rain_mm": 25.6,
+      "rain_day_before_mm": 20.1
+    },
+    {
+      "date": "2024-10-18",
+      "flood_reports": 76,
+      "rain_mm": 30.2,
+      "rain_day_before_mm": 8.3
+    },
+    {
+      "date": "2024-10-21",
+      "flood_reports": 63,
+      "rain_mm": 9.7,
+      "rain_day_before_mm": 24.0
+    },
+    {
+      "date": "2024-10-22",
+      "flood_reports": 54,
+      "rain_mm": 25.6,
+      "rain_day_before_mm": 9.7
+    },
+    {
+      "date": "2024-10-23",
+      "flood_reports": 51,
+      "rain_mm": 16.4,
+      "rain_day_before_mm": 25.6
+    },
+    {
+      "date": "2024-10-24",
+      "flood_reports": 38,
+      "rain_mm": 2.0,
+      "rain_day_before_mm": 16.4
+    },
+    {
+      "date": "2024-11-15",
+      "flood_reports": 41,
+      "rain_mm": 10.3,
+      "rain_day_before_mm": 15.2
+    },
+    {
+      "date": "2024-11-17",
+      "flood_reports": 40,
+      "rain_mm": 25.0,
+      "rain_day_before_mm": 2.5
+    },
+    {
+      "date": "2025-02-18",
+      "flood_reports": 22,
+      "rain_mm": 17.8,
+      "rain_day_before_mm": 6.4
+    },
+    {
+      "date": "2025-04-07",
+      "flood_reports": 21,
+      "rain_mm": 10.3,
+      "rain_day_before_mm": 0.6
+    },
+    {
+      "date": "2025-04-15",
+      "flood_reports": 39,
+      "rain_mm": 14.9,
+      "rain_day_before_mm": 21.0
+    },
+    {
+      "date": "2025-04-19",
+      "flood_reports": 15,
+      "rain_mm": 14.8,
+      "rain_day_before_mm": 9.2
+    },
+    {
+      "date": "2025-05-10",
+      "flood_reports": 318,
+      "rain_mm": 36.3,
+      "rain_day_before_mm": 8.9
+    },
+    {
+      "date": "2025-05-11",
+      "flood_reports": 70,
+      "rain_mm": 15.9,
+      "rain_day_before_mm": 36.3
+    },
+    {
+      "date": "2025-05-12",
+      "flood_reports": 183,
+      "rain_mm": 22.2,
+      "rain_day_before_mm": 15.9
+    },
+    {
+      "date": "2025-05-13",
+      "flood_reports": 68,
+      "rain_mm": 10.8,
+      "rain_day_before_mm": 22.2
+    },
+    {
+      "date": "2025-05-14",
+      "flood_reports": 43,
+      "rain_mm": 31.5,
+      "rain_day_before_mm": 10.8
+    },
+    {
+      "date": "2025-05-15",
+      "flood_reports": 55,
+      "rain_mm": 20.2,
+      "rain_day_before_mm": 31.5
+    },
+    {
+      "date": "2025-05-16",
+      "flood_reports": 133,
+      "rain_mm": 27.1,
+      "rain_day_before_mm": 20.2
+    },
+    {
+      "date": "2025-05-21",
+      "flood_reports": 40,
+      "rain_mm": 22.6,
+      "rain_day_before_mm": 3.8
+    },
+    {
+      "date": "2025-05-24",
+      "flood_reports": 95,
+      "rain_mm": 16.3,
+      "rain_day_before_mm": 15.5
+    },
+    {
+      "date": "2025-06-09",
+      "flood_reports": 33,
+      "rain_mm": 29.3,
+      "rain_day_before_mm": 8.2
+    },
+    {
+      "date": "2025-07-01",
+      "flood_reports": 25,
+      "rain_mm": 19.4,
+      "rain_day_before_mm": 18.0
+    },
+    {
+      "date": "2025-07-14",
+      "flood_reports": 18,
+      "rain_mm": 5.9,
+      "rain_day_before_mm": 16.8
+    },
+    {
+      "date": "2025-07-16",
+      "flood_reports": 28,
+      "rain_mm": 31.3,
+      "rain_day_before_mm": 16.4
+    },
+    {
+      "date": "2025-07-17",
+      "flood_reports": 26,
+      "rain_mm": 15.6,
+      "rain_day_before_mm": 31.3
+    },
+    {
+      "date": "2025-08-17",
+      "flood_reports": 20,
+      "rain_mm": 3.9,
+      "rain_day_before_mm": 17.8
+    },
+    {
+      "date": "2025-08-22",
+      "flood_reports": 32,
+      "rain_mm": 26.2,
+      "rain_day_before_mm": 20.2
+    },
+    {
+      "date": "2025-09-04",
+      "flood_reports": 72,
+      "rain_mm": 15.7,
+      "rain_day_before_mm": 18.3
+    },
+    {
+      "date": "2025-09-05",
+      "flood_reports": 125,
+      "rain_mm": 10.6,
+      "rain_day_before_mm": 15.7
+    },
+    {
+      "date": "2025-09-06",
+      "flood_reports": 315,
+      "rain_mm": 26.1,
+      "rain_day_before_mm": 10.6
+    },
+    {
+      "date": "2025-09-07",
+      "flood_reports": 213,
+      "rain_mm": 39.4,
+      "rain_day_before_mm": 26.1
+    },
+    {
+      "date": "2025-09-08",
+      "flood_reports": 114,
+      "rain_mm": 32.0,
+      "rain_day_before_mm": 39.4
+    },
+    {
+      "date": "2025-09-09",
+      "flood_reports": 32,
+      "rain_mm": 18.1,
+      "rain_day_before_mm": 32.0
+    },
+    {
+      "date": "2025-09-17",
+      "flood_reports": 80,
+      "rain_mm": 25.5,
+      "rain_day_before_mm": 8.1
+    },
+    {
+      "date": "2025-09-18",
+      "flood_reports": 203,
+      "rain_mm": 11.5,
+      "rain_day_before_mm": 25.5
+    },
+    {
+      "date": "2025-09-27",
+      "flood_reports": 115,
+      "rain_mm": 30.4,
+      "rain_day_before_mm": 15.3
+    },
+    {
+      "date": "2025-09-28",
+      "flood_reports": 44,
+      "rain_mm": 5.6,
+      "rain_day_before_mm": 30.4
+    },
+    {
+      "date": "2025-10-01",
+      "flood_reports": 55,
+      "rain_mm": 8.3,
+      "rain_day_before_mm": 29.8
+    },
+    {
+      "date": "2025-10-04",
+      "flood_reports": 371,
+      "rain_mm": 14.3,
+      "rain_day_before_mm": 4.4
+    },
+    {
+      "date": "2025-10-06",
+      "flood_reports": 187,
+      "rain_mm": 14.5,
+      "rain_day_before_mm": 9.5
+    },
+    {
+      "date": "2025-10-07",
+      "flood_reports": 59,
+      "rain_mm": 16.2,
+      "rain_day_before_mm": 14.5
+    },
+    {
+      "date": "2025-10-08",
+      "flood_reports": 49,
+      "rain_mm": 21.3,
+      "rain_day_before_mm": 16.2
+    },
+    {
+      "date": "2025-10-12",
+      "flood_reports": 99,
+      "rain_mm": 22.8,
+      "rain_day_before_mm": 10.3
+    },
+    {
+      "date": "2025-10-13",
+      "flood_reports": 62,
+      "rain_mm": 26.5,
+      "rain_day_before_mm": 22.8
+    },
+    {
+      "date": "2025-10-14",
+      "flood_reports": 62,
+      "rain_mm": 48.4,
+      "rain_day_before_mm": 26.5
+    },
+    {
+      "date": "2025-11-02",
+      "flood_reports": 223,
+      "rain_mm": 36.5,
+      "rain_day_before_mm": 45.9
+    },
+    {
+      "date": "2025-11-03",
+      "flood_reports": 354,
+      "rain_mm": 17.1,
+      "rain_day_before_mm": 36.5
+    },
+    {
+      "date": "2025-11-04",
+      "flood_reports": 127,
+      "rain_mm": 3.5,
+      "rain_day_before_mm": 17.1
+    },
+    {
+      "date": "2025-11-10",
+      "flood_reports": 44,
+      "rain_mm": 19.0,
+      "rain_day_before_mm": 5.2
+    },
+    {
+      "date": "2025-11-12",
+      "flood_reports": 35,
+      "rain_mm": 12.7,
+      "rain_day_before_mm": 2.9
+    },
+    {
+      "date": "2025-11-13",
+      "flood_reports": 130,
+      "rain_mm": 23.8,
+      "rain_day_before_mm": 12.7
+    },
+    {
+      "date": "2026-03-12",
+      "flood_reports": 54,
+      "rain_mm": 15.3,
+      "rain_day_before_mm": 0.6
+    },
+    {
+      "date": "2026-03-17",
+      "flood_reports": 18,
+      "rain_mm": 27.0,
+      "rain_day_before_mm": 1.4
+    },
+    {
+      "date": "2026-05-01",
+      "flood_reports": 39,
+      "rain_mm": 16.6,
+      "rain_day_before_mm": 6.5
+    },
+    {
+      "date": "2026-05-04",
+      "flood_reports": 61,
+      "rain_mm": 16.5,
+      "rain_day_before_mm": 2.8
+    },
+    {
+      "date": "2026-05-05",
+      "flood_reports": 33,
+      "rain_mm": 5.5,
+      "rain_day_before_mm": 16.5
+    },
+    {
+      "date": "2026-05-08",
+      "flood_reports": 41,
+      "rain_mm": 20.8,
+      "rain_day_before_mm": 8.9
+    },
+    {
+      "date": "2026-05-31",
+      "flood_reports": 96,
+      "rain_mm": 41.7,
+      "rain_day_before_mm": 7.6
+    },
+    {
+      "date": "2026-06-16",
+      "flood_reports": 48,
+      "rain_mm": 16.1,
+      "rain_day_before_mm": 12.4
+    },
+    {
+      "date": "2026-06-28",
+      "flood_reports": 102,
+      "rain_mm": 18.2,
+      "rain_day_before_mm": 9.7
+    },
+    {
+      "date": "2026-07-02",
+      "flood_reports": 60,
+      "rain_mm": 18.5,
+      "rain_day_before_mm": 10.5
+    },
+    {
+      "date": "2026-07-30",
+      "flood_reports": 44,
+      "rain_mm": 22.5,
+      "rain_day_before_mm": 26.3
+    },
+    {
+      "date": "2026-07-31",
+      "flood_reports": 59,
+      "rain_mm": 28.3,
+      "rain_day_before_mm": 22.5
+    },
+    {
+      "date": "2026-09-10",
+      "flood_reports": 90,
+      "rain_mm": 37.2,
+      "rain_day_before_mm": 7.9
+    },
+    {
+      "date": "2026-09-11",
+      "flood_reports": 69,
+      "rain_mm": 16.4,
+      "rain_day_before_mm": 37.2
+    },
+    {
+      "date": "2026-09-15",
+      "flood_reports": 159,
+      "rain_mm": 33.4,
+      "rain_day_before_mm": 15.3
+    },
+    {
+      "date": "2026-09-16",
+      "flood_reports": 141,
+      "rain_mm": 22.1,
+      "rain_day_before_mm": 33.4
+    },
+    {
+      "date": "2026-09-25",
+      "flood_reports": 1500,
+      "rain_mm": 139.9,
+      "rain_day_before_mm": 21.1
+    },
+    {
+      "date": "2026-09-26",
+      "flood_reports": 3787,
+      "rain_mm": 126.2,
+      "rain_day_before_mm": 139.9
+    },
+    {
+      "date": "2026-09-27",
+      "flood_reports": 2252,
+      "rain_mm": 64.8,
+      "rain_day_before_mm": 126.2
+    },
+    {
+      "date": "2026-09-28",
+      "flood_reports": 2025,
+      "rain_mm": 45.2,
+      "rain_day_before_mm": 64.8
+    },
+    {
+      "date": "2026-09-29",
+      "flood_reports": 1020,
+      "rain_mm": 4.2,
+      "rain_day_before_mm": 45.2
+    },
+    {
+      "date": "2026-10-03",
+      "flood_reports": 456,
+      "rain_mm": 10.0,
+      "rain_day_before_mm": 4.1
+    },
+    {
+      "date": "2026-10-04",
+      "flood_reports": 311,
+      "rain_mm": 5.6,
+      "rain_day_before_mm": 10.0
+    },
+    {
+      "date": "2026-10-06",
+      "flood_reports": 385,
+      "rain_mm": 27.1,
+      "rain_day_before_mm": 8.8
+    },
+    {
+      "date": "2026-10-07",
+      "flood_reports": 293,
+      "rain_mm": 10.4,
+      "rain_day_before_mm": 27.1
+    }
+  ],
+  "years": [
+    {
+      "year": 2022,
+      "flood_reports": 10028,
+      "storm_flood_reports": 5899,
+      "storm_days": 29,
+      "other_reports": 183711,
+      "flooded_cells": 4344,
+      "dry_cells": 10307,
+      "test_year": false
+    },
+    {
+      "year": 2023,
+      "flood_reports": 5172,
+      "storm_flood_reports": 2562,
+      "storm_days": 32,
+      "other_reports": 268158,
+      "flooded_cells": 1985,
+      "dry_cells": 15647,
+      "test_year": false
+    },
+    {
+      "year": 2024,
+      "flood_reports": 3662,
+      "storm_flood_reports": 1578,
+      "storm_days": 34,
+      "other_reports": 304071,
+      "flooded_cells": 1178,
+      "dry_cells": 17571,
+      "test_year": false
+    },
+    {
+      "year": 2025,
+      "flood_reports": 6546,
+      "storm_flood_reports": 4454,
+      "storm_days": 44,
+      "other_reports": 366111,
+      "flooded_cells": 3021,
+      "dry_cells": 21337,
+      "test_year": false
+    },
+    {
+      "year": 2026,
+      "flood_reports": 19035,
+      "storm_flood_reports": 13143,
+      "storm_days": 25,
+      "other_reports": 302313,
+      "flooded_cells": 9347,
+      "dry_cells": 16657,
+      "test_year": true
+    }
+  ]
+}

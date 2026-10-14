@@ -11,6 +11,7 @@ from src.risk import cell_size_m, distance_to_water_m
 
 MAIN_RIVER = "Chao Phraya River"
 LOCAL_WINDOW_M = 1000  # neighbourhood for "relative elevation"
+STREET_WINDOW_M = 300  # ...and for the small dips where rain collects (street-flood model)
 
 # Human-readable names for charts and the app
 FEATURE_LABELS = {
@@ -27,6 +28,10 @@ FEATURE_LABELS = {
     "tree": "Tree cover (%)",
     "grassland": "Grassland (%)",
     "wetland": "Wetland (%)",
+    # Street-flood model only (build_features(street=True)); buildings cover Bangkok's 50 districts
+    "relative_elevation_300m": "Elevation vs. surroundings (300 m)",
+    "log_buildings": "Buildings per cell (log)",
+    "building_height_m": "Mean building height",
 }
 
 
@@ -70,6 +75,22 @@ def feature_rasters(area: StudyArea) -> dict:
     return {k: np.asarray(v, dtype="float32") for k, v in rasters.items()}
 
 
-def build_features(area: StudyArea) -> pd.DataFrame:
-    """One row per grid cell (row-major), one column per feature."""
-    return pd.DataFrame({k: v.ravel() for k, v in feature_rasters(area).items()})
+def street_rasters(area: StudyArea) -> dict:
+    """Extra features for street flooding: local dips, and building density and height (0 where none)."""
+    dy, _ = cell_size_m()
+    window = max(3, int(round(STREET_WINDOW_M / dy)) | 1)
+    rasters = {"relative_elevation_300m": area.dem - uniform_filter(area.dem, size=window, mode="nearest")}
+    if C.BUILDINGS_GRID_FILE.exists():
+        with rasterio.open(C.BUILDINGS_GRID_FILE) as src:
+            count, height = src.read(1), src.read(2)
+        rasters["log_buildings"] = np.log1p(count)
+        rasters["building_height_m"] = np.nan_to_num(height)
+    return {k: np.asarray(v, dtype="float32") for k, v in rasters.items()}
+
+
+def build_features(area: StudyArea, street: bool = False) -> pd.DataFrame:
+    """One row per grid cell (row-major), one column per feature; `street` adds street_rasters."""
+    rasters = feature_rasters(area)
+    if street:
+        rasters.update(street_rasters(area))
+    return pd.DataFrame({k: v.ravel() for k, v in rasters.items()})
