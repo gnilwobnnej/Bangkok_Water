@@ -100,10 +100,17 @@ def street_labels(n_storm_flood: np.ndarray, n_flood: np.ndarray, n_other: np.nd
 
 
 def load_reports() -> pd.DataFrame | None:
-    """Every flood report (scripts/fetch_traffy.py), or None if not fetched."""
-    if not C.TRAFFY_FLOOD_FILE.exists():
+    """Every flood report (scripts/fetch_traffy.py), oldest first, or None if not fetched."""
+    files = report_files()
+    if not files:
         return None
-    return pd.read_parquet(C.TRAFFY_FLOOD_FILE)
+    df = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    return df.sort_values("time", kind="stable").reset_index(drop=True)
+
+
+def report_files() -> list:
+    """The monthly flood-report files, oldest first."""
+    return sorted(C.TRAFFY_REPORTS_DIR.glob("*.parquet")) if C.TRAFFY_REPORTS_DIR.exists() else []
 
 
 def load_summary() -> dict | None:

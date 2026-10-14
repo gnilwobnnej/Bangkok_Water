@@ -23,7 +23,7 @@ from src.viz3d import city_deck, district_deck, district_view, footprint_coords
 from src.ml import ML_2011, ML_ALL, ML_STREET, load_ml, load_street
 from src.risk import compute_factors, district_mean, district_risk, risk_index
 from src.simulate import level_curve, simulate
-from src.traffy import load_reports, load_summary as load_traffy_summary, reports_in
+from src.traffy import load_reports, load_summary as load_traffy_summary, report_files, reports_in
 from src.uncertainty import load_dem_uncertainty, load_flood_chance
 from src.validation import (
     CI, REFERENCE, TEST_CV, TEST_RADAR, TEST_STREET, cv_table, loeo_table, validation_table, wins,
@@ -151,7 +151,7 @@ area = get_area()
 factors = get_factors()
 ml = get_ml(file_version(C.ML_PROB_FILE, C.ML_REPORT_FILE))
 street = get_street(file_version(C.ML_STREET_PROB_FILE, C.ML_STREET_REPORT_FILE))
-traffy = get_traffy(file_version(C.TRAFFY_FLOOD_FILE, C.TRAFFY_STORMS_FILE))
+traffy = get_traffy(file_version(C.TRAFFY_STORMS_FILE, *report_files()))
 radar_version = file_version(C.RADAR_SUMMARY_FILE)
 radar = get_radar(radar_version)
 unc_version = file_version(C.DEM_UNCERTAINTY_FILE)

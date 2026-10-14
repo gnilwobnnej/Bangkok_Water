@@ -2,7 +2,8 @@
 
     python scripts/build_traffy_labels.py
 
-Needs scripts/fetch_traffy.py --all (flood reports, and every other report for the "dry" class).
+Needs scripts/fetch_traffy.py --all (flood reports, and every other report for the "dry" class). The daily
+Update data workflow runs it after fetch_traffy.py --daily.
 
 1. Storm days: days when far more flood reports came in than usual for the time of year, with rain on the day or
    the day before (src/traffy.storm_days; thresholds in src/config.py). Most flood reports on ordinary days are
@@ -37,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prepare_data import PROFILE  # noqa: E402
 from src import config as C  # noqa: E402
-from src.traffy import count_grid, storm_days, street_labels  # noqa: E402
+from src.traffy import count_grid, load_reports, storm_days, street_labels  # noqa: E402
 
 OPEN_METEO_ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 RAIN_LATS = (13.62, 13.76, 13.90)
@@ -71,7 +72,9 @@ def load_other_counts() -> dict:
 
 
 def main():
-    reports = pd.read_parquet(C.TRAFFY_FLOOD_FILE)
+    reports = load_reports()
+    if reports is None:
+        raise SystemExit(f"No flood reports in {C.TRAFFY_REPORTS_DIR}: run scripts/fetch_traffy.py first")
     other = load_other_counts()
     rain = city_rain(f"{reports['time'].min():%Y-%m-%d}", f"{reports['time'].max():%Y-%m-%d}")
     storms = storm_days(reports["time"], rain)

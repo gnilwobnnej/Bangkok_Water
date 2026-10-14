@@ -1,4 +1,5 @@
 """Shared settings: study area, analysis grid, and file locations."""
+import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -15,6 +16,7 @@ WIDTH = round((EAST - WEST) / RES)
 HEIGHT = round((NORTH - SOUTH) / RES)
 
 DEM_FILE = PROCESSED_DIR / "dem.tif"
+DEM_SOURCE = "copernicus"  # scripts/prepare_data.py --dem: "copernicus" (surface) or "fabdem" (buildings removed)
 POP_FILE = PROCESSED_DIR / "population.tif"
 WATER_FILE = PROCESSED_DIR / "waterways.tif"
 DISTRICTS_FILE = PROCESSED_DIR / "districts.geojson"
@@ -65,10 +67,11 @@ DEFENCE_LINES_FILE = PROCESSED_DIR / "defences.geojson"  # the lines, with name,
 
 # Street flooding from Traffy Fondue citizen reports (scripts/fetch_traffy.py, scripts/build_traffy_labels.py)
 TRAFFY_DIR = PROCESSED_DIR / "traffy"
-TRAFFY_FLOOD_FILE = TRAFFY_DIR / "flood_reports.parquet"  # every flood report: point, time, district, text
+TRAFFY_REPORTS_DIR = TRAFFY_DIR / "flood_reports"       # every flood report (point, time, district, text),
+                                                        # one YYYY-MM.parquet per month so daily updates stay small
 TRAFFY_OTHER_FILE = TRAFFY_DIR / "other_counts.tif"       # reports of anything else per cell, one band per year
 TRAFFY_STORMS_FILE = TRAFFY_DIR / "summary.json"          # storm days and their rain, label counts per year
-TRAFFY_YEARS = range(2022, 2027)          # reports start in 2022; 2026 (TEST_YEARS_FROM) is a test year
+TRAFFY_YEARS = range(2022, datetime.date.today().year + 1)  # reports start in 2022; TEST_YEARS_FROM on are tests
 TRAFFY_STORM_MIN_REPORTS = 15   # a storm day has >= this many flood reports...
 TRAFFY_STORM_SPIKE = 3.0        # ...and >= this x the typical daily count for the time of year...
 TRAFFY_STORM_MIN_RAIN_MM = 10   # ...and >= this much rain (wettest point in the city) that day or the day before

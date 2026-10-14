@@ -10,7 +10,7 @@ population and built-up land are left out of it. This note ranks the free data t
 | # | Source | What it gives | Strength | Weakness | Status |
 |---|---|---|---|---|---|
 | 1 | **Traffy Fondue** (BMA's citizen-report app), public API, no key | 44,442 flood reports since 2022, each with a point, time (to the second), photo and text; plus ~1.5 M reports of other problems | Densest exactly where satellites are blind; catches floods that drain within hours | Reports follow people and app use; some "flood" reports are chronic drain complaints | **Built** (below) |
-| 2 | **FABDEM** (Copernicus DEM with buildings and trees removed; Hawker et al. 2022) | A better ground surface in the dense city | Fixes the DEM's building bias (~1.6 m in built-up areas) | A better input, not flood observations; non-commercial licence | Next |
+| 2 | **FABDEM** (Copernicus DEM with buildings and trees removed; Hawker et al. 2022) | A better ground surface in the dense city | Fixes the DEM's building bias (~1.6 m in built-up areas) | A better input, not flood observations; non-commercial licence | Tested: helps street floods, hurts river floods; not the default |
 | 3 | **BMA Drainage and Sewerage Dept** flood points and rain gauges | ~737 known flood-prone points; rain and street-water sensors behind floodmanagement.bangkok.go.th | Official, long record | No bulk download found; may need a data request | Next |
 | 4 | **Sentinel-1 "double bounce"** in the existing radar pipeline | Flooded streets make radar *brighter* (water + wall reflection) | Same data and code already used | A pass every few days misses most cloudbursts; depends on wall orientation | Next |
 | 5 | **Sentinel-1 InSAR coherence** (ASF HyP3, free Earthdata login) | Coherence drops where water fills streets | The most reliable satellite urban-flood signal (UrbanSARFloods; Mason et al. 2021) | Heavy processing; same timing problem | Later, river-scale events only |
@@ -54,9 +54,30 @@ factors are distance to the Chao Phraya, building count, ground elevation and lo
 built-up land add under 0.01. Details: README ("Street flooding from residents' reports") and the app's
 Validation tab.
 
+## FABDEM vs Copernicus elevation (`scripts/compare_dem.py`)
+FABDEM (Copernicus with buildings and trees removed, from the Earth Engine community catalog) puts the dense city
+a median 0.72 m lower (Bangkok as a whole: 0.18 m lower; greater Bangkok: no change). The bathtub model was run on
+both, with and without defences, and scored on every flood with labels. Each change has a 95% block bootstrap
+interval, and every one of the 29 excludes zero:
+
+| Test (ROC-AUC, bathtub + defences) | Copernicus | FABDEM |
+|---|---|---|
+| 2011 flood (MODIS) | **0.721** | 0.669 |
+| Wet seasons 2017-2025 (radar) | **0.77-0.81** | 0.64-0.70 |
+| 2026 radar passes | **0.74-0.86** | 0.61-0.82 |
+| Street flooding 2022-2025, dense city | 0.51-0.53 | **0.57-0.61** |
+| Street flooding 2026, dense city | 0.562 | **0.675** |
+
+FABDEM is better on all 10 street-flood tests and worse on all 19 river-flood tests. Lowering the city makes the
+bathtub flood it earlier, which matches where rain pools in streets but not where the river spreads. The river
+floods are what the bathtub is for, so **Copernicus stays the default** (`config.DEM_SOURCE`).
+`prepare_data.py --dem fabdem --dem-only` switches. FABDEM elevation could still become a street-model feature.
+
 ## Sources
 - Traffy Fondue: [overview](https://www.thailand.go.th/issue-focus-detail/001_05_025),
   [one million complaints](https://pr-bangkok.com/?p=583017); API: `publicapi.traffy.in.th/teamchadchart-stat-api/geojson/v1`.
+- FABDEM V1-2: Earth Engine `projects/sat-io/open-datasets/FABDEM`
+  ([community catalog](https://gee-community-catalog.org/projects/fabdem/)); CC BY-NC-SA 4.0.
 - BMA flood risk platform: [CivicDataLab](https://civicdatalab.in/work/climateaction/bma-flood-risk-data-platform/);
   flood-prone points: [Thai PBS World](https://www.thaipbsworld.com/?p=294390).
 - Urban SAR flood mapping: [UrbanSARFloods](https://arxiv.org/html/2406.04111v1);

@@ -2,14 +2,24 @@
 
 Run once before starting the app:
     python scripts/prepare_data.py
+    python scripts/prepare_data.py --dem fabdem --dem-only   # rebuild just the elevation, from FABDEM
+
+Elevation sources (--dem):
+    copernicus  Copernicus GLO-30 surface model (default; includes buildings and trees)
+    fabdem      FABDEM V1-2: the same data with buildings and trees removed (Hawker et al. 2022), from the
+                Earth Engine community catalog, so it needs an Earth Engine login like fetch_current_flood.py.
+                Licence CC BY-NC-SA 4.0: non-commercial use only.
 
 Outputs (data/processed/):
-    dem.tif            terrain elevation in metres (EGM2008), Float32
+    dem.tif            terrain elevation in metres (EGM2008), Float32, tagged with its source
     population.tif     people per grid cell, Float32
     waterways.tif      1 where a river/canal crosses the cell, UInt8
     districts.geojson  Bangkok's 50 districts (khet)
     waterways.geojson  river/canal centre lines for the map
 """
+from __future__ import annotations
+
+import argparse
 import sys
 from pathlib import Path
 
@@ -34,6 +44,8 @@ POP_URL = (
     "https://data.worldpop.org/GIS/Population/Global_2000_2020_Constrained/"
     "2020/BSGM/THA/tha_ppp_2020_constrained.tif"
 )
+FABDEM_EE = "projects/sat-io/open-datasets/FABDEM"  # 1x1 degree tiles, 1 arc-second (~30 m)
+DEM_SOURCES = ("copernicus", "fabdem")
 GEOBOUNDARIES_API = "https://www.geoboundaries.org/api/current/gbOpen/THA/{level}/"
 OVERPASS_URLS = [
     "https://overpass-api.de/api/interpreter",
@@ -83,14 +95,46 @@ def write_raster(path: Path, arr: np.ndarray, dtype: str):
         dst.write(arr.astype(dtype), 1)
 
 
-def prepare_dem():
-    print("[1/4] Elevation (Copernicus GLO-30)")
-    raw = download(DEM_URL, C.RAW_DIR / "copernicus_dem_N13_E100.tif")
+def download_fabdem(dest: Path, project: str | None = None) -> Path:
+    """FABDEM over the study area at its native 1 arc-second grid, as one GeoTIFF (~17 MB)."""
+    if dest.exists():
+        print(f"  cached: {dest.name}")
+        return dest
+    from fetch_current_flood import download as fetch_url, init_earth_engine
+    ee = init_earth_engine(project)
+    pad = 0.01  # a margin so the cells at the edge get whole 30 m samples
+    region = ee.Geometry.Rectangle([C.WEST - pad, C.SOUTH - pad, C.EAST + pad, C.NORTH + pad])
+    image = ee.ImageCollection(FABDEM_EE).filterBounds(region).mosaic().toFloat()
+    arcsec = 1 / 3600
+    url = image.getDownloadURL({"region": region, "crs": "EPSG:4326", "format": "GEO_TIFF",
+                                "crs_transform": [arcsec, 0, 100, 0, -arcsec, 15]})
+    print(f"  downloading FABDEM from Earth Engine ({FABDEM_EE})")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    fetch_url(url, tmp)
+    tmp.replace(dest)
+    return dest
+
+
+def build_dem(source: str = "copernicus", project: str | None = None) -> np.ndarray:
+    """Elevation on the analysis grid from `source` (one of DEM_SOURCES)."""
+    if source == "fabdem":
+        raw = download_fabdem(C.RAW_DIR / "fabdem_bangkok.tif", project)
+    else:
+        raw = download(DEM_URL, C.RAW_DIR / "copernicus_dem_N13_E100.tif")
     # Copernicus is a surface model (includes buildings/trees). Taking the *minimum* 30 m sample
     # in each ~65 m cell, then a small median filter, approximates bare ground between buildings.
+    # FABDEM has had buildings removed already; the same steps keep the two comparable.
     dem, _ = warp_to_grid(raw, Resampling.min)
-    dem = median_filter(np.nan_to_num(dem, nan=0.0), size=3)
+    return median_filter(np.nan_to_num(dem, nan=0.0), size=3)
+
+
+def prepare_dem(source: str = "copernicus", project: str | None = None):
+    print(f"[1/4] Elevation ({'FABDEM V1-2' if source == 'fabdem' else 'Copernicus GLO-30'})")
+    dem = build_dem(source, project)
     write_raster(C.DEM_FILE, dem, "float32")
+    with rasterio.open(C.DEM_FILE, "r+") as dst:
+        dst.update_tags(source=source)
     print(f"  elevation range: p2={np.percentile(dem, 2):.2f} m  "
           f"median={np.median(dem):.2f} m  p98={np.percentile(dem, 98):.2f} m")
 
@@ -165,8 +209,15 @@ def prepare_waterways():
 
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--dem", choices=DEM_SOURCES, default=C.DEM_SOURCE, help="elevation source")
+    ap.add_argument("--dem-only", action="store_true", help="rebuild only dem.tif")
+    ap.add_argument("--gee-project", help="Google Cloud project for Earth Engine (FABDEM only)")
+    args = ap.parse_args()
     print(f"Grid: {C.WIDTH} x {C.HEIGHT} cells at {C.RES} deg")
-    prepare_dem()
+    prepare_dem(args.dem, args.gee_project)
+    if args.dem_only:
+        sys.exit(0)
     prepare_population()
     prepare_districts()
     prepare_waterways()

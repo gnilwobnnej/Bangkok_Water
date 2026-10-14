@@ -85,3 +85,38 @@ def test_sampled_days_are_every_nth_day_and_stop_before_today():
     assert all((d - ft.FIRST_DAY).days % 3 == 0 for d in days) and len(days) == 20  # 59 days / 3
     current = ft.months_between(f"{dt.date.today():%Y-%m}", f"{dt.date.today():%Y-%m}")
     assert all(d < dt.date.today() for d in ft.sampled_days(current, every=1))
+
+
+def test_daily_adds_only_uncounted_days_and_starts_a_band_each_new_year():
+    import datetime as dt
+    today = dt.date.today()
+    counted = today - dt.timedelta(days=4)
+    through = {counted.year: counted}
+    assert ft.days_to_add(through, every=1) == [today - dt.timedelta(days=k) for k in (3, 2, 1)]
+    new_year = ft.days_to_add({today.year - 1: dt.date(today.year - 1, 12, 31)}, every=1)
+    assert all(d.year == today.year for d in new_year) and len(new_year) == today.timetuple().tm_yday - 1
+
+
+def test_other_counts_keep_their_through_day(tmp_path, monkeypatch):
+    import datetime as dt
+    monkeypatch.setattr(C, "TRAFFY_OTHER_FILE", tmp_path / "other_counts.tif")
+    bands = {2025: np.ones((C.HEIGHT, C.WIDTH)), 2026: np.zeros((C.HEIGHT, C.WIDTH))}
+    through = {2025: dt.date(2025, 12, 30), 2026: dt.date(2026, 10, 13)}
+    ft.save_other_counts(bands, through, every=3)
+    got_bands, got_through, every = ft.read_other_counts()
+    assert got_through == through and every == 3 and got_bands[2025].sum() == C.HEIGHT * C.WIDTH
+
+
+def test_flood_reports_are_saved_and_loaded_by_month(tmp_path, monkeypatch):
+    from src.traffy import load_reports
+    monkeypatch.setattr(ft, "RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(C, "TRAFFY_REPORTS_DIR", tmp_path / "reports")
+    rows = {"2026-09": [report_row(feature(100.5, 13.7, [FLOOD_TYPE], ticket="A", timestamp="2026-09-30 23:00:00"))],
+            "2026-10": [report_row(feature(100.5, 13.7, [FLOOD_TYPE], ticket=t, timestamp=f"2026-10-0{d} 08:00:00"))
+                        for t, d in (("C", 2), ("B", 1))]}
+    for m, r in rows.items():
+        ft.write_month(ft.cache_path("flood", m), r)
+    ft.write_flood_reports(["2026-08", "2026-09", "2026-10"])  # August has no cache: no file
+    assert [p.name for p in sorted((tmp_path / "reports").iterdir())] == ["2026-09.parquet", "2026-10.parquet"]
+    df = load_reports()
+    assert list(df["ticket_id"]) == ["A", "B", "C"] and "is_flood" not in df and df["types"][0] == FLOOD_TYPE

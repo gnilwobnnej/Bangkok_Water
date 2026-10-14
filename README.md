@@ -202,6 +202,7 @@ LightGBM model learns from them (`docs/URBAN_FLOOD_DATA.md` ranks this source ag
 
 ```bash
 python scripts/fetch_traffy.py --all        # flood reports + every report on every 3rd day (~1-2 h first time; cached)
+                                            # (the daily Update data workflow runs --daily: only what's new)
 python scripts/build_traffy_labels.py       # storm days (with ERA5 rain) -> flood_labels/traffy_YYYY.tif
 python scripts/train_model.py --kind street # trains on 2022-2025
 python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm

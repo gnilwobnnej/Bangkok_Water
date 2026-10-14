@@ -1,6 +1,7 @@
 name: Update data
 
-# Daily: fetch new Sentinel-1 radar passes plus rain and river flow, re-score the models, and commit the results.
+# Daily: fetch new Sentinel-1 radar passes plus rain and river flow, and new Traffy Fondue street-flood reports;
+# re-score the models and commit the results.
 # The push redeploys the Streamlit Community Cloud app. Needs the repo secret GEE_SERVICE_ACCOUNT_KEY
 # (a Google Cloud service account's JSON key with Earth Engine access; see the README).
 on:
@@ -57,21 +58,45 @@ jobs:
         if: steps.radar.outcome == 'success'
         run: python scripts/evaluate_current.py
 
+      # Residents' flood reports (no key needed). Independent of the radar: a failure here doesn't stop the rest.
+      - name: Fetch new Traffy Fondue reports and rebuild the street-flood labels
+        id: traffy
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          {
+            python scripts/fetch_traffy.py --daily
+            python scripts/build_traffy_labels.py
+            python scripts/evaluate_street.py
+          } 2>&1 | tee "$RUNNER_TEMP/traffy.log"
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/processed/radar_flood
+          # Street-flood data is committed when a new storm day shows up, weekly (Mondays) and on manual runs,
+          # so the repo doesn't grow by a megabyte every day; runs in between re-fetch from the last commit.
+          msg="radar flood data and weather"
+          if [ "${{ steps.traffy.outcome }}" = success ]; then
+            storms() { python -c "import json, sys; print([s['date'] for s in json.load(sys.stdin)['storms']])"; }
+            old=$(git show HEAD:data/processed/traffy/summary.json | storms)
+            new=$(storms < data/processed/traffy/summary.json)
+            if [ "$old" != "$new" ] || [ "$(date -u +%u)" = 1 ] || [ "${{ github.event_name }}" = workflow_dispatch ]; then
+              git add data/processed/traffy data/processed/flood_labels/traffy_*.tif
+              msg="$msg, street-flood reports"
+            fi
+          fi
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
           passes=$(python -c "import json; print(len(json.load(open('data/processed/radar_flood/summary.json'))['passes']))")
-          git commit -m "Update radar flood data and weather (automated; $passes passes)"
+          git commit -m "Update $msg (automated; $passes passes)"
           git pull --rebase
           git push
 
-      # Fail the run (GitHub emails you) if the radar step failed, after the weather has still been saved.
+      # Fail the run (GitHub emails you) if a fetch failed, after the weather has still been saved.
       # The error's last line goes into the run's Annotations, so it's visible without opening the logs.
       - name: Report a radar failure
         if: steps.radar.outcome == 'failure'
@@ -79,4 +104,11 @@ jobs:
           reason=$(grep -v '^[[:space:]]*$' "$RUNNER_TEMP/radar.log" | tail -n 1 | cut -c1-500)
           echo "::error title=Radar fetch failed::${reason:-no output}"
           echo "Rain and river flow were still updated. Full output: the 'Fetch new radar passes' step."
+          exit 1
+
+      - name: Report a Traffy failure
+        if: always() && steps.traffy.outcome == 'failure'
+        run: |
+          reason=$(grep -v '^[[:space:]]*$' "$RUNNER_TEMP/traffy.log" | tail -n 1 | cut -c1-500)
+          echo "::error title=Traffy update failed::${reason:-no output}"
           exit 1
