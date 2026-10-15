@@ -75,7 +75,7 @@
   <div class="meta">
     <div><b>50 districts</b><span>Bangkok's khet, ~10.9 M people (WorldPop 2020)</span></div>
     <div><b>~65 m grid</b><span>Satellite elevation, population &amp; 5,500 river/canal segments</span></div>
-    <div><b>18 min</b><span>Suggested live demo length, plus Q&amp;A</span></div>
+    <div><b>20 min</b><span>Suggested live demo length, plus Q&amp;A</span></div>
   </div>
 </section>
 
@@ -90,6 +90,7 @@
     <li><b>The risk index and its weights</b> — how it works and every reason to change the weights</li>
     <li><b>The machine-learning model</b> — what ten real floods (2011 and nine radar-mapped wet seasons) teach us</li>
     <li><b>The current flood</b> — what satellite radar sees this week, which model saw it coming, and whether that's luck</li>
+    <li><b>Street flooding</b> — what 44,000 residents' reports show that satellites can't see, and two ideas that didn't work</li>
     <li><b>Buildings in 3D</b> — 2.1 million buildings, and which ones the water reaches</li>
     <li><b>How sure is this?</b> — ranges from elevation error, chance-flooded maps, and where the ML model disagrees with itself</li>
     <li><b>Key numbers cheat sheet</b></li>
@@ -119,20 +120,22 @@
     <li>Reset to the starting state before you go on: water level <b>1.0 m</b>, weights <b>0.50 / 0.30 / 0.20</b>, layers <b>Flood depth</b> only.</li>
   </ol>
 
-  <h3>Suggested agenda (about 18 minutes)</h3>
+  <h3>Suggested agenda (about 20 minutes)</h3>
   <table class="agenda">
     <tr><th>Time</th><th>Segment</th><th>Demo steps</th></tr>
     <tr><td>0:00–1:00</td><td>Hook: current flooding and why Bangkok is exposed</td><td>—</td></tr>
     <tr><td>1:00–2:30</td><td>What you're looking at</td><td>Steps 1–2</td></tr>
     <tr><td>2:30–5:00</td><td>Raise the water: the animation</td><td>Steps 3–4</td></tr>
     <tr><td>5:00–6:30</td><td>Why the east floods first: elevation</td><td>Step 5</td></tr>
-    <tr><td>6:30–7:30</td><td>River flood vs rain flood</td><td>Step 6</td></tr>
-    <tr><td>7:30–10:30</td><td>Risk index: changing the weights</td><td>Step 7</td></tr>
-    <tr><td>10:30–12:30</td><td>Machine learning: what really flooded in 2011</td><td>Step 8</td></tr>
-    <tr><td>12:30–14:30</td><td>The current flood from satellite radar</td><td>Step 9</td></tr>
-    <tr><td>14:30–16:30</td><td>Buildings in 3D: who the water reaches</td><td>Step 10</td></tr>
-    <tr><td>16:30–18:00</td><td>Charts, how sure we are (uncertainty), limitations</td><td>Steps 12–13</td></tr>
+    <tr><td>6:30–8:00</td><td>River flood vs rain flood; the flood defences</td><td>Steps 6–7</td></tr>
+    <tr><td>8:00–10:30</td><td>Risk index: changing the weights</td><td>Step 8</td></tr>
+    <tr><td>10:30–12:30</td><td>Machine learning: what really flooded in 2011</td><td>Step 9</td></tr>
+    <tr><td>12:30–14:30</td><td>The current flood from satellite radar</td><td>Step 10</td></tr>
+    <tr><td>14:30–16:30</td><td>Street flooding: what residents report</td><td>Step 11</td></tr>
+    <tr><td>16:30–18:30</td><td>Buildings in 3D: who the water reaches</td><td>Step 12</td></tr>
+    <tr><td>18:30–20:00</td><td>Charts, how sure we are (uncertainty), close</td><td>Steps 13–14</td></tr>
   </table>
+  <div class="note"><b>Residents' reports are frozen at 13 Oct 2026.</b> The Traffy Fondue data service has been offline since 14 Oct, so the street-flood layer and its scores stop there. The daily update catches up on its own once the service is back. Say “up to 13 October” if anyone asks how current the reports are.</div>
   <div class="note"><b>If something breaks live:</b> refresh the browser tab (it keeps no state). If the map background is blank, the internet is down. The flood overlay still works, so carry on and mention it.</div>
 </section>
 
@@ -143,10 +146,10 @@
     <img src="screenshots/01_overview.png" alt="App overview">
     <div class="dot" style="left:20.5%;top:16.5%">1</div>
     <div class="dot" style="left:20.5%;top:23.5%">2</div>
-    <div class="dot" style="left:20.5%;top:29%">3</div>
-    <div class="dot" style="left:15.5%;top:34.8%">4</div>
-    <div class="dot" style="left:11%;top:66.8%">5</div>
-    <div class="dot" style="left:92%;top:32.5%">6</div>
+    <div class="dot" style="left:20.5%;top:32.4%">3</div>
+    <div class="dot" style="left:14.5%;top:38.2%">4</div>
+    <div class="dot" style="left:9.5%;top:67%">5</div>
+    <div class="dot" style="left:92%;top:37.6%">6</div>
     <div class="dot" style="left:96%;top:52%">7</div>
     <figcaption>The app at its starting state: water at 1.0 m, flood depth shown on a dark basemap.</figcaption>
   </figure>
@@ -155,8 +158,8 @@
     <li><b>“Water must flow from rivers/canals”</b>. On: a river or tidal flood (low ground floods only if water can reach it). Off: rain pooling in every low spot.</li>
     <li><b>Animate rising water</b>. Plays 0 → 3 m in about 10 s. This is the moment that grabs the audience.</li>
     <li><b>Risk index weights</b>. How much low ground, nearness to water, and population density count toward risk (Section 5).</li>
-    <li><b>Map layers</b>. Flood depth, ground elevation (with an adjustable colour range), chance flooded (elevation uncertainty), risk index, ML flood susceptibility, ML model disagreement, observed 2011 flood, radar flood (with a date picker), rivers &amp; canals, flood defences, dark/light basemap.</li>
-    <li><b>Headline numbers</b>. Water level, flooded area, people affected (whole map area), and how many of the 50 districts are more than 25% flooded. The grey “range” under each is the middle 90% of 50 simulations with elevation error (Section 9).</li>
+    <li><b>Map layers</b>. Flood depth, ground elevation (with an adjustable colour range), chance flooded (elevation uncertainty), risk index, ML flood susceptibility, ML model disagreement, observed 2011 flood, ML street-flood susceptibility, reported street flooding (with a storm picker), radar flood (with a date picker), rivers &amp; canals, flood defences, dark/light basemap.</li>
+    <li><b>Headline numbers</b>. Water level, flooded area, people affected (whole map area), and how many of the 50 districts are more than 25% flooded. The grey “range” under each is the middle 90% of 50 simulations with elevation error (Section 10).</li>
     <li><b>Interactive map</b>. Zoom, pan, and hover any district for its details. The layer button is at the top right.</li>
   </ol>
   <p class="muted">Below the map are nine tabs: <i>Most affected districts</i>, <i>Elevation profile</i>, <i>Flood curve</i>, <i>Current flood</i>, <i>Buildings 3D</i>, <i>ML model</i>, <i>Validation</i>, <i>District table</i> and <i>Method &amp; limitations</i>.</p>
@@ -241,21 +244,25 @@
   <p class="do">Untick <b>Observed flood (2011)</b> and <b>Flood depth</b>, tick <b>Radar flood (Sentinel-1)</b>, then open the <b>Current flood</b> tab. The full talk track is in Section 7.</p>
   <div class="say">Everything so far was history or simulation. This is Bangkok this week, seen from space through the monsoon clouds. And a model trained on past floods, none of them from this year, predicted it.</div>
 
-  <div class="step"><div class="n">11</div><h3>Show the buildings in 3D</h3></div>
-  <p class="do">Set the water level to <b>1.5 m</b>, open the <b>Buildings 3D</b> tab, start on <b>Whole city</b>, then switch to <b>District</b> and pick Lat Krabang or Nong Chok. Right-drag to tilt and rotate. The full talk track is in Section 8.</p>
+  <div class="step"><div class="n">11</div><h3>Show where streets flood (residents' reports)</h3></div>
+  <p class="do">Untick <b>Radar flood</b>. Tick <b>ML street-flood susceptibility</b>, then <b>Reported street flooding</b>, and pick <b>Storm 2026-09-26</b> under <i>Reports from</i>. Hover a dot to read a report. The full talk track is in Section 8.</p>
+  <div class="say">Radar can't see water between buildings, so in the city centre every model so far is half blind. Residents can see it. These dots are 3,800 flood reports from one day of the September storm, on top of a model that had never seen a single report from this year.</div>
+
+  <div class="step"><div class="n">12</div><h3>Show the buildings in 3D</h3></div>
+  <p class="do">Set the water level to <b>1.5 m</b>, open the <b>Buildings 3D</b> tab, start on <b>Whole city</b>, then switch to <b>District</b> and pick Lat Krabang or Nong Chok. Right-drag to tilt and rotate. The full talk track is in Section 9.</p>
   <div class="say">Maps of blue areas are abstract. These are 2.1 million real buildings. At one and a half metres, the water reaches about 140,000 of them, and 58 hospitals, schools and emergency stations.</div>
 
-  <div class="step"><div class="n">12</div><h3>Show the charts</h3></div>
+  <div class="step"><div class="n">13</div><h3>Show the charts</h3></div>
   <div class="grid2">
     <figure><img src="screenshots/15_tab_top.png" alt="Top districts"><figcaption>Most affected districts at the current level.</figcaption></figure>
-    <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve"><figcaption>Flooded area and people affected across all levels. The shaded bands are the 90% range with elevation error (Section 9).</figcaption></figure>
+    <figure><img src="screenshots/17_tab_curve.png" alt="Flood curve"><figcaption>Flooded area and people affected across all levels. The shaded bands are the 90% range with elevation error (Section 10).</figcaption></figure>
   </div>
   <div class="note"><b>About the steps in the flood curve:</b> the jumps at exactly 0.5, 1.0, 1.5 and 2.0 m come from the elevation data, not from the real world. The Copernicus dataset rounds many flat areas to 0.5 m heights, so big patches flip to “flooded” together. The shaded uncertainty bands are smooth, because a little elevation error breaks those plateaus up. Point the audience to the overall trend: the number of people affected climbs faster once the water passes about 1.5 m.</div>
-  <p class="do">Then tick <b>Chance flooded (elevation uncertainty)</b> with <b>Flood depth</b> off. The full talk track is in Section 9.</p>
+  <p class="do">Then tick <b>Chance flooded (elevation uncertainty)</b> with <b>Flood depth</b> off. The full talk track is in Section 10.</p>
   <div class="say">One more honest question: how sure is all this? Here is the same flood rerun fifty times with realistic errors in the elevation. The dark blue floods every time; the pale areas only sometimes.</div>
 
-  <div class="step"><div class="n">13</div><h3>Close</h3></div>
-  <div class="say">This isn't a forecast. It models Bangkok's main walls and dikes but not its pumps or drainage tunnels. It also shows how much its answers depend on imperfect elevation data. From free satellite data it shows where the terrain puts people at risk, and a model trained on ten real floods tells us which of those warnings to trust. Every score has an error bar, and this year's floods are kept out of training, so the test stays honest.</div>
+  <div class="step"><div class="n">14</div><h3>Close</h3></div>
+  <div class="say">This isn't a forecast. It models Bangkok's main walls and dikes but not its pumps or drainage tunnels. It also shows how much its answers depend on imperfect elevation data. From free satellite data and residents' reports it shows where the terrain puts people at risk, and models trained on real floods, from space and from the street, tell us which of those warnings to trust. Every score has an error bar, and this year's floods are kept out of training, so the test stays honest.</div>
 </section>
 
 <!-- ============================ RISK WEIGHTS ============================ -->
@@ -417,9 +424,62 @@
   <div class="note"><b>Be honest about the limits:</b> passes a few days apart see the same flood, so “9 of 9” is a trend, not 9 independent trials. On quiet passes under 0.5% of cells flooded, so PR-AUC is low for every method; compare it with the random-guess line. Most detected flooding is farmland on the city's edge, so the scores mostly describe the rural fringe.</div>
 </section>
 
+<!-- ============================ STREET FLOODING ============================ -->
+<section class="page">
+  <h2>8. Street flooding: what residents report</h2>
+  <p>Everything so far comes from satellites, and satellites can't see water between buildings. Radar bounces off walls and roofs, so a flooded street in the city centre looks dry. That's why the ML model and the radar maps mostly describe the farmland on the edge. For the streets of the dense city we need a different witness: <b>the people who live there</b>.</p>
+  <h3>The data: Traffy Fondue</h3>
+  <ul>
+    <li><b>Bangkok's complaint app.</b> Residents report problems with a pin, a time and usually a photo. Since 2022 they have filed <b>44,443 flood reports</b>, plus about <b>1.4 million reports</b> of other problems (counted on every third day and scaled up).</li>
+    <li><b>Storm days, not complaints:</b> many flood reports are long-running drain complaints. A day counts as a storm when it has at least 15 flood reports, at least 3× the usual for the time of year, and at least 10 mm of rain that day or the day before. <b>164 storm days</b> in 2022–2026 hold 62% of all flood reports.</li>
+    <li><b>Flooded vs dry:</b> a cell is <i>flooded</i> if someone reported a flood there on a storm day. It is <i>dry</i> if nobody reported a flood all year, but people reported at least 5 other problems there. So people do use the app there, and would probably have reported a flood. Places where nobody reports anything stay unknown.</li>
+  </ul>
+  <h3>A second model, for the streets</h3>
+  <p>The same kind of model (LightGBM), trained on 2022–2025 and tested on <b>2026, which it never saw</b>. Because both flooded and dry cells are busy, built-up places, population and building density can safely be factors here (in the river model they taught the lesson “dense city = dry”). It also uses small dips in the ground (300 m) and building height. Its strongest factors: distance to the Chao Phraya, number of buildings, ground elevation, and local dips.</p>
+  <table>
+    <tr><th>ROC-AUC</th><th class="num">ML street</th><th class="num">ML, all floods (radar)</th><th class="num">Bathtub + defences</th><th class="num">Risk index</th></tr>
+    <tr><td>2022–2025, each year left out</td><td class="num"><b>0.71–0.74</b></td><td class="num"></td><td class="num">0.52–0.56</td><td class="num"></td></tr>
+    <tr><td>2026, Bangkok (50 districts)</td><td class="num"><b>0.78</b></td><td class="num">0.67</td><td class="num">0.60</td><td class="num">0.59</td></tr>
+    <tr><td>2026, dense city (95% interval)</td><td class="num"><b>0.79</b> (0.75–0.82)</td><td class="num">0.67</td><td class="num">0.56</td><td class="num">0.58</td></tr>
+    <tr><td>2026 storm days, dense city: best method</td><td class="num"><b>25 of 25</b></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+    <tr><td>25–29 Sep 2026 storm, dense city</td><td class="num"><b>0.81–0.82</b></td><td class="num">0.66–0.75</td><td class="num">0.54–0.61</td><td class="num">0.58–0.61</td></tr>
+  </table>
+  <p class="muted" style="font-size:9pt"><i>Dense city</i> = cells at least 90% built-up (ESA WorldCover), about 30% of Bangkok, the part radar can't test at all. About a third of the 2026 cells scored are flooded, so a random guess scores PR-AUC ≈ 0.32; the street model scores 0.63.</p>
+</section>
+
+<section class="page">
+  <div class="grid2">
+    <figure><img src="screenshots/32_ml_street.png" alt="ML street-flood susceptibility"><figcaption><span class="pill">ML street model</span> Chance a street floods in a downpour (darker = higher). Highest in the built-up suburbs: the north, the inner east and the Thonburi side. Lowest in the old centre along the Chao Phraya, where few floods are reported.</figcaption></figure>
+    <figure><img src="screenshots/33_reports_storm.png" alt="Reported street flooding, 26 Sep 2026"><figcaption><span class="pill">26 Sep 2026</span> 3,787 flood reports in a day (dots) on top of the street model. Few fall in the pale old centre; most are in the darker suburbs to its north and east. No 2026 report was used to train the model.</figcaption></figure>
+  </div>
+  <figure><img src="screenshots/35_validation_street.png" alt="Validation tab, street flooding" style="max-height:120mm;width:auto;margin:0 auto"><figcaption>The <b>Validation</b> tab's street-flooding section: every method scored on the 2026 reports, for the year and storm by storm, with 95% intervals. Switch between the dense city and all 50 districts.</figcaption></figure>
+  <h3>What to point out</h3>
+  <ul>
+    <li><b>A different map for a different flood.</b> The river model's danger zone is farmland on the city's edge. The street model's is the built-up suburbs, where radar sees no water at all. Both are right, about different kinds of flooding.</li>
+    <li><b>Tested on a year it never saw.</b> On every one of 2026's 25 storm days, the street model was the best method in the dense city.</li>
+    <li><b>The bathtub can't do this.</b> In the dense city it barely beats a coin flip (0.56). Street flooding is about drains and small dips, not a rising water level.</li>
+  </ul>
+  <div class="say">Satellites told us where the river spreads. Residents told us where the streets fill up. A model trained on four years of their reports picked out this year's flooded streets far better than anything built from satellites, on every storm day of the year.</div>
+  <div class="note"><b>Be honest about the limits:</b> reports follow people. A flooded lane nobody reports looks unknown, not flooded, and the app was little used before mid-2022. Choosing dry cells only where people <i>do</i> report keeps this bias the same on both sides, but doesn't remove it. Some storm-day reports are still drain complaints. The model says where streets flood in a storm, not how deep or for how long, and covers only Bangkok's 50 districts. 2026 had one exceptional storm (25–29 Sep), so 36% of its scored cells are flooded, against 6–30% in earlier years.</div>
+</section>
+
+<section>
+  <figure><img src="screenshots/34_tab_ml_street.png" alt="ML model tab, street-flood section" style="max-height:110mm;width:auto;margin:0 auto"><figcaption>The street-flood section at the bottom of the <b>ML model</b> tab: how it compares with the existing methods (cross-validation over 2022–2025) and what drives it.</figcaption></figure>
+  <h3>Two ideas that didn't work, and why that's worth saying</h3>
+  <p><b>1. Better elevation (FABDEM).</b> FABDEM is the same satellite elevation with buildings and trees removed by machine learning (Hawker et al. 2022). It puts the dense city about 0.7 m lower. We ran the bathtub on both maps and scored them on every flood:</p>
+  <table>
+    <tr><th>Bathtub + defences, ROC-AUC</th><th class="num">Copernicus (in use)</th><th class="num">FABDEM</th></tr>
+    <tr><td>River floods: 2011, wet seasons 2017–2025, 2026 radar passes</td><td class="num"><b>better on all 19</b></td><td class="num">e.g. seasons 0.77–0.81 → 0.64–0.70</td></tr>
+    <tr><td>Street flooding 2022–2026, dense city</td><td class="num">0.51–0.56</td><td class="num"><b>better on all 5</b> (2026: 0.56 → 0.68)</td></tr>
+  </table>
+  <p>Lowering the city makes it flood earlier. That matches where rain pools in streets, but not where the river spreads, and river floods are what the bathtub is for. So the app keeps the original elevation.</p>
+  <p><b>2. Seeing street floods from space (“double bounce”).</b> In a flooded street, radar can bounce off the water, then off a wall, and back to the satellite, so the street gets <i>brighter</i>. We tested this on the 16 radar passes since 2022 that came within six hours of a burst of flood reports. It scored a median ROC-AUC of <b>0.52</b>, barely above a coin flip, against 0.82 for the street model; only the 27 Sep 2026 storm showed a real signal (0.69). The city does brighten after rain (3.6% of built-up ground vs 1.7% in the dry season), but because roofs and roads are wet, not because streets are flooded. And a pass at 06:00 or 18:00 rarely catches water that drains in hours. It is not used in the app.</p>
+  <div class="say">Not everything worked. A cleaner elevation map helped the streets but hurt the river floods, so we kept the old one. Looking for street floods in radar didn't beat a coin flip. We tested both against real floods before trusting them, and that's why the residents' reports are the street data we use.</div>
+</section>
+
 <!-- ============================ BUILDINGS 3D ============================ -->
 <section class="page">
-  <h2>8. Buildings in 3D</h2>
+  <h2>9. Buildings in 3D</h2>
   <p>The <b>Buildings 3D</b> tab turns flooded area into something people recognise: <b>2,116,261 buildings</b> across Bangkok's 50 districts, each with its footprint and height, coloured by whether the water reaches it. Footprints and heights come from Google Open Buildings, which is mapped from satellite imagery by AI. Hospitals, clinics, schools, universities, police and fire stations come from OpenStreetMap.</p>
   <figure><img src="screenshots/27_tab_buildings.png" alt="Buildings 3D tab, whole city" style="max-height:112mm;width:auto;margin:0 auto"><figcaption><span class="pill">Whole city at 1.5 m</span> Each column is a ~520 m block: height = buildings affected, redder = a larger share affected. The eastern districts and the southwest light up, and the protected centre stays grey.</figcaption></figure>
   <h3>How to use it</h3>
@@ -455,7 +515,7 @@
 
 <!-- ============================ UNCERTAINTY ============================ -->
 <section class="page">
-  <h2>9. How sure is this? Uncertainty</h2>
+  <h2>10. How sure is this? Uncertainty</h2>
   <p>Every number so far came from one simulation on one elevation map. But satellite elevation has errors, and in a city this flat a few tens of centimetres decide whether a street floods. The app now shows how much the answers move when the elevation is a little wrong, and where the ML model is least sure of itself.</p>
   <h3>Elevation error: ranges on every headline number</h3>
   <ul>
@@ -492,7 +552,7 @@
 
 <!-- ============================ NUMBERS ============================ -->
 <section class="page">
-  <h2>10. Key numbers cheat sheet</h2>
+  <h2>11. Key numbers cheat sheet</h2>
   <p>River/tidal mode (connectivity on). <b>Greater Bangkok</b> is the whole map area (about 18 M people, including neighbouring provinces). The headline cards use this. <b>Bangkok (50 districts)</b> covers only the city proper (about 10.9 M people, 1,581 km²). The table and district counts use this.</p>
   <table>
     <tr><th class="num">Water level</th><th class="num">Flooded area<br>greater Bangkok</th><th class="num">People affected<br>greater Bangkok</th><th class="num">Flooded area<br>Bangkok (50)</th><th class="num">People affected<br>Bangkok (50)</th><th class="num">Districts &gt;25% flooded</th></tr>
@@ -519,6 +579,9 @@
     <li><b>Models vs the 27 Sep flood:</b> ML 0.96 (0.98 in Bangkok), 2011-only ML 0.91, bathtub 0.70, risk index 0.39 ROC-AUC.</li>
     <li><b>Flood defences at 2.0 m:</b> people affected in Bangkok fall from 1.93 M to 0.80 M; at 2.5 m the King's Dike is overtopped. With defences the bathtub scores 0.72 vs 0.67 on 2011 and beats the plain bathtub on all 9 radar passes.</li>
     <li><b>Across all 9 radar passes:</b> ML beats the bathtub on all 9, every one clear of the 95% interval.</li>
+    <li><b>Street flooding (Traffy Fondue):</b> 44,443 flood reports since 2022, 164 storm days. The street model scores 0.79 ROC-AUC in the dense city in 2026, a year it never saw (river ML 0.67, bathtub 0.56), and is the best method on all 25 storm days of 2026.</li>
+    <li><b>Biggest storm day:</b> 26 Sep 2026, 3,787 flood reports after about 126 mm of rain (wettest point in the city, ERA5).</li>
+    <li><b>Tried and dropped:</b> FABDEM elevation (helps street floods, hurts all 19 river-flood tests); radar double bounce (median 0.52 ROC-AUC on 16 storm passes).</li>
     <li><b>Buildings:</b> 2,116,261 mapped. Affected at 1.0 / 1.5 / 2.0 m: 36,711 / 139,517 / 353,200. Critical facilities affected: 17 / 58 / 148 of 1,390.</li>
   </ul>
   <figure><img src="screenshots/18_tab_table.png" alt="District table"><figcaption>District table (1.5 m, balanced weights). Every column can be sorted live, which is useful for audience questions about a specific district.</figcaption></figure>
@@ -526,7 +589,7 @@
 
 <!-- ============================ Q&A ============================ -->
 <section>
-  <h2 style="margin-top:24px">11. Anticipated questions</h2>
+  <h2 style="margin-top:24px">12. Anticipated questions</h2>
   <table class="qa">
     <tr><th style="width:32%">Question</th><th>Suggested answer</th></tr>
     <tr><td>Is this a forecast of the current flood?</td><td>No. It's a “what-if” tool: it shows where water <i>would</i> go at a given height. The <i>Current flood</i> tab shows recent rainfall and modelled river flow for context, but they don't set the water level. Driving the simulation from live river gauges is a planned next step.</td></tr>
@@ -550,24 +613,29 @@
     <tr><td>Isn't this just rice paddies?</td><td>We compare against the same weeks last year, so paddies flooded on the usual schedule mostly cancel out. The jump came right after about 200 mm of rain, which points to real flooding, but some field-management changes can still slip through.</td></tr>
     <tr><td>Are these real buildings?</td><td>Yes. They're Google's AI-mapped footprints from satellite imagery, with heights from the same project. They're good at city scale, but individual buildings can be wrong, merged or missing.</td></tr>
     <tr><td>Does “affected” mean the building floods inside?</td><td>No. It means the building stands in a ~65 m area that floods in that scenario. Raised ground floors, walls and pumps can keep water out, so treat it as “in the flood zone”.</td></tr>
-    <tr><td>Can I zoom in to my street?</td><td>You can zoom the map, but the model works on ~65 m cells, so it's meant for district-scale patterns, not individual buildings.</td></tr>
+    <tr><td>Can satellites see flooded streets in the city?</td><td>Not well. Radar bounces off buildings, so water between them is mostly missed. We tested the one radar trick that should help (“double bounce”, streets getting brighter when flooded) and it barely beat a coin flip. That's why the street model learns from residents' reports instead.</td></tr>
+    <tr><td>Aren't complaint-app reports biased?</td><td>Yes: they follow people and app use. The model only treats a place as dry if people there report other problems but never a flood, so both sides have the same reporting habits. It was then tested on a year it never saw, and it beat every satellite-based method on every storm day.</td></tr>
+    <tr><td>Why not use a better elevation map with the buildings removed?</td><td>We tried FABDEM. It helped on street flooding but made the bathtub worse on every one of the 19 river-flood tests, so the app keeps the original elevation. The street model covers the dense city instead.</td></tr>
+    <tr><td>How current are the street reports?</td><td>They update daily from Traffy Fondue's public data service, which has been offline since 14 Oct 2026; until it's back, the reports stop at 13 Oct.</td></tr>
+    <tr><td>Can I zoom in to my street?</td><td>You can zoom the map, but the model works on ~65 m cells, so it's meant for district-scale patterns, not individual buildings. The street-flood layer is the closest to street level, but it gives a chance of flooding in a storm, not a forecast for your street.</td></tr>
   </table>
 </section>
 
 <!-- ============================ LIMITS & NEXT ============================ -->
 <section>
-  <h2 style="margin-top:24px">12. Limitations and next steps</h2>
+  <h2 style="margin-top:24px">13. Limitations and next steps</h2>
   <h3>Limitations (say these out loud, because it builds credibility)</h3>
   <ul>
     <li><b>“Bathtub” model:</b> water is static. There's no flow speed, rainfall timing, tide cycle or flood duration.</li>
     <li><b>Flood defences, simplified:</b> the river walls, King's Dike and airport dike are modelled (when switched on) with one crest height per section; pumping stations, drainage tunnels, gate capacity and the west bank's polder dikes are not.</li>
-    <li><b>Surface elevation:</b> buildings and trees inflate heights, especially in the centre. Ground subsidence of a few cm per year isn't included. Its effect is now <i>shown</i>, not just mentioned: ranges on every headline number and a chance-flooded map (Section 9). But the error size behind them (0.7 m) is an assumption.</li>
+    <li><b>Surface elevation:</b> buildings and trees inflate heights, especially in the centre. Ground subsidence of a few cm per year isn't included. Its effect is now <i>shown</i>, not just mentioned: ranges on every headline number and a chance-flooded map (Section 10). But the error size behind them (0.7 m) is an assumption.</li>
     <li><b>Elevation rounding:</b> many flat areas are stored in 0.5 m steps, which makes the curve jump at those levels and puts the single simulation outside its own uncertainty range.</li>
     <li><b>Population:</b> 2020 modelled estimates of where people live, not where they are during the day.</li>
     <li><b>Risk index:</b> relative, not absolute. It has no vulnerability factor (for example income, building type, or access to hospitals). Against 2011 it scored below random.</li>
-    <li><b>ML model:</b> trained on one extreme river flood and nine ordinary seasons, with satellite labels that under-count urban flooding. It says nothing about cloudbursts and under-rates places that flood only in extreme years. Where its five cross-validation versions disagree is shown as a map layer.</li>
+    <li><b>ML model:</b> trained on one extreme river flood and nine ordinary seasons, with satellite labels that under-count urban flooding. On its own it says nothing about cloudbursts in the city (the street model covers that) and under-rates places that flood only in extreme years. Where its five cross-validation versions disagree is shown as a map layer.</li>
     <li><b>Uncertainty shown is partial:</b> the ranges cover elevation error and the model's training data, not every limit on this list, so the real uncertainty is larger.</li>
     <li><b>Radar flood maps:</b> under-count water between buildings, can mistake smooth surfaces or field flooding for floodwater, and are snapshots every 4–8 days.</li>
+    <li><b>Street model:</b> learns from complaint-app reports, which follow people and app use; it gives the chance a street floods in a storm, not depth or duration, and covers only the 50 districts.</li>
     <li><b>Buildings:</b> AI-estimated footprints and heights; “affected” is judged per ~65 m cell, not per building; small sheds left out in the six largest districts.</li>
   </ul>
   <h3>Next steps</h3>
@@ -575,11 +643,12 @@
     <li><b>Keep testing:</b> after the 2026 season, score it as a whole, then add it to training and hold out 2027.</li>
     <li><b>Go live:</b> rainfall and modelled river flow are now shown next to each radar pass; the next step is using real river-gauge levels to set the simulated water level.</li>
     <li><b>Refine defences:</b> surveyed crest heights along each wall, the west bank's polder dikes, and pumping capacity.</li>
+    <li><b>A second street-flood test:</b> Bangkok's drainage department tracks about 737 flood-prone points. Their website couldn't be reached from outside Thailand, so the next step is a data request.</li>
     <li><b>Add vulnerability:</b> hospitals, schools and income data to go beyond exposure.</li>
-    <li><b>Share it:</b> deploy on Streamlit Community Cloud so anyone can open a link.</li>
+    <li><b>Keep it current:</b> the app is on Streamlit Community Cloud, and radar, weather and residents' reports update daily through GitHub Actions.</li>
   </ol>
 
-  <h2 style="margin-top:24px">13. Appendix</h2>
+  <h2 style="margin-top:24px">14. Appendix</h2>
   <h3>Data sources</h3>
   <table>
     <tr><th>Layer</th><th>Source</th><th>Resolution</th></tr>
@@ -596,6 +665,8 @@
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
     <tr><td>Flood defences</td><td>Routes: Royal Development Projects Board and Think of Living (2011), traced on OpenStreetMap roads. Crests: BMA flood-wall figures, JICA (Rom Klao Road 2.47 m), Airports of Thailand (3.5 m)</td><td>Lines, ~65 m grid</td></tr>
+    <tr><td>Street flooding</td><td>Traffy Fondue public API (Bangkok's complaint app): flood reports, and every report on every third day; storm-day rain from the Open-Meteo archive (ERA5)</td><td>Points, ~65 m grid</td></tr>
+    <tr><td>Building-free elevation (tested, not used)</td><td>FABDEM V1-2 (Hawker et al. 2022), via the Google Earth Engine community catalog; CC BY-NC-SA 4.0</td><td>30 m</td></tr>
     <tr><td>Basemap</td><td>Esri World Gray Canvas tiles</td><td>Online tiles</td></tr>
   </table>
   <h3>Rebuilding the ML model</h3>
@@ -614,6 +685,13 @@ python scripts/fetch_current_flood.py --weather-only               # just refres
   <pre>python scripts/prepare_defences.py               # routes from OpenStreetMap roads, crests from the sources in the script
 python scripts/train_model.py --baselines-only    # re-score the bathtub on 2011 without retraining the ML model
 python scripts/evaluate_current.py                # and on every radar pass</pre>
+  <h3>Rebuilding the street-flood model</h3>
+  <pre>python scripts/fetch_traffy.py --all        # flood reports + every report on every 3rd day (~1-2 h the first time)
+python scripts/build_traffy_labels.py       # storm days and flooded/dry labels per year
+python scripts/train_model.py --kind street # trains on 2022-2025
+python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
+python scripts/compare_dem.py               # optional: FABDEM vs Copernicus elevation
+python scripts/double_bounce.py --gee-project YOUR_PROJECT   # optional: the radar double-bounce test</pre>
   <h3>Rebuilding the building data</h3>
   <pre>python scripts/prepare_buildings.py --gee-project YOUR_PROJECT   # all 50 districts, about 45 min</pre>
   <h3>Regenerating the screenshots and this PDF</h3>

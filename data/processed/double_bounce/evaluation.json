@@ -1,0 +1,891 @@
+{
+  "method": {
+    "bright_db": 3.0,
+    "baseline_days": 60,
+    "window_hours": 6,
+    "min_wet_reports": 20,
+    "built_up": "ESA/WorldCover/v200 class 50",
+    "min_built_pct": 25,
+    "speckle_radius_m": 30
+  },
+  "summary": {
+    "wet_passes": 17,
+    "control_passes": 12,
+    "median_bright_pct_wet": 3.577622413635254,
+    "median_bright_pct_control": 1.68614262342453,
+    "scored_passes": 16
+  },
+  "results": [
+    {
+      "pass": "2022-02-06T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 11,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 1.6402907371520996
+    },
+    {
+      "pass": "2022-03-09T18",
+      "kind": "control",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 1.8075159788131714
+    },
+    {
+      "pass": "2022-06-25T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 30,
+      "bright_pct_bangkok": 2.769803047180176,
+      "n_flooded": 29,
+      "n_dry": 9974,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.4354805252276609,
+          "pr_auc": 0.00261531260869431,
+          "roc_auc_ci": [
+            0.3842337808312905,
+            0.5048851077529434
+          ],
+          "pr_auc_ci": [
+            0.0016558428989573205,
+            0.0041484215334146
+          ],
+          "roc_auc_diff_ci": [
+            -0.4119399049494161,
+            -0.18407365502062614
+          ],
+          "pr_auc_diff_ci": [
+            -0.02650828858480682,
+            -0.0037970565695529053
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.7465859510589602,
+          "pr_auc": 0.011568528102484793,
+          "roc_auc_ci": [
+            0.6396370544697778,
+            0.8231758051580347
+          ],
+          "pr_auc_ci": [
+            0.006225729306719378,
+            0.029398904875429968
+          ]
+        }
+      },
+      "bright_pct_flooded": 0.42256441712379456,
+      "bright_pct_dry": 3.1848645210266113
+    },
+    {
+      "pass": "2022-08-17T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 51,
+      "bright_pct_bangkok": 2.962796211242676,
+      "n_flooded": 43,
+      "n_dry": 9974,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.6119422125433103,
+          "pr_auc": 0.04763820025584424,
+          "roc_auc_ci": [
+            0.3614599170274513,
+            0.6776150185550314
+          ],
+          "pr_auc_ci": [
+            0.0008818316965172718,
+            0.07888922258591101
+          ],
+          "roc_auc_diff_ci": [
+            -0.4750385652454779,
+            -0.2743844319114429
+          ],
+          "pr_auc_diff_ci": [
+            -0.17366847286990297,
+            -0.004005301179789086
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.940093079215262,
+          "pr_auc": 0.1127785739321491,
+          "roc_auc_ci": [
+            0.842926903927256,
+            0.9709334775746803
+          ],
+          "pr_auc_ci": [
+            0.004888162242508962,
+            0.24790665361674408
+          ]
+        }
+      },
+      "bright_pct_flooded": 11.752370834350586,
+      "bright_pct_dry": 3.588834762573242
+    },
+    {
+      "pass": "2022-09-10T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 99,
+      "bright_pct_bangkok": 3.680018663406372,
+      "n_flooded": 88,
+      "n_dry": 9974,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.524945540222761,
+          "pr_auc": 0.013229706236272915,
+          "roc_auc_ci": [
+            0.4739412614724095,
+            0.5837848356832486
+          ],
+          "pr_auc_ci": [
+            0.008073222813851358,
+            0.03079858892971258
+          ],
+          "roc_auc_diff_ci": [
+            -0.4503757078856407,
+            -0.32948623489722123
+          ],
+          "pr_auc_diff_ci": [
+            -0.1638591252918561,
+            -0.04913426437314694
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.9129429699035674,
+          "pr_auc": 0.10906600810205681,
+          "roc_auc_ci": [
+            0.8772954711701412,
+            0.942547747106582
+          ],
+          "pr_auc_ci": [
+            0.06562986075214458,
+            0.18105229177851515
+          ]
+        }
+      },
+      "bright_pct_flooded": 7.754819869995117,
+      "bright_pct_dry": 4.913764953613281
+    },
+    {
+      "pass": "2022-09-22T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 67,
+      "bright_pct_bangkok": 6.244484901428223,
+      "n_flooded": 61,
+      "n_dry": 9974,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.5194933055452372,
+          "pr_auc": 0.007450414492564892,
+          "roc_auc_ci": [
+            0.43916535240679916,
+            0.594959808799494
+          ],
+          "pr_auc_ci": [
+            0.00503860056321839,
+            0.012844111705816175
+          ],
+          "roc_auc_diff_ci": [
+            -0.46572615407690326,
+            -0.295658992903023
+          ],
+          "pr_auc_diff_ci": [
+            -0.14727547068744334,
+            -0.04739025940726242
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.9038171376727031,
+          "pr_auc": 0.08703627036125566,
+          "roc_auc_ci": [
+            0.8695717358107273,
+            0.9391373643055468
+          ],
+          "pr_auc_ci": [
+            0.0539020014273762,
+            0.1567065575687766
+          ]
+        }
+      },
+      "bright_pct_flooded": 13.798354148864746,
+      "bright_pct_dry": 10.860006332397461
+    },
+    {
+      "pass": "2022-10-04T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 45,
+      "bright_pct_bangkok": 2.064089059829712,
+      "n_flooded": 36,
+      "n_dry": 9974,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.6345637546509815,
+          "pr_auc": 0.0288485628683645,
+          "roc_auc_ci": [
+            0.5432497284711282,
+            0.7276653610770182
+          ],
+          "pr_auc_ci": [
+            0.005375567525076906,
+            0.08521987640948378
+          ],
+          "roc_auc_diff_ci": [
+            -0.3394693586566854,
+            -0.14939028785523273
+          ],
+          "pr_auc_diff_ci": [
+            -0.06629958040014763,
+            0.019850885461194224
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.8749108793975446,
+          "pr_auc": 0.0566279357894465,
+          "roc_auc_ci": [
+            0.8099788833430028,
+            0.9332821282097108
+          ],
+          "pr_auc_ci": [
+            0.022127770786903686,
+            0.13220021296814416
+          ]
+        }
+      },
+      "bright_pct_flooded": 10.767851829528809,
+      "bright_pct_dry": 2.299201250076294
+    },
+    {
+      "pass": "2023-01-08T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 9,
+      "reports_in_window": 2,
+      "bright_pct_bangkok": 0.9972327351570129
+    },
+    {
+      "pass": "2023-02-13T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 9,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 1.9441674947738647
+    },
+    {
+      "pass": "2023-03-16T18",
+      "kind": "control",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 1.8915798664093018
+    },
+    {
+      "pass": "2023-09-24T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 8,
+      "reports_in_window": 55,
+      "bright_pct_bangkok": 2.3183271884918213,
+      "n_flooded": 49,
+      "n_dry": 15106,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.5219449225473323,
+          "pr_auc": 0.00396056077899767,
+          "roc_auc_ci": [
+            0.4607956697858898,
+            0.5897966584377996
+          ],
+          "pr_auc_ci": [
+            0.0022328845050240903,
+            0.007641043830399078
+          ],
+          "roc_auc_diff_ci": [
+            -0.3835104298854499,
+            -0.20047411308265378
+          ],
+          "pr_auc_diff_ci": [
+            -0.07692044424725557,
+            -0.005336452290012453
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.8113467550398951,
+          "pr_auc": 0.020818666337068654,
+          "roc_auc_ci": [
+            0.7542832455581422,
+            0.873727065198868
+          ],
+          "pr_auc_ci": [
+            0.008858466122720319,
+            0.08386377148521161
+          ]
+        }
+      },
+      "bright_pct_flooded": 3.6159636974334717,
+      "bright_pct_dry": 2.3937973976135254
+    },
+    {
+      "pass": "2024-01-15T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 1,
+      "bright_pct_bangkok": 1.6927984952926636
+    },
+    {
+      "pass": "2024-03-03T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 2,
+      "bright_pct_bangkok": 1.7103458642959595
+    },
+    {
+      "pass": "2024-10-24T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 30,
+      "bright_pct_bangkok": 2.994649648666382,
+      "n_flooded": 29,
+      "n_dry": 16949,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.698617149623312,
+          "pr_auc": 0.006497759185711421,
+          "roc_auc_ci": [
+            0.4870440457136505,
+            0.7796506049396974
+          ],
+          "pr_auc_ci": [
+            0.0008399357070524412,
+            0.017378965128921585
+          ],
+          "roc_auc_diff_ci": [
+            -0.3486919810189646,
+            0.004322411939025988
+          ],
+          "pr_auc_diff_ci": [
+            -0.007648178343393936,
+            0.008544488606002938
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.8206566962550939,
+          "pr_auc": 0.006340248956662552,
+          "roc_auc_ci": [
+            0.7476123831569023,
+            0.9076251008889861
+          ],
+          "pr_auc_ci": [
+            0.0021101329934116423,
+            0.01534945605694979
+          ]
+        }
+      },
+      "bright_pct_flooded": 13.918973922729492,
+      "bright_pct_dry": 3.901047468185425
+    },
+    {
+      "pass": "2024-11-17T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 38,
+      "bright_pct_bangkok": 1.9280105829238892,
+      "n_flooded": 36,
+      "n_dry": 16949,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.45841036180436734,
+          "pr_auc": 0.0020836955395589366,
+          "roc_auc_ci": [
+            0.405059721020736,
+            0.5018257308694402
+          ],
+          "pr_auc_ci": [
+            0.0012014952480703736,
+            0.003570485246389091
+          ],
+          "roc_auc_diff_ci": [
+            -0.4052491667922613,
+            -0.24383380682644581
+          ],
+          "pr_auc_diff_ci": [
+            -0.027564519354453247,
+            -0.004213330286348893
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.7914527897417744,
+          "pr_auc": 0.013896495943721863,
+          "roc_auc_ci": [
+            0.6922581065608594,
+            0.8678711678243877
+          ],
+          "pr_auc_ci": [
+            0.0061855051293155236,
+            0.02996124094564374
+          ]
+        }
+      },
+      "bright_pct_flooded": 1.208876371383667,
+      "bright_pct_dry": 2.220987558364868
+    },
+    {
+      "pass": "2025-01-04T18",
+      "kind": "control",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 1.3547978401184082
+    },
+    {
+      "pass": "2025-02-02T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 10,
+      "reports_in_window": 0,
+      "bright_pct_bangkok": 2.1050522327423096
+    },
+    {
+      "pass": "2025-03-05T18",
+      "kind": "control",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 1,
+      "bright_pct_bangkok": 1.6442511081695557
+    },
+    {
+      "pass": "2025-05-15T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 14,
+      "reports_in_window": 21,
+      "bright_pct_bangkok": 3.7319560050964355,
+      "n_flooded": 17,
+      "n_dry": 20478
+    },
+    {
+      "pass": "2025-09-18T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 18,
+      "reports_in_window": 124,
+      "bright_pct_bangkok": 3.577622413635254,
+      "n_flooded": 92,
+      "n_dry": 20478,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.6239201030161743,
+          "pr_auc": 0.009053650169164202,
+          "roc_auc_ci": [
+            0.495913655708762,
+            0.6782528530674186
+          ],
+          "pr_auc_ci": [
+            0.002470753234119562,
+            0.024516018512076597
+          ],
+          "roc_auc_diff_ci": [
+            -0.4164978168072395,
+            -0.2539845049071091
+          ],
+          "pr_auc_diff_ci": [
+            -0.37159534679473055,
+            -0.08684102140599294
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.9407237671817475,
+          "pr_auc": 0.27938709575221676,
+          "roc_auc_ci": [
+            0.8943223107657782,
+            0.9616875062150396
+          ],
+          "pr_auc_ci": [
+            0.09077671489320453,
+            0.3912796990213092
+          ]
+        }
+      },
+      "bright_pct_flooded": 10.407736778259277,
+      "bright_pct_dry": 4.324794769287109
+    },
+    {
+      "pass": "2025-10-06T06",
+      "kind": "wet",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 20,
+      "reports_in_window": 140,
+      "bright_pct_bangkok": 3.0708670616149902,
+      "n_flooded": 122,
+      "n_dry": 20478,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.6023799631431732,
+          "pr_auc": 0.013183311015601024,
+          "roc_auc_ci": [
+            0.528247224552586,
+            0.6651828198554623
+          ],
+          "pr_auc_ci": [
+            0.004936423762308543,
+            0.02551448423341637
+          ],
+          "roc_auc_diff_ci": [
+            -0.3882006607072142,
+            -0.20073826851716686
+          ],
+          "pr_auc_diff_ci": [
+            -0.21929995590067075,
+            -0.017113554537793375
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.9012971137358124,
+          "pr_auc": 0.09104560546560202,
+          "roc_auc_ci": [
+            0.8538022739878823,
+            0.9444348498089957
+          ],
+          "pr_auc_ci": [
+            0.027888345957923572,
+            0.23743151117848735
+          ]
+        }
+      },
+      "bright_pct_flooded": 9.874369621276855,
+      "bright_pct_dry": 3.7801971435546875
+    },
+    {
+      "pass": "2025-10-07T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 48,
+      "bright_pct_bangkok": 8.512406349182129,
+      "n_flooded": 44,
+      "n_dry": 20478,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.5121649397579664,
+          "pr_auc": 0.002119718779410715,
+          "roc_auc_ci": [
+            0.4149578230360693,
+            0.6137678886281838
+          ],
+          "pr_auc_ci": [
+            0.0012654607612872348,
+            0.00415220817254333
+          ],
+          "roc_auc_diff_ci": [
+            -0.4913946205420442,
+            -0.2477802441987889
+          ],
+          "pr_auc_diff_ci": [
+            -0.22834055101413786,
+            -0.025172439922123525
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.8847210753891094,
+          "pr_auc": 0.11741169219479965,
+          "roc_auc_ci": [
+            0.8242490742660192,
+            0.9288685578788664
+          ],
+          "pr_auc_ci": [
+            0.027789036348723435,
+            0.2312379012445225
+          ]
+        }
+      },
+      "bright_pct_flooded": 11.804159164428711,
+      "bright_pct_dry": 13.64324951171875
+    },
+    {
+      "pass": "2025-11-12T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 23,
+      "bright_pct_bangkok": 2.262019157409668,
+      "n_flooded": 23,
+      "n_dry": 20478,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.4751132710820095,
+          "pr_auc": 0.0012857106773448003,
+          "roc_auc_ci": [
+            0.38697730375334116,
+            0.5874093103132285
+          ],
+          "pr_auc_ci": [
+            0.00044275385410368453,
+            0.0033640169240524006
+          ],
+          "roc_auc_diff_ci": [
+            -0.4538363799871605,
+            0.0011608222804055735
+          ],
+          "pr_auc_diff_ci": [
+            -0.06864609830848024,
+            0.0005953412724402039
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.7477229009286743,
+          "pr_auc": 0.015565897459634359,
+          "roc_auc_ci": [
+            0.5010680666312282,
+            0.893821708418257
+          ],
+          "pr_auc_ci": [
+            0.0010919602683336655,
+            0.07041250974224285
+          ]
+        }
+      },
+      "bright_pct_flooded": 2.684361696243286,
+      "bright_pct_dry": 2.789134979248047
+    },
+    {
+      "pass": "2026-01-10T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 16,
+      "reports_in_window": 2,
+      "bright_pct_bangkok": 1.4026445150375366
+    },
+    {
+      "pass": "2026-03-11T06",
+      "kind": "control",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline_scenes": 12,
+      "reports_in_window": 2,
+      "bright_pct_bangkok": 1.6794867515563965
+    },
+    {
+      "pass": "2026-06-16T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 8,
+      "reports_in_window": 31,
+      "bright_pct_bangkok": 3.821577548980713,
+      "n_flooded": 31,
+      "n_dry": 16024,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.49944035559563876,
+          "pr_auc": 0.002620769466864053,
+          "roc_auc_ci": [
+            0.4167488593950283,
+            0.6415476873496154
+          ],
+          "pr_auc_ci": [
+            0.00130319350582004,
+            0.00872187028394772
+          ],
+          "roc_auc_diff_ci": [
+            -0.3852028603161097,
+            0.08242738523159157
+          ],
+          "pr_auc_diff_ci": [
+            -0.030135355573363005,
+            0.0048748223572330825
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.6768496448875074,
+          "pr_auc": 0.008809794044921371,
+          "roc_auc_ci": [
+            0.49507932396236265,
+            0.8112898691187644
+          ],
+          "pr_auc_ci": [
+            0.0013414048775790906,
+            0.03391667401696225
+          ]
+        }
+      },
+      "bright_pct_flooded": 5.516647815704346,
+      "bright_pct_dry": 3.7830328941345215
+    },
+    {
+      "pass": "2026-06-28T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 8,
+      "reports_in_window": 100,
+      "bright_pct_bangkok": 8.751688957214355,
+      "n_flooded": 91,
+      "n_dry": 16024,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.4601627778113051,
+          "pr_auc": 0.005330986217022276,
+          "roc_auc_ci": [
+            0.3982609993767869,
+            0.5311640241039391
+          ],
+          "pr_auc_ci": [
+            0.003379141016940478,
+            0.008637938224313585
+          ],
+          "roc_auc_diff_ci": [
+            -0.348790584378372,
+            -0.1178532124055465
+          ],
+          "pr_auc_diff_ci": [
+            -0.013099612369844731,
+            -0.0024239836629539216
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.7077508736894658,
+          "pr_auc": 0.011720840681987829,
+          "roc_auc_ci": [
+            0.6296412530089416,
+            0.7649796352894895
+          ],
+          "pr_auc_ci": [
+            0.00705504873914496,
+            0.018899932154722136
+          ]
+        }
+      },
+      "bright_pct_flooded": 11.416058540344238,
+      "bright_pct_dry": 13.903125762939453
+    },
+    {
+      "pass": "2026-09-15T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 136,
+      "bright_pct_bangkok": 7.489651203155518,
+      "n_flooded": 126,
+      "n_dry": 16024,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.5431173675993946,
+          "pr_auc": 0.009164073011325605,
+          "roc_auc_ci": [
+            0.49882328929727243,
+            0.5803493716728273
+          ],
+          "pr_auc_ci": [
+            0.006085168684502535,
+            0.012140987103521943
+          ],
+          "roc_auc_diff_ci": [
+            -0.18432125078161923,
+            -0.0510949320639467
+          ],
+          "pr_auc_diff_ci": [
+            -0.015564445829068848,
+            -0.0032566480455530557
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.6572740096204899,
+          "pr_auc": 0.017260482368209897,
+          "roc_auc_ci": [
+            0.5968517202881284,
+            0.7037430202517492
+          ],
+          "pr_auc_ci": [
+            0.010323185264923523,
+            0.026083135894383352
+          ]
+        }
+      },
+      "bright_pct_flooded": 13.530302047729492,
+      "bright_pct_dry": 10.921150207519531
+    },
+    {
+      "pass": "2026-09-27T18",
+      "kind": "wet",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline_scenes": 10,
+      "reports_in_window": 1259,
+      "bright_pct_bangkok": 6.743868827819824,
+      "n_flooded": 1044,
+      "n_dry": 16024,
+      "methods": {
+        "Double bounce": {
+          "roc_auc": 0.6851698326552317,
+          "pr_auc": 0.15833389059655129,
+          "roc_auc_ci": [
+            0.6471495489260808,
+            0.7131809605533962
+          ],
+          "pr_auc_ci": [
+            0.11299318168173848,
+            0.1989345951487334
+          ],
+          "roc_auc_diff_ci": [
+            -0.18081146426651976,
+            -0.07328764639554754
+          ],
+          "pr_auc_diff_ci": [
+            -0.11438312252449548,
+            -0.00806074122636036
+          ]
+        },
+        "ML street": {
+          "roc_auc": 0.8083344631041943,
+          "pr_auc": 0.21682301190676134,
+          "roc_auc_ci": [
+            0.7610724781246461,
+            0.8497592721458421
+          ],
+          "pr_auc_ci": [
+            0.16718647960335306,
+            0.27480291154440395
+          ]
+        }
+      },
+      "bright_pct_flooded": 21.31720542907715,
+      "bright_pct_dry": 6.6255574226379395
+    }
+  ]
+}

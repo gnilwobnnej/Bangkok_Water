@@ -12,7 +12,7 @@ population and built-up land are left out of it. This note ranks the free data t
 | 1 | **Traffy Fondue** (BMA's citizen-report app), public API, no key | 44,442 flood reports since 2022, each with a point, time (to the second), photo and text; plus ~1.5 M reports of other problems | Densest exactly where satellites are blind; catches floods that drain within hours | Reports follow people and app use; some "flood" reports are chronic drain complaints | **Built** (below) |
 | 2 | **FABDEM** (Copernicus DEM with buildings and trees removed; Hawker et al. 2022) | A better ground surface in the dense city | Fixes the DEM's building bias (~1.6 m in built-up areas) | A better input, not flood observations; non-commercial licence | Tested: helps street floods, hurts river floods; not the default |
 | 3 | **BMA Drainage and Sewerage Dept** flood points and rain gauges | ~737 known flood-prone points; rain and street-water sensors behind floodmanagement.bangkok.go.th | Official, long record | No bulk download found; may need a data request | Next |
-| 4 | **Sentinel-1 "double bounce"** in the existing radar pipeline | Flooded streets make radar *brighter* (water + wall reflection) | Same data and code already used | A pass every few days misses most cloudbursts; depends on wall orientation | Next |
+| 4 | **Sentinel-1 "double bounce"** in the existing radar pipeline | Flooded streets make radar *brighter* (water + wall reflection) | Same data and code already used | A pass every few days misses most cloudbursts; depends on wall orientation | Tested: too weak to use |
 | 5 | **Sentinel-1 InSAR coherence** (ASF HyP3, free Earthdata login) | Coherence drops where water fills streets | The most reliable satellite urban-flood signal (UrbanSARFloods; Mason et al. 2021) | Heavy processing; same timing problem | Later, river-scale events only |
 | — | Commercial radar or optical imagery (ICEYE, Capella, Planet) | Sub-metre images | — | Paid | Not used |
 | — | Copernicus EMS / UNOSAT maps | Rapid flood maps | — | Large river floods only | Not used |
@@ -72,6 +72,24 @@ FABDEM is better on all 10 street-flood tests and worse on all 19 river-flood te
 bathtub flood it earlier, which matches where rain pools in streets but not where the river spreads. The river
 floods are what the bathtub is for, so **Copernicus stays the default** (`config.DEM_SOURCE`).
 `prepare_data.py --dem fabdem --dem-only` switches. FABDEM elevation could still become a street-model feature.
+
+## Sentinel-1 double bounce (`scripts/double_bounce.py`)
+Built-up ground (ESA WorldCover) flagged where VV backscatter rose by at least 3 dB over the median of the same
+orbit's scenes in the previous 60 days. Tested on every pass since 2022 that came within 6 hours of at least 20
+flood reports on a storm day (17 wet passes, 16 with enough cells to score), and on 12 quiet dry-season passes as
+controls. Flooded = a flood report within 6 hours of the pass; dry = that year's Traffy "dry" label.
+
+| | Double bounce | ML street model |
+|---|---|---|
+| ROC-AUC on the 16 wet passes, median (range) | 0.52 (0.44-0.70) | **0.82 (0.66-0.94)** |
+| Passes where the interval is above a coin flip (0.5) | 3 of 16 | |
+| Passes where ML street is clearly better | | 13 of 16 |
+| 27 Sep 2026 storm (1,044 flooded cells) | 0.69 (0.65-0.71) | **0.81** |
+
+Built-up Bangkok does brighten more on wet passes (median 3.6% of the ground vs 1.7% on dry-season controls), but
+not specifically where streets flooded: rain-soaked roofs and roads also brighten. Only the largest storm, with
+widespread standing water at pass time, shows a usable signal. Two passes a day (06:00 and 18:00) rarely catch
+water that drains in hours. **Not added** to the radar pipeline or the app.
 
 ## Sources
 - Traffy Fondue: [overview](https://www.thailand.go.th/issue-focus-detail/001_05_025),

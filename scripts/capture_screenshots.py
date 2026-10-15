@@ -84,6 +84,20 @@ class App:
         self.pg.screenshot(path=OUT / f"{name}.png", clip=self.map_box())
         print("saved", name)
 
+    def shot_section(self, name, start, end):
+        """The part of the open tab from the `start` element down to the top of the `end` element."""
+        self.pg.set_viewport_size({"width": 1600, "height": 2100})
+        self.settle(2500)
+        start.evaluate("e => e.scrollIntoView({block: 'start'})")
+        self.pg.wait_for_timeout(1500)
+        top, bottom = start.bounding_box(), end.bounding_box()
+        panel = self.pg.locator('[data-testid="stTabs"]').bounding_box()  # full width of the tab panel
+        self.pg.screenshot(path=OUT / f"{name}.png", clip={
+            "x": panel["x"], "y": top["y"] - 10, "width": panel["width"], "height": bottom["y"] - top["y"]})
+        self.pg.set_viewport_size({"width": 1600, "height": 1100})
+        self.settle(2500)
+        print("saved", name)
+
     def shot_page(self, name, height=1100):
         self.pg.screenshot(path=OUT / f"{name}.png", clip={"x": 0, "y": 0, "width": 1600, "height": height})
         print("saved", name)
@@ -198,6 +212,26 @@ def main():
             app.checkbox("Chance flooded", False)
             app.checkbox("Flood depth", True)
 
+        # 8c. Street flooding from residents' reports (only once scripts/build_traffy_labels.py and
+        # train_model.py --kind street have run): the street model, then the 25-29 Sep 2026 storm's reports on it
+        has_street = pg.locator('[data-testid="stSidebar"] label').filter(has_text="ML street-flood").count() > 0
+        if has_street:
+            app.checkbox("Flood depth", False)
+            app.checkbox("ML street-flood susceptibility", True)
+            app.shot_map("32_ml_street")
+            if pg.locator('[data-testid="stSidebar"] label').filter(has_text="Reported street flooding").count():
+                app.checkbox("Reported street flooding", True)
+                # The option list only renders what's in view, so type to filter it down to the storm
+                pg.locator('[data-testid="stSidebar"] [data-testid="stSelectbox"]').filter(
+                    has_text="Reports from").locator("input").click()
+                pg.keyboard.type("Storm 2026-09-26")
+                pg.get_by_role("option").filter(has_text="Storm 2026-09-26").first.click()
+                app.settle(6000)
+                app.shot_map("33_reports_storm")
+                app.checkbox("Reported street flooding", False)
+            app.checkbox("ML street-flood susceptibility", False)
+            app.checkbox("Flood depth", True)
+
         # 9. Current flood from Sentinel-1 radar (only once scripts/fetch_current_flood.py has run)
         has_radar = pg.locator('[data-testid="stSidebar"] label').filter(has_text="Radar flood").count() > 0
         if has_radar:
@@ -236,6 +270,17 @@ def main():
                 tabs.screenshot(path=OUT / f"{name}.png")
                 trim_bottom(OUT / f"{name}.png")
             print("saved", name)
+
+        # 10b. The street-flood sections of the ML and Validation tabs
+        if has_street:
+            pg.get_by_role("tab").filter(has_text="ML model").click()
+            pg.wait_for_timeout(2500)
+            app.shot_section("34_tab_ml_street", pg.locator("h3").filter(has_text="Street flooding: a second model"),
+                             pg.locator('[data-testid="stExpander"]').filter(has_text="The years it was trained on"))
+            pg.get_by_role("tab").filter(has_text="Validation").click()
+            pg.wait_for_timeout(2500)
+            app.shot_section("35_validation_street", pg.locator("h3").filter(has_text="Street flooding in the dense"),
+                             pg.locator("h3").filter(has_text="All results"))
 
         # 11. Buildings 3D (only once scripts/prepare_buildings.py has run); WebGL needs extra render time
         pg.get_by_role("tab").filter(has_text="Buildings 3D").click()
