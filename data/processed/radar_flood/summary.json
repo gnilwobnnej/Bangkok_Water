@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14T07:55:27Z",
+  "generated": "2026-10-15T07:40:21Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -125,6 +125,19 @@
       "flooded_km2_bangkok": 28.66873550415039,
       "coverage_pct": 100.0,
       "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-10-13",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-09-22",
+      "baseline_to": "2025-11-04",
+      "baseline_scenes": 10,
+      "flooded_km2": 54.68020248413086,
+      "flooded_km2_bangkok": 20.36009407043457,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
     }
   ],
   "rainfall": [
@@ -150,15 +163,15 @@
     },
     {
       "date": "2026-08-18",
-      "mm": 5.8
+      "mm": 13.0
     },
     {
       "date": "2026-08-19",
-      "mm": 3.3
+      "mm": 1.5
     },
     {
       "date": "2026-08-20",
-      "mm": 12.5
+      "mm": 12.3
     },
     {
       "date": "2026-08-21",
@@ -378,7 +391,11 @@
     },
     {
       "date": "2026-10-14",
-      "mm": 6.6
+      "mm": 7.3
+    },
+    {
+      "date": "2026-10-15",
+      "mm": 6.3
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
@@ -697,6 +714,11 @@
       "date": "2026-10-14",
       "m3s": 4476.13,
       "normal_m3s": 3945.8
+    },
+    {
+      "date": "2026-10-15",
+      "m3s": 4435.09,
+      "normal_m3s": 3891.5
     }
   ],
   "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E); normal = 1996-2025 median for the date"
