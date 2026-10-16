@@ -245,7 +245,7 @@
   <div class="say">Everything so far was history or simulation. This is Bangkok this week, seen from space through the monsoon clouds. And a model trained on past floods, none of them from this year, predicted it.</div>
 
   <div class="step"><div class="n">11</div><h3>Show where streets flood (residents' reports)</h3></div>
-  <p class="do">Untick <b>Radar flood</b>. Tick <b>ML street-flood susceptibility</b>, then <b>Reported street flooding</b>, and pick <b>Storm 2026-09-26</b> under <i>Reports from</i>. Hover a dot to read a report. The full talk track is in Section 8.</p>
+  <p class="do">Untick <b>Radar flood</b>. Tick <b>ML street-flood susceptibility</b>, then <b>Reported street flooding</b>, and pick <b>Storm 2026-09-26</b> under <i>Reports from</i>. Hover a dot for a short preview, then click it to open the whole report in English (<b>Read more</b> shows the rest of a long one). The full talk track is in Section 8.</p>
   <div class="say">Radar can't see water between buildings, so in the city centre every model so far is half blind. Residents can see it. These dots are 3,800 flood reports from one day of the September storm, on top of a model that had never seen a single report from this year.</div>
 
   <div class="step"><div class="n">12</div><h3>Show the buildings in 3D</h3></div>
@@ -433,6 +433,7 @@
     <li><b>Bangkok's complaint app.</b> Residents report problems with a pin, a time and usually a photo. Since 2022 they have filed <b>44,443 flood reports</b>, plus about <b>1.4 million reports</b> of other problems (counted on every third day and scaled up).</li>
     <li><b>Storm days, not complaints:</b> many flood reports are long-running drain complaints. A day counts as a storm when it has at least 15 flood reports, at least 3× the usual for the time of year, and at least 10 mm of rain that day or the day before. <b>164 storm days</b> in 2022–2026 hold 62% of all flood reports.</li>
     <li><b>Flooded vs dry:</b> a cell is <i>flooded</i> if someone reported a flood there on a storm day. It is <i>dry</i> if nobody reported a flood all year, but people reported at least 5 other problems there. So people do use the app there, and would probably have reported a flood. Places where nobody reports anything stay unknown.</li>
+    <li><b>In English:</b> the reports are written in Thai. All 40,258 distinct texts were machine-translated on our own computer with a free model (Helsinki-NLP opus-mt-th-en), and new reports are translated in the daily update. The app's own form answers at the end of most reports (“Water: knee-deep. Flooded for less than 3 hours.”) and the district names are translated exactly; the rest gives the gist, and place names often come out wrong.</li>
   </ul>
   <h3>A second model, for the streets</h3>
   <p>The same kind of model (LightGBM), trained on 2022–2025 and tested on <b>2026, which it never saw</b>. Because both flooded and dry cells are busy, built-up places, population and building density can safely be factors here (in the river model they taught the lesson “dense city = dry”). It also uses small dips in the ground (300 m) and building height. Its strongest factors: distance to the Chao Phraya, number of buildings, ground elevation, and local dips.</p>
@@ -460,11 +461,12 @@
     <li><b>The bathtub can't do this.</b> In the dense city it barely beats a coin flip (0.56). Street flooding is about drains and small dips, not a rising water level.</li>
   </ul>
   <div class="say">Satellites told us where the river spreads. Residents told us where the streets fill up. A model trained on four years of their reports picked out this year's flooded streets far better than anything built from satellites, on every storm day of the year.</div>
-  <div class="note"><b>Be honest about the limits:</b> reports follow people. A flooded lane nobody reports looks unknown, not flooded, and the app was little used before mid-2022. Choosing dry cells only where people <i>do</i> report keeps this bias the same on both sides, but doesn't remove it. Some storm-day reports are still drain complaints. The model says where streets flood in a storm, not how deep or for how long, and covers only Bangkok's 50 districts. 2026 had one exceptional storm (25–29 Sep), so 36% of its scored cells are flooded, against 6–30% in earlier years.</div>
+  <div class="note"><b>Be honest about the limits:</b> reports follow people. A flooded lane nobody reports looks unknown, not flooded, and the app was little used before mid-2022. Choosing dry cells only where people <i>do</i> report keeps this bias the same on both sides, but doesn't remove it. Some storm-day reports are still drain complaints. The model says where streets flood in a storm, not how deep or for how long, and covers only Bangkok's 50 districts. The English on the map is machine translation: read it for the gist, not for street names. 2026 had one exceptional storm (25–29 Sep), so 36% of its scored cells are flooded, against 6–30% in earlier years.</div>
 </section>
 
 <section>
   <figure><img src="screenshots/34_tab_ml_street.png" alt="ML model tab, street-flood section" style="max-height:110mm;width:auto;margin:0 auto"><figcaption>The street-flood section at the bottom of the <b>ML model</b> tab: how it compares with the existing methods (cross-validation over 2022–2025) and what drives it.</figcaption></figure>
+  <figure><img src="screenshots/36_report_popup.png" alt="A resident's report, opened on the map" style="max-height:95mm;width:auto;margin:0 auto"><figcaption><span class="pill">Click a dot</span> A resident's report from 27 Sep 2026, opened and expanded with <b>Read more</b>. The English is machine-translated from Thai: the gist (flooded since morning, asking for pumps and sandbags) comes through, but the place names are garbled.</figcaption></figure>
   <h3>Two ideas that didn't work, and why that's worth saying</h3>
   <p><b>1. Better elevation (FABDEM).</b> FABDEM is the same satellite elevation with buildings and trees removed by machine learning (Hawker et al. 2022). It puts the dense city about 0.7 m lower. We ran the bathtub on both maps and scored them on every flood:</p>
   <table>
@@ -617,6 +619,7 @@
     <tr><td>Aren't complaint-app reports biased?</td><td>Yes: they follow people and app use. The model only treats a place as dry if people there report other problems but never a flood, so both sides have the same reporting habits. It was then tested on a year it never saw, and it beat every satellite-based method on every storm day.</td></tr>
     <tr><td>Why not use a better elevation map with the buildings removed?</td><td>We tried FABDEM. It helped on street flooding but made the bathtub worse on every one of the 19 river-flood tests, so the app keeps the original elevation. The street model covers the dense city instead.</td></tr>
     <tr><td>How current are the street reports?</td><td>They update daily from Traffy Fondue's public data service, which has been offline since 14 Oct 2026; until it's back, the reports stop at 13 Oct.</td></tr>
+    <tr><td>Are the reports really in English?</td><td>Residents write them in Thai. The app shows a machine translation made with a free model run on our own computer, so expect the gist, not polished English, and don't trust the street or village names. A report not translated yet shows in Thai until the next daily update.</td></tr>
     <tr><td>Can I zoom in to my street?</td><td>You can zoom the map, but the model works on ~65 m cells, so it's meant for district-scale patterns, not individual buildings. The street-flood layer is the closest to street level, but it gives a chance of flooding in a storm, not a forecast for your street.</td></tr>
   </table>
 </section>
@@ -665,7 +668,7 @@
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
     <tr><td>Flood defences</td><td>Routes: Royal Development Projects Board and Think of Living (2011), traced on OpenStreetMap roads. Crests: BMA flood-wall figures, JICA (Rom Klao Road 2.47 m), Airports of Thailand (3.5 m)</td><td>Lines, ~65 m grid</td></tr>
-    <tr><td>Street flooding</td><td>Traffy Fondue public API (Bangkok's complaint app): flood reports, and every report on every third day; storm-day rain from the Open-Meteo archive (ERA5)</td><td>Points, ~65 m grid</td></tr>
+    <tr><td>Street flooding</td><td>Traffy Fondue public API (Bangkok's complaint app): flood reports, and every report on every third day; storm-day rain from the Open-Meteo archive (ERA5); English text by Helsinki-NLP opus-mt-th-en (machine translation, run locally)</td><td>Points, ~65 m grid</td></tr>
     <tr><td>Building-free elevation (tested, not used)</td><td>FABDEM V1-2 (Hawker et al. 2022), via the Google Earth Engine community catalog; CC BY-NC-SA 4.0</td><td>30 m</td></tr>
     <tr><td>Basemap</td><td>Esri World Gray Canvas tiles</td><td>Online tiles</td></tr>
   </table>
@@ -690,6 +693,7 @@ python scripts/evaluate_current.py                # and on every radar pass</pre
 python scripts/build_traffy_labels.py       # storm days and flooded/dry labels per year
 python scripts/train_model.py --kind street # trains on 2022-2025
 python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
+python scripts/translate_traffy.py          # the reports in English for the map (~1 h the first time on a CPU)
 python scripts/compare_dem.py               # optional: FABDEM vs Copernicus elevation
 python scripts/double_bounce.py --gee-project YOUR_PROJECT   # optional: the radar double-bounce test</pre>
   <h3>Rebuilding the building data</h3>

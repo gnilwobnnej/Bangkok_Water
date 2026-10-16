@@ -38,6 +38,9 @@ population and built-up land are left out of it. This note ranks the free data t
    population and built-up land, and adds small dips in the ground (300 m) and building density and height.
 5. **Validation** (`scripts/evaluate_street.py`). Every method is scored on the 2026 reports, for the year and
    storm by storm, in Bangkok and in the **dense city** (cells ≥ 90% built-up), which radar can't test.
+6. **English text** (`scripts/translate_traffy.py`). The map shows each report machine-translated from Thai
+   (Helsinki-NLP/opus-mt-th-en, run locally), with the form's depth and duration answers and district names translated
+   exactly. Good for the gist; place names are often wrong.
 
 ## Results
 | Test (ROC-AUC) | ML street | ML, all floods (radar) | Bathtub + defences | Risk index |

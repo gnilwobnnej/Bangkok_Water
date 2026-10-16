@@ -70,6 +70,23 @@ jobs:
             python scripts/evaluate_street.py
           } 2>&1 | tee "$RUNNER_TEMP/traffy.log"
 
+      # New reports in English for the map (a free local model, ~300 MB, kept between runs). Only new texts are
+      # translated, a few seconds' work; reports it misses show in Thai until the next run.
+      - name: Restore the translation model
+        if: steps.traffy.outcome == 'success'
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface
+          key: hf-opus-mt-th-en
+
+      - name: Translate new Traffy reports into English
+        if: steps.traffy.outcome == 'success'
+        continue-on-error: true
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install transformers sentencepiece
+          python scripts/translate_traffy.py
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"

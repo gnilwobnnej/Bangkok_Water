@@ -7,6 +7,8 @@ reports of anything else show where people report things at all, which is what t
 """
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import pandas as pd
 
@@ -100,12 +102,151 @@ def street_labels(n_storm_flood: np.ndarray, n_flood: np.ndarray, n_other: np.nd
 
 
 def load_reports() -> pd.DataFrame | None:
-    """Every flood report (scripts/fetch_traffy.py), oldest first, or None if not fetched."""
+    """Every flood report (scripts/fetch_traffy.py), oldest first, or None if not fetched. `description_en` is the
+    English text (scripts/translate_traffy.py), NaN where it hasn't been translated."""
     files = report_files()
     if not files:
         return None
     df = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
-    return df.sort_values("time", kind="stable").reset_index(drop=True)
+    df = df.sort_values("time", kind="stable").reset_index(drop=True)
+    en = load_translations()
+    df["description_en"] = df["description"].map(en) if en else np.nan
+    return df
+
+
+def load_translations() -> dict:
+    """{Thai description: English}, empty if nothing has been translated."""
+    if not C.TRAFFY_TRANSLATIONS_FILE.exists():
+        return {}
+    t = pd.read_parquet(C.TRAFFY_TRANSLATIONS_FILE)
+    return dict(zip(t["description"], t["description_en"]))
+
+
+# ---------- English text ----------
+# Traffy's flood form ends every report with "ความสูงระดับ <depth> น้ำท่วมมาแล้ว <duration>" ("water depth ...
+# flooded for ..."). Those parts are translated exactly here; the machine translation only gets the free text.
+DEPTH_MARK, DURATION_MARK = "ความสูงระดับ", "น้ำท่วมมาแล้ว"
+DEPTHS = [("สูงกว่าเอว", "above the waist"), ("เอว", "waist-deep"), ("เข่า", "knee-deep"),
+          ("แข้ง", "shin-deep"), ("ตาตุ่ม", "ankle-deep"), ("ข้อเท้า", "ankle-deep")]  # first match wins
+UNITS = {"ชั่วโมง": "hour", "ชม": "hour", "วัน": "day", "สัปดาห์": "week", "อาทิตย์": "week", "เดือน": "month"}
+QUALIFIERS = {"น้อยกว่า": "less than ", "มากกว่า": "more than ", "ประมาณ": "about ", "": ""}
+POLITE = re.compile(r"(นะคะ|นะครับ|ค่ะ|คะ|ครับ|จ้า|ค่า)+$")
+THAI = re.compile(r"[฀-๿]")
+
+
+def _clean(s: str) -> str:
+    return POLITE.sub("", s.strip()).strip()
+
+
+def depth_en(s: str) -> str | None:
+    """The form's depth answer in English, or None if it isn't one of the form's answers."""
+    s = _clean(s)
+    about = s.startswith("ประมาณ")
+    s = s.removeprefix("ประมาณ").strip()
+    if not s or len(s) > 12:
+        return None
+    for th, en in DEPTHS:
+        if th in s:
+            return ("about " if about else "") + en
+    return None
+
+
+def duration_en(s: str) -> str | None:
+    """The form's duration answer in English ("" if it was cut off), or None if it isn't one."""
+    s = _clean(s)
+    if s.startswith("ตั้งแต่เมื่อคืน"):
+        return "since last night"
+    m = re.fullmatch(r"(น้อยกว่า|มากกว่า|ประมาณ)?\s*(\d+)\s*(ชั่วโมง|ชม\.?|วัน|สัปดาห์|อาทิตย์|เดือน)", s)
+    if m:
+        n, unit = int(m[2]), UNITS[m[3].rstrip(".")]
+        return f"{QUALIFIERS[m[1] or '']}{n} {unit}{'s' if n != 1 else ''}"
+    if re.fullmatch(r"(น้อยกว่า|มากกว่า)?\s*\d*", s) or any(q.startswith(s) for q in ("น้อยกว่า", "มากกว่า")):
+        return ""  # cut off by Traffy's 255-character limit
+    return None
+
+
+def split_description(text: str) -> tuple[list, str]:
+    """(free-text pieces to machine-translate, the form's depth and duration already in English)."""
+    body, form = text, []
+    i = text.rfind(DEPTH_MARK)
+    if i >= 0:
+        body, tail = text[:i], text[i + len(DEPTH_MARK):]
+        depth, _, duration = tail.partition(DURATION_MARK)
+        d = depth_en(depth)
+        if d is None:
+            body += " " + depth
+        else:
+            form.append(f"Water: {d}.")
+        if duration.strip():
+            u = duration_en(duration)
+            if u is None:
+                body += " " + duration
+            elif u:
+                form.append(f"Flooded for {u}.")
+    pieces = [p.strip() for p in re.split(r"\n+", body) if p.strip()]
+    return pieces, " ".join(form)
+
+
+# The commonest short reports, translated exactly (polite endings such as ค่ะ/ครับ removed first)
+PHRASES = {
+    "น้ำท่วม": "Flooding", "นำ้ท่วม": "Flooding", "ไม่แสดงรายละเอียด": "No details given",
+    "น้ำท่วมขัง": "Standing water", "น้ำขัง": "Standing water", "น้ำท่วมสูง": "Deep flooding",
+    "น้ำท่วมหนัก": "Heavy flooding", "น้ำท่วมถนน": "Flooded road", "น้ำท่วมซอย": "Flooded soi (side street)",
+    "น้ำท่วมขังในซอย": "Standing water in the soi (side street)", "น้ำท่วมบ้าน": "Flooded house",
+    "น้ำท่วมเข้าบ้าน": "Water coming into the house", "น้ำท่วมฟุตบาท": "Flooded pavement",
+    "ฝนตกน้ำท่วม": "Flooding after rain", "ฝนตกน้ำท่วมขัง": "Standing water after rain",
+    "ท่อระบายน้ำตัน": "Blocked drain", "ท่อตัน": "Blocked drain", "ถนน": "Road",
+    "สวัสดี": "Hello", "ขอบคุณ": "Thank you",
+}
+# Bangkok's 50 districts (English as in districts.geojson), and the neighbouring ones that reports also name
+DISTRICTS = {
+    "พระนคร": "Phra Nakhon", "ดุสิต": "Dusit", "หนองจอก": "Nong Chok", "บางรัก": "Bang Rak", "บางเขน": "Bang Khen",
+    "บางกะปิ": "Bang Kapi", "ปทุมวัน": "Pathum Wan", "ป้อมปราบศัตรูพ่าย": "Pom Prap Sattru Phai",
+    "พระโขนง": "Phra Khanong", "มีนบุรี": "Min Buri", "ลาดกระบัง": "Lat Krabang", "ยานนาวา": "Yan Nawa",
+    "สัมพันธวงศ์": "Samphanthawong", "พญาไท": "Phaya Thai", "ธนบุรี": "Thon Buri", "บางกอกใหญ่": "Bangkok Yai",
+    "ห้วยขวาง": "Huai Khwang", "คลองสาน": "Khlong San", "ตลิ่งชัน": "Taling Chan", "บางกอกน้อย": "Bangkok Noi",
+    "บางขุนเทียน": "Bang Khun Thian", "ภาษีเจริญ": "Phasi Charoen", "หนองแขม": "Nong Khaem",
+    "ราษฎร์บูรณะ": "Rat Burana", "บางพลัด": "Bang Phlat", "ดินแดง": "Din Daeng", "บึงกุ่ม": "Bueng Kum",
+    "สาทร": "Sathon", "บางซื่อ": "Bang Sue", "จตุจักร": "Chatuchak", "บางคอแหลม": "Bang Kho Laem",
+    "ประเวศ": "Prawet", "คลองเตย": "Khlong Toei", "สวนหลวง": "Suan Luang", "จอมทอง": "Chom Thong",
+    "ดอนเมือง": "Don Mueang", "ราชเทวี": "Ratchathewi", "ลาดพร้าว": "Lat Phrao", "วัฒนา": "Vadhana",
+    "บางแค": "Bang Khae", "หลักสี่": "Lak Si", "สายไหม": "Sai Mai", "คันนายาว": "Khan Na Yao",
+    "สะพานสูง": "Saphan Sung", "วังทองหลาง": "Wang Thonglang", "คลองสามวา": "Khlong Sam Wa", "บางนา": "Bang Na",
+    "ทวีวัฒนา": "Thawi Watthana", "ทุ่งครุ": "Thung Khru", "บางบอน": "Bang Bon",
+    # outside Bangkok
+    "กระทุ่มแบน": "Krathum Baen", "บางพลี": "Bang Phli", "ลำลูกกา": "Lam Luk Ka", "ปากเกร็ด": "Pak Kret",
+    "เมืองสมุทรปราการ": "Mueang Samut Prakan", "เมืองสมุทรสาคร": "Mueang Samut Sakhon",
+}
+LABELS = {"เขต": "District", "แขวง": "Subdistrict", "ถนน": "Road", "ซอย": "Soi", "สถานที่": "Place",
+          "เวลา": "Time", "วันที่": "Date"}
+
+
+def fixed_en(piece: str) -> str | None:
+    """An exact English version of a stock phrase or a "เขต: <district>" label, or None to machine-translate."""
+    s = _clean(piece)
+    if s in PHRASES:
+        return PHRASES[s]
+    m = re.fullmatch(r"(\S+?)\s*:\s*(.+)", s)
+    if m and m[1] in LABELS:
+        value = m[2].strip()
+        if m[1] == "เขต" and value.removeprefix("เขต").strip() in DISTRICTS:
+            return f"District: {district_en(value)}"
+        if not THAI.search(value):
+            return f"{LABELS[m[1]]}: {value}"
+    return None
+
+
+def district_en(thai) -> str:
+    """A report's district in English (spelled as in districts.geojson), or the Thai name if it isn't listed."""
+    if not isinstance(thai, str) or not thai.strip():
+        return ""
+    s = thai.strip().removeprefix("เขต").strip()
+    return DISTRICTS.get(s, s)
+
+
+def join_english(pieces_en: list, form_en: str) -> str:
+    text = " ".join(p.strip().rstrip(".") + "." for p in pieces_en if p.strip())
+    return " ".join(s for s in (text, form_en) if s)
 
 
 def report_files() -> list:

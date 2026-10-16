@@ -98,6 +98,29 @@ class App:
         self.settle(2500)
         print("saved", name)
 
+    def shot_report_popup(self, name):
+        """Click residents' report dots until one has a long report, open its "Read more" and screenshot it."""
+        box = self.map_box()
+        frame = self.pg.frame_locator(MAP)
+        dots = frame.locator('path.leaflet-interactive[fill="#00e5ff"]')
+        for i in range(0, dots.count(), 7):
+            bb = dots.nth(i).bounding_box()
+            # well inside the map, with room for the popup above the dot
+            if not (bb and box["x"] + 300 < bb["x"] < box["x"] + box["width"] - 300
+                    and box["y"] + 380 < bb["y"] < box["y"] + box["height"] - 60):
+                continue
+            self.pg.mouse.click(bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2)
+            self.pg.wait_for_timeout(800)
+            more = frame.locator(".leaflet-popup-content summary")
+            if more.count() and "Machine-translated" in frame.locator(".leaflet-popup-content").inner_text():
+                more.click()
+                self.pg.mouse.move(box["x"] + 5, box["y"] + 5)
+                self.pg.wait_for_timeout(800)
+                self.pg.screenshot(path=OUT / f"{name}.png", clip=box)
+                print("saved", name)
+                return
+        print("no long report found for", name)
+
     def shot_page(self, name, height=1100):
         self.pg.screenshot(path=OUT / f"{name}.png", clip={"x": 0, "y": 0, "width": 1600, "height": height})
         print("saved", name)
@@ -228,6 +251,7 @@ def main():
                 pg.get_by_role("option").filter(has_text="Storm 2026-09-26").first.click()
                 app.settle(6000)
                 app.shot_map("33_reports_storm")
+                app.shot_report_popup("36_report_popup")
                 app.checkbox("Reported street flooding", False)
             app.checkbox("ML street-flood susceptibility", False)
             app.checkbox("Flood depth", True)

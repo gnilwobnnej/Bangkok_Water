@@ -151,7 +151,7 @@ area = get_area()
 factors = get_factors()
 ml = get_ml(file_version(C.ML_PROB_FILE, C.ML_REPORT_FILE))
 street = get_street(file_version(C.ML_STREET_PROB_FILE, C.ML_STREET_REPORT_FILE))
-traffy = get_traffy(file_version(C.TRAFFY_STORMS_FILE, *report_files()))
+traffy = get_traffy(file_version(C.TRAFFY_STORMS_FILE, C.TRAFFY_TRANSLATIONS_FILE, *report_files()))
 radar_version = file_version(C.RADAR_SUMMARY_FILE)
 radar = get_radar(radar_version)
 unc_version = file_version(C.DEM_UNCERTAINTY_FILE)
@@ -222,7 +222,8 @@ with st.sidebar:
         show_reports = st.checkbox(
             "Reported street flooding", value=False,
             help="Flood reports from residents on Traffy Fondue, Bangkok's complaint app, on storm days: days "
-                 "with far more flood reports than usual, after rain. Hover a dot for the report.")
+                 "with far more flood reports than usual, after rain. Hover a dot for a preview; click it to read "
+                 "the whole report (machine-translated from Thai).")
         storm_dates = [s["date"] for s in traffy[1]["storms"]]
         years = sorted({d[:4] for d in storm_dates}, reverse=True)
         n_storm = {d: s["flood_reports"] for d, s in zip(storm_dates, traffy[1]["storms"])}

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+import html
 import io
 
 import branca.colormap as bcm
@@ -19,6 +20,7 @@ from shapely.ops import unary_union
 from src import config as C
 from src.data_loader import StudyArea
 from src.ml import ML_2011, ML_ALL, ML_STREET
+from src.traffy import district_en
 
 MAX_DEPTH_M = 3.0
 WATER_CMAP = LinearSegmentedColormap.from_list("water", ["#8fd3ff", "#2b7bd6", "#0a2f6b"])
@@ -30,6 +32,9 @@ ML_CMAP = colormaps["RdPu"]
 STREET_CMAP = colormaps["YlGn"]  # street-flood model: green, so it can't be mistaken for the river-flood model
 REPORT_COLOR = "#00e5ff"         # residents' flood reports (Traffy Fondue)
 MAX_REPORT_MARKERS = 3000        # keep the page light: the most recent reports of the chosen period
+TOOLTIP_CHARS = 100              # report text in the hover box; clicking a dot shows all of it
+POPUP_PREVIEW_CHARS = 160        # ...in the click popup, the rest is behind "Read more"
+REPORT_POPUP_WIDTH = 480
 # Chance flooded (elevation uncertainty): pale yellow-green (rarely) to deep blue (almost always)
 CHANCE_COLORS = ["#edf8b1", "#7fcdbb", "#2c7fb8", "#253494"]
 CHANCE_CMAP = LinearSegmentedColormap.from_list("chance", CHANCE_COLORS)
@@ -289,21 +294,70 @@ def build_map(
         ).add_to(m)
     if reports is not None and not reports.empty:
         r = reports.sort_values("time").tail(MAX_REPORT_MARKERS)
+        when = r["time"].dt.strftime("%d %b %Y %H:%M")
+        district = r["district"].map(district_en)
+        text = report_text(r)
+        translated = r["description_en"].notna() if "description_en" in r else pd.Series(False, index=r.index)
         pts = gpd.GeoDataFrame({
-            "when": r["time"].dt.strftime("%d %b %Y %H:%M"),
-            "district": r["district"].fillna(""),
-            "text": r["description"].fillna("").str.slice(0, 160),
+            "when": when, "district": district.map(html.escape),
+            "preview": text.map(lambda t: html.escape(shorten(t, TOOLTIP_CHARS, " (click the dot to read more)"))),
+            "popup": [report_popup_html(w, d, t, tr) for w, d, t, tr in zip(when, district, text, translated)],
         }, geometry=gpd.points_from_xy(r["lon"], r["lat"]), crs="EPSG:4326")
+        m.get_root().header.add_child(folium.Element(REPORT_CSS))
         folium.GeoJson(
             pts.to_json(), name=reports_label,
             marker=folium.CircleMarker(radius=4, weight=1, color="#003b44", fill=True, fill_color=REPORT_COLOR,
                                        fill_opacity=0.9),
-            tooltip=folium.GeoJsonTooltip(fields=["when", "district", "text"],
+            tooltip=folium.GeoJsonTooltip(fields=["when", "district", "preview"],
                                           aliases=["Reported", "District", "Report"],
-                                          style="max-width:360px;white-space:normal"),
+                                          style="width:380px;white-space:normal"),
+            popup=folium.GeoJsonPopup(fields=["popup"], labels=False, max_width=REPORT_POPUP_WIDTH),
         ).add_to(m)
     folium.LayerControl(collapsed=True).add_to(m)
     return m
+
+
+# ---------- residents' reports ----------
+REPORT_CSS = """<style>
+.report-popup {width: 440px; max-width: 75vw; font-size: 13px; line-height: 1.45; white-space: normal}
+.report-popup summary {list-style: none; cursor: pointer}
+.report-popup summary::-webkit-details-marker {display: none}
+.report-popup details[open] summary {display: none}
+.report-popup .more {color: #0b6fa4; text-decoration: underline; white-space: nowrap}
+.report-popup .note {color: #888; font-size: 11px; margin-top: 6px}
+</style>"""
+
+
+def report_text(reports: pd.DataFrame) -> pd.Series:
+    """Each report's text in English (scripts/translate_traffy.py), or the Thai original where not translated yet."""
+    th = reports["description"].fillna("")
+    if "description_en" not in reports:
+        return th
+    return reports["description_en"].where(reports["description_en"].notna(), th).fillna("")
+
+
+def shorten(text: str, n: int, suffix: str = "") -> str:
+    """The text cut at a word boundary to about n characters, with "…" and the suffix, or unchanged if short."""
+    if len(text) <= n:
+        return text
+    cut = text[:n]
+    cut = cut[:cut.rfind(" ")] if " " in cut[n // 2:] else cut
+    return cut.rstrip(" ,.;:") + "…" + suffix
+
+
+def report_popup_html(when: str, district: str, text: str, translated: bool = True,
+                      preview: int = POPUP_PREVIEW_CHARS) -> str:
+    """A report as popup HTML: the first part of the text, and the rest behind "Read more". The text comes from
+    the public, so everything in it is escaped."""
+    head = f"<b>{html.escape(when)}</b>" + (f" · {html.escape(district)}" if district else "")
+    if len(text) <= preview:
+        body = f"<div>{html.escape(text)}</div>"
+    else:
+        body = (f"<details><summary>{html.escape(shorten(text, preview))} <span class='more'>Read more</span>"
+                f"</summary>{html.escape(text)}</details>")
+    note = ("Machine-translated from Thai (Traffy Fondue); place names may be wrong." if translated
+            else "Not translated yet: the resident's original Thai text (Traffy Fondue).")
+    return f"<div class='report-popup'>{head}{body}<div class='note'>{note}</div></div>"
 
 
 # ---------- charts ----------

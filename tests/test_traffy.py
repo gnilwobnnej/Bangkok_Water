@@ -120,3 +120,58 @@ def test_flood_reports_are_saved_and_loaded_by_month(tmp_path, monkeypatch):
     assert [p.name for p in sorted((tmp_path / "reports").iterdir())] == ["2026-09.parquet", "2026-10.parquet"]
     df = load_reports()
     assert list(df["ticket_id"]) == ["A", "B", "C"] and "is_flood" not in df and df["types"][0] == FLOOD_TYPE
+
+
+def test_flood_form_answers_are_translated_exactly():
+    from src.traffy import duration_en, split_description
+    pieces, form = split_description("น้ำท่วมขังหน้าบ้าน\nช่วยด้วยค่ะ ความสูงระดับหัวเข่าค่ะ น้ำท่วมมาแล้วน้อยกว่า 3 ชั่วโมง ")
+    assert pieces == ["น้ำท่วมขังหน้าบ้าน", "ช่วยด้วยค่ะ"]  # line by line for the model
+    assert form == "Water: knee-deep. Flooded for less than 3 hours."
+    assert duration_en("2วัน") == "2 days" and duration_en("มากกว่า 1 สัปดาห์") == "more than 1 week"
+    assert duration_en("น้อยก") == ""  # cut off by the 255-character limit: dropped
+    # an answer that isn't one of the form's goes to the model instead
+    pieces, form = split_description("ท่อตัน ความสูงระดับน้ำขัง ไม่ลงท่อระบายน้ำ")
+    assert form == "" and pieces == ["ท่อตัน  น้ำขัง ไม่ลงท่อระบายน้ำ"]
+
+
+def test_stock_phrases_and_districts_skip_the_model():
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import translate_traffy as tt
+    from src.traffy import district_en, fixed_en
+    assert fixed_en("น้ำท่วมครับ") == "Flooding" and fixed_en("เขต: บางกะปิ") == "District: Bang Kapi"
+    assert district_en("เขตประเวศ") == "Prawet" and district_en("บางพลี") == "Bang Phli" and district_en(None) == ""
+    seen = []
+
+    def stub(pieces):
+        seen.extend(pieces)
+        return [f"<{p}>" for p in pieces]
+    got = tt.translate_texts(["น้ำท่วม", "ซอยลึก\nOK 123 ความสูงระดับข้อเท้า น้ำท่วมมาแล้ว 1 วัน"], stub)
+    assert seen == ["ซอยลึก"]  # stock phrase, English text and form answers never reach the model
+    assert got == {"น้ำท่วม": "Flooding.", "ซอยลึก\nOK 123 ความสูงระดับข้อเท้า น้ำท่วมมาแล้ว 1 วัน":
+                   "<ซอยลึก>. OK 123. Water: ankle-deep. Flooded for 1 day."}
+    assert tt.pending(pd.Series(["ก", "ข", "ก", " ", None]), {"ข": "b"}) == ["ก"]
+
+
+def test_reports_carry_their_english_text(tmp_path, monkeypatch):
+    from src.traffy import load_reports
+    monkeypatch.setattr(C, "TRAFFY_REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(C, "TRAFFY_TRANSLATIONS_FILE", tmp_path / "translations.parquet")
+    (tmp_path / "reports").mkdir()
+    pd.DataFrame({"time": pd.to_datetime(["2026-09-26 18:00", "2026-09-26 19:00"]),
+                  "description": ["น้ำท่วม", "ใหม่"]}).to_parquet(tmp_path / "reports" / "2026-09.parquet")
+    assert load_reports()["description_en"].isna().all()  # nothing translated yet
+    pd.DataFrame({"description": ["น้ำท่วม"], "description_en": ["Flooding."]}).to_parquet(
+        tmp_path / "translations.parquet")
+    assert load_reports()["description_en"].tolist()[0] == "Flooding." and pd.isna(load_reports()["description_en"][1])
+
+
+def test_report_popup_escapes_text_and_hides_the_rest_behind_read_more():
+    from src.viz import report_popup_html, report_text, shorten
+    short = report_popup_html("26 Sep 2026 18:00", "Prawet", "Water <b>knee</b> deep")
+    assert "&lt;b&gt;knee&lt;/b&gt;" in short and "<details>" not in short and "Machine-translated" in short
+    long_text = "word " * 60
+    pop = report_popup_html("t", "", long_text.strip(), translated=False, preview=50)
+    assert "<details>" in pop and "Read more" in pop and "Not translated yet" in pop
+    assert shorten("one two three four", 10, "!") == "one two…!" and shorten("short", 10) == "short"
+    r = pd.DataFrame({"description": ["ไทย", "ไทย2"], "description_en": ["English", None]})
+    assert report_text(r).tolist() == ["English", "ไทย2"]

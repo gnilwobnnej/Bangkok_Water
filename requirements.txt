@@ -15,6 +15,7 @@ requests>=2.31
 lightgbm>=4.0
 scikit-learn>=1.3
 # shap>=0.44          # training only (train_model.py); the app reads precomputed SHAP values
+# transformers sentencepiece  # translate_traffy.py only (plus torch); the app reads the saved English text
 # earthengine-api     # optional: only for prepare_ml_data.py --gee-project
 # 3D buildings tab
 pydeck>=0.8

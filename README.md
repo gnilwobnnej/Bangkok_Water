@@ -206,6 +206,7 @@ python scripts/fetch_traffy.py --all        # flood reports + every report on ev
 python scripts/build_traffy_labels.py       # storm days (with ERA5 rain) -> flood_labels/traffy_YYYY.tif
 python scripts/train_model.py --kind street # trains on 2022-2025
 python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
+python scripts/translate_traffy.py          # the reports in English for the map (~2 h first time; then only new ones)
 ```
 - **Storm days:** at least 15 flood reports, at least 3x the usual count for the time of year, and at least 10 mm
   of rain that day or the day before. 164 storm days hold 62% of all flood reports; the rest are mostly
@@ -231,9 +232,15 @@ its scores by under 0.01; its top factors are distance to the Chao Phraya, build
 local dips.
 
 The app gains "ML street-flood susceptibility" and "Reported street flooding" layers (by year or storm; hover a dot for its
-time, district and description), a section in the **ML model** tab, and dense-city scores in the **Validation**
+time, district and a preview, click it for the whole report), a section in the **ML model** tab, and dense-city scores in the **Validation**
 tab. **Caveats:** reports follow people and app use (little use before mid-2022); a flooded soi nobody reports
 counts as unknown, not dry; the scores measure *where* streets flood in a storm, not how deep or how long.
+
+**Reports in English:** `translate_traffy.py` translates the Thai reports with Helsinki-NLP/opus-mt-th-en, a free
+model run locally (`pip install transformers sentencepiece`; the app doesn't need it). It gives the gist, not a
+polished translation: Thai place and street names often come out wrong. The flood form's own answers (water
+depth, how long it has flooded), the commonest short reports and district names are translated exactly instead.
+The daily update translates new reports; any not yet translated show in Thai.
 
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
