@@ -90,6 +90,14 @@ def probability_rgba(prob: np.ndarray, alpha: int = 170, cmap=ML_CMAP) -> np.nda
     return rgba
 
 
+def best_model_rgba(river_prob: np.ndarray, street_prob: np.ndarray, zone: np.ndarray) -> np.ndarray:
+    """The street-flood model (green) inside the city zone, the river-flood model (pink) everywhere else, and
+    where the street model has no prediction."""
+    use_street = zone & np.isfinite(street_prob)
+    return np.where(use_street[..., None], probability_rgba(street_prob, cmap=STREET_CMAP),
+                    probability_rgba(river_prob))
+
+
 def chance_rgba(chance: np.ndarray, max_alpha: int = 215) -> np.ndarray:
     """Share of elevation-error runs (0-1) in which a cell floods; under 5% transparent, so rare cells don't fog
     the map."""
@@ -161,13 +169,16 @@ def build_map(
     disagreement: np.ndarray | None = None,
     street_prob: np.ndarray | None = None,
     reports: pd.DataFrame | None = None, reports_label: str = "Reported street flooding",
+    best_model: tuple | None = None,
 ) -> folium.Map:
+    """`best_model`: (river-flood probability, street-flood probability, city zone, zone outline GeoJSON) for
+    the "Best model by area" layer."""
     m = folium.Map(
         location=CENTER, zoom_start=11, control_scale=True,
         tiles=ESRI_CANVAS.format("World_Dark_Gray_Base" if dark else "World_Light_Gray_Base"),
         attr=ESRI_ATTR,
     )
-    if elevation_range is not None or chance is not None or disagreement is not None:
+    if elevation_range is not None or chance is not None or disagreement is not None or best_model is not None:
         # White card behind the legends so they stay readable on the dark basemap.
         m.get_root().header.add_child(folium.Element(
             "<style>.legend.leaflet-control{background:rgba(255,255,255,.88);"
@@ -197,6 +208,23 @@ def build_map(
             to_data_url(probability_rgba(street_prob, cmap=STREET_CMAP)), bounds=BOUNDS,
             name="ML street-flood susceptibility", interactive=False, zindex=2,
         ).add_to(m)
+    if best_model is not None:
+        river, street, zone, outline = best_model
+        folium.raster_layers.ImageOverlay(
+            to_data_url(best_model_rgba(river, street, zone)), bounds=BOUNDS,
+            name="Best model by area", interactive=False, zindex=2,
+        ).add_to(m)
+        folium.GeoJson(
+            outline, name="City zone (street-flood model inside)",
+            style_function=lambda f: {"color": "#ffffff" if dark else "#222222", "weight": 2.5, "opacity": 0.9,
+                                      "dashArray": "6 5"},
+            tooltip="City zone: street-flood model inside, river-flood model outside",
+        ).add_to(m)
+        for cmap, caption in [(ML_CMAP, "River-flood chance (outside the city zone)"),
+                              (STREET_CMAP, "Street-flood chance in a downpour (city zone)")]:
+            legend = bcm.LinearColormap([cmap(x) for x in np.linspace(0, 1, 6)], vmin=0, vmax=1)
+            legend.caption = caption
+            legend.add_to(m)
     if disagreement is not None:
         vmax = float(np.nanpercentile(disagreement, 99))
         folium.raster_layers.ImageOverlay(

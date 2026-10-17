@@ -25,8 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from src import config as C  # noqa: E402
 from src.current_flood import DRY_PCT, FLOODED_PCT, load_pass, radar_labels  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
-from src.ml import ML_2011, ML_ALL  # noqa: E402
+from src.ml import ML_2011, ML_ALL, ML_STREET  # noqa: E402
 from src.validation import N_BOOT, block_bootstrap  # noqa: E402
+from src.zones import OUTSIDE_SCOPE, load_city_zone  # noqa: E402
 from train_model import BLOCK_M, baseline_methods, spatial_blocks  # noqa: E402
 
 
@@ -45,12 +46,21 @@ def main():
         if path.exists():
             with rasterio.open(path) as src:
                 methods = {name: src.read(1), **methods}
+    # Outside the city zone the map shows the river model; the street model is scored there too, to show why
+    # (it covers only the 50 districts, hence that scope)
+    zone = load_city_zone(area)
+    scopes = [("Greater Bangkok", np.ones_like(bkk), methods), ("Bangkok (50 districts)", bkk, methods)]
+    if zone is not None and C.ML_STREET_PROB_FILE.exists():
+        with rasterio.open(C.ML_STREET_PROB_FILE) as src:
+            scopes.append((OUTSIDE_SCOPE, bkk & ~zone, {ML_STREET: src.read(1), **methods}))
 
     results = []
     for p in summary["passes"]:
         labels = radar_labels(load_pass(p["date"]))
-        for scope, mask in [("Greater Bangkok", np.ones_like(bkk)), ("Bangkok (50 districts)", bkk)]:
+        for scope, mask, methods in scopes:
             known = (labels >= 0) & mask
+            for s in methods.values():
+                known &= np.isfinite(s)
             y = labels[known]
             if y.sum() < 20 or (y == 0).sum() < 20:
                 continue

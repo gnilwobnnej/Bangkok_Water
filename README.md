@@ -236,6 +236,14 @@ time, district and a preview, click it for the whole report), a section in the *
 tab. **Caveats:** reports follow people and app use (little use before mid-2022); a flooded soi nobody reports
 counts as unknown, not dry; the scores measure *where* streets flood in a storm, not how deep or how long.
 
+**Best model by area:** one map layer showing each model where it scores best. Inside the *city zone* (the dense
+city, at least 90% built-up, smoothed over ~1 km into 8 areas covering 27% of Bangkok; `src/zones.py`) it shows the
+street model, which scores 0.78 there on 2026's reports against 0.64 for the river model. Outside it shows the river
+model, which scores a median 0.93 on the radar passes there against 0.44 for the street model. The two keep separate
+colour scales: they are different measures. Radar sees too little water inside the city zone to score it. Outside
+it, the street model still beats the river model on *street* floods (0.71 vs 0.58), so the suburbs outside the line
+get both kinds of flooding. The Validation tab has the table.
+
 **Reports in English:** `translate_traffy.py` translates the Thai reports with Helsinki-NLP/opus-mt-th-en, a free
 model run locally (`pip install transformers sentencepiece`; the app doesn't need it). It gives the gist, not a
 polished translation: Thai place and street names often come out wrong. The flood form's own answers (water

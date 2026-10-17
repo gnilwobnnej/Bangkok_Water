@@ -7,8 +7,8 @@ Needs the street-flood labels (scripts/build_traffy_labels.py). Scores each meth
     year    flooded = a flood report on any storm day of the year; dry = no flood report all year, but at least
             TRAFFY_MIN_OTHER_REPORTS reports of other problems (as in the training labels)
     storm   flooded = a flood report on that day (or the next, as reports trail the rain); dry = as above
-in two scopes: Bangkok's 50 districts, and the dense city (cells >= config.DENSE_BUILT_UP_PCT built-up), which
-radar can't test at all.
+in Bangkok's 50 districts and in the dense city (cells >= config.DENSE_BUILT_UP_PCT built-up), which radar can't
+test at all; and in the city zone (src/zones.py) and the rest of the 50 districts, the map's "Best model by area" split.
 
 Each score gets a 95% block bootstrap interval, as in evaluate_current.py.
 
@@ -30,6 +30,7 @@ from src.data_loader import load_study_area  # noqa: E402
 from src.ml import ML_2011, ML_ALL, ML_STREET  # noqa: E402
 from src.traffy import count_grid, load_reports, reports_in  # noqa: E402
 from src.validation import N_BOOT, block_bootstrap  # noqa: E402
+from src.zones import CITY_SCOPE, OUTSIDE_SCOPE, load_city_zone  # noqa: E402
 from train_model import BLOCK_M, baseline_methods, spatial_blocks  # noqa: E402
 
 MIN_CELLS = 20  # an event needs at least this many flooded and dry cells to be scored
@@ -41,6 +42,8 @@ def main():
     with rasterio.open(C.LANDCOVER_FILE) as src:
         built_up = src.read(1 + list(src.descriptions).index("built_up"))
     scopes = [("Bangkok (50 districts)", bkk), ("Dense city", bkk & (built_up >= C.DENSE_BUILT_UP_PCT))]
+    zone = load_city_zone(area)  # the map's "Best model by area" split
+    scopes += [(CITY_SCOPE, zone), (OUTSIDE_SCOPE, bkk & ~zone)]
     blocks = spatial_blocks().reshape(bkk.shape)
     methods = baseline_methods(area)
     for name, path in [(ML_2011, C.ML_PROB_2011_FILE), (ML_ALL, C.ML_PROB_FILE), (ML_STREET, C.ML_STREET_PROB_FILE)]:

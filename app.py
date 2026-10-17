@@ -19,6 +19,7 @@ from src.buildings import (
 from src.current_flood import (
     DRY_PCT, FLOODED_PCT, conditions_alert, district_flooded_pct, load_evaluation, load_pass, load_summary,
 )
+from src.zones import CITY_SCOPE, OUTSIDE_SCOPE, load_city_zone, zone_outline
 from src.viz3d import city_deck, district_deck, district_view, footprint_coords
 from src.ml import ML_2011, ML_ALL, ML_STREET, load_ml, load_street
 from src.risk import compute_factors, district_mean, district_risk, risk_index
@@ -26,7 +27,7 @@ from src.simulate import level_curve, simulate
 from src.traffy import load_reports, load_summary as load_traffy_summary, report_files, reports_in
 from src.uncertainty import load_dem_uncertainty, load_flood_chance
 from src.validation import (
-    CI, REFERENCE, TEST_CV, TEST_RADAR, TEST_STREET, cv_table, loeo_table, validation_table, wins,
+    CI, REFERENCE, TEST_CV, TEST_RADAR, TEST_STREET, cv_table, loeo_table, validation_table, wins, zone_scores,
 )
 from src.viz import (
     basemap_rgb, build_map, difference_chart, elevation_histogram, feature_importance_chart, flood_frame,
@@ -82,6 +83,13 @@ def get_ml(version: tuple):
 @st.cache_resource(max_entries=1)
 def get_street(version: tuple):
     return load_street()
+
+
+@st.cache_resource(max_entries=1)
+def get_city_zone(version: tuple):
+    """(city zone grid, its outline as GeoJSON) for the "Best model by area" layer, or None."""
+    zone = load_city_zone(get_area())
+    return None if zone is None else (zone, zone_outline(zone, get_area().transform))
 
 
 @st.cache_resource(max_entries=1)
@@ -199,7 +207,15 @@ with st.sidebar:
              "cell floods. Shown for the nearest of 0.5, 1.0 … 3.0 m. Follows the connectivity and defence "
              "settings above.")
     show_risk = st.checkbox("Risk index", value=False)
-    show_ml = show_obs = show_disagree = False
+    show_ml = show_obs = show_disagree = show_best = False
+    city = get_city_zone(file_version(C.LANDCOVER_FILE, C.DISTRICTS_FILE)) if ml and street else None
+    if city is not None:
+        show_best = st.checkbox(
+            "Best model by area", value=False,
+            help="Each place shown with the model that scored best there. Inside the dashed line (the dense "
+                 "city) is the street-flood model, green, tested on residents' reports; outside it, the "
+                 "river-flood model, pink, tested on radar flood maps. The two colours are different measures, "
+                 "not one scale. The Validation tab has the scores.")
     if ml is not None:
         show_ml = st.checkbox("ML flood susceptibility", value=False,
                               help="Probability of flooding learned from where Bangkok flooded in 2011 and in "
@@ -337,6 +353,7 @@ fmap = build_map(
     defences=get_defence_lines() if show_defences else None, level=level,
     disagreement=ml.disagreement if show_disagree else None,
     street_prob=street.prob if show_street else None,
+    best_model=(ml.prob, street.prob, *city) if show_best else None,
     reports=(reports_in(traffy[0], report_period, [s["date"] for s in traffy[1]["storms"]])
              if show_reports else None),
     reports_label=f"Reported street flooding {report_period}",
@@ -864,6 +881,19 @@ with tab_valid:
                                 use_container_width=True)
                 st.caption(f"One point per storm day (that day's and the next day's reports); shading = {CI}% "
                            "interval. Storms with fewer than 20 flooded cells in the area aren't scored.")
+
+        zs = zone_scores(ev_all, ev_street, [ML_STREET, ML_ALL, "Bathtub + defences", REFERENCE],
+                         CITY_SCOPE, OUTSIDE_SCOPE, vmetric)
+        if len(zs) == 2:
+            st.subheader("Which model where: the map's “Best model by area”")
+            st.dataframe(zs.style.format("{:.3f}", na_rep="–").highlight_max(axis=1, color="#c7e9c0"),
+                         use_container_width=True)
+            st.caption(
+                f"{metric_name}, each zone tested on the floods it gets. The *city zone* (dashed line on the map) "
+                f"is the dense city ({C.DENSE_BUILT_UP_PCT}%+ built-up) smoothed over ~1 km; radar sees too little "
+                "water there to score it. Outside it, river floods dominate and the street-flood model is no "
+                "better than a guess, while the river-flood model is the best method. Inside it, the street-flood "
+                "model is the best method on residents' reports. Neither zone's scores were trained on.")
 
         st.subheader("All results")
 

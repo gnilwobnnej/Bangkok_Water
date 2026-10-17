@@ -80,6 +80,9 @@ TRAFFY_MIN_STORM_REPORTS = 1    # label flooded: >= this many flood reports on s
 TRAFFY_MIN_OTHER_REPORTS = 5    # label dry: no flood report, and >= this many reports of other problems
 TRAFFY_EVAL_FILE = TRAFFY_DIR / "evaluation.json"  # every method scored on the test years' reports
 DENSE_BUILT_UP_PCT = 90  # "dense city": cells at least this % built-up (ESA WorldCover), ~30% of Bangkok
+# The city zone (src/zones.py): the dense city smoothed into solid areas, ~27% of Bangkok in 8 pieces
+CITY_ZONE_WINDOW = 15    # cells (~1 km): a cell is in the zone if most of the square around it is dense city
+CITY_ZONE_MIN_KM2 = 2.0  # smaller pieces are dropped
 
 # Buildings (scripts/prepare_buildings.py)
 BUILDINGS_DIR = PROCESSED_DIR / "buildings"              # one GeoParquet per district

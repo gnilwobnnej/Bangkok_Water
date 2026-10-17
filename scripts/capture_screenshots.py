@@ -254,6 +254,10 @@ def main():
                 app.shot_report_popup("36_report_popup")
                 app.checkbox("Reported street flooding", False)
             app.checkbox("ML street-flood susceptibility", False)
+            if pg.locator('[data-testid="stSidebar"] label').filter(has_text="Best model by area").count():
+                app.checkbox("Best model by area", True)
+                app.shot_map("37_best_model")
+                app.checkbox("Best model by area", False)
             app.checkbox("Flood depth", True)
 
         # 9. Current flood from Sentinel-1 radar (only once scripts/fetch_current_flood.py has run)

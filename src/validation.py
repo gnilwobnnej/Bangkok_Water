@@ -197,3 +197,22 @@ def wins(radar_eval: pd.DataFrame, method: str, scope: str, metric: str = "roc_a
     return {"passes": len(dates), "better": int((diff > 0).sum()),
             "clearly_better": int((lo > 0).sum()), "clearly_worse": int((hi < 0).sum()),
             "has_intervals": bool(lo.notna().any())}
+
+
+def zone_scores(radar_eval: pd.DataFrame | None, street_eval: pd.DataFrame | None, methods: list,
+                city_scope: str, outside_scope: str, metric: str = "roc_auc") -> pd.DataFrame:
+    """The "Best model by area" split in numbers: each method's score in the city zone on the latest year of
+    residents' reports, and outside it on the radar passes (median over passes). Rows: zone; columns: methods."""
+    rows = {}
+    if street_eval is not None and not street_eval.empty:
+        yr = street_eval[(street_eval["kind"] == "year") & (street_eval["scope"] == city_scope)]
+        if not yr.empty:
+            latest = yr[yr["date"] == yr["date"].max()]
+            rows[f"City zone: street floods reported in {latest['date'].iloc[0]}"] = \
+                latest.set_index("method")[metric]
+    if radar_eval is not None and not radar_eval.empty:
+        out = radar_eval[radar_eval["scope"] == outside_scope]
+        if not out.empty:
+            rows[f"Outside it: radar floods ({out['date'].nunique()} passes, median)"] = \
+                out.groupby("method")[metric].median()
+    return pd.DataFrame(rows).T.reindex(columns=[m for m in methods if any(m in r.index for r in rows.values())])
