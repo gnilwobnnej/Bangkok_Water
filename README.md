@@ -207,6 +207,7 @@ python scripts/build_traffy_labels.py       # storm days (with ERA5 rain) -> flo
 python scripts/train_model.py --kind street # trains on 2022-2025
 python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
 python scripts/translate_traffy.py          # the reports in English for the map (~2 h first time; then only new ones)
+python scripts/fetch_traffy_photos.py       # links to residents' photos, Sep 2026 on (~40 min first time)
 ```
 - **Storm days:** at least 15 flood reports, at least 3x the usual count for the time of year, and at least 10 mm
   of rain that day or the day before. 164 storm days hold 62% of all flood reports; the rest are mostly
@@ -249,6 +250,12 @@ model run locally (`pip install transformers sentencepiece`; the app doesn't nee
 polished translation: Thai place and street names often come out wrong. The flood form's own answers (water
 depth, how long it has flooded), the commonest short reports and district names are translated exactly instead.
 The daily update translates new reports; any not yet translated show in Thai.
+
+**Residents' photos:** reports from September 2026 on show the resident's photo at the top of the popup (click
+it for the full size). `fetch_traffy_photos.py` finds the links through Traffy's public search API; only the
+links are saved, and the photos load from Traffy's servers when a report is opened. Earlier reports have no photo,
+to keep the fetch small (`TRAFFY_PHOTOS_FROM` in `src/config.py`). Photos are taken by the public and may show
+faces, homes or number plates.
 
 ## 3D buildings (optional)
 Every building in Bangkok in 3D, coloured by flood impact under the simulated level, the latest radar pass,
@@ -345,6 +352,7 @@ scripts/dem_uncertainty.py      Elevation-error ensemble: flood ranges and chanc
 scripts/event_context.py        Rainfall and river peaks for each training flood
 scripts/fetch_traffy.py         Traffy Fondue reports (floods, and all reports on every 3rd day)
 scripts/build_traffy_labels.py  Storm days + street-flood labels from the reports
+scripts/fetch_traffy_photos.py  Links to residents' photos of the flood reports (Sep 2026 on)
 scripts/evaluate_street.py      Score every method against 2026 street-flood reports
 scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
 scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF

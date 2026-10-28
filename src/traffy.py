@@ -111,6 +111,8 @@ def load_reports() -> pd.DataFrame | None:
     df = df.sort_values("time", kind="stable").reset_index(drop=True)
     en = load_translations()
     df["description_en"] = df["description"].map(en) if en else np.nan
+    photos = load_photos()
+    df["photo_url"] = df["ticket_id"].map(photos) if photos and "ticket_id" in df else np.nan
     return df
 
 
@@ -120,6 +122,28 @@ def load_translations() -> dict:
         return {}
     t = pd.read_parquet(C.TRAFFY_TRANSLATIONS_FILE)
     return dict(zip(t["description"], t["description_en"]))
+
+
+# ---------- photos ----------
+PHOTO_HOST = "https://storage.googleapis.com/traffy_public_bucket/"  # where Traffy keeps residents' photos
+
+
+def load_photos() -> dict:
+    """{ticket_id: photo URL} (scripts/fetch_traffy_photos.py), empty if not fetched."""
+    if not C.TRAFFY_PHOTOS_FILE.exists():
+        return {}
+    p = pd.read_parquet(C.TRAFFY_PHOTOS_FILE)
+    return dict(zip(p["ticket_id"], p["photo_url"]))
+
+
+def safe_photo_url(url) -> str | None:
+    """The URL if it is a plain https link into Traffy's public photo bucket, else None. The links come from a
+    public API, so anything else is never put into the map's HTML."""
+    if not isinstance(url, str) or not url.startswith(PHOTO_HOST):
+        return None
+    if re.search(r"[\s\"'<>\\`]", url):
+        return None
+    return url
 
 
 # ---------- English text ----------

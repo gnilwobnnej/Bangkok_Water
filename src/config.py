@@ -72,6 +72,8 @@ TRAFFY_REPORTS_DIR = TRAFFY_DIR / "flood_reports"       # every flood report (po
 TRAFFY_OTHER_FILE = TRAFFY_DIR / "other_counts.tif"       # reports of anything else per cell, one band per year
 TRAFFY_STORMS_FILE = TRAFFY_DIR / "summary.json"          # storm days and their rain, label counts per year
 TRAFFY_TRANSLATIONS_FILE = TRAFFY_DIR / "translations.parquet"  # report text in English (scripts/translate_traffy.py)
+TRAFFY_PHOTOS_FILE = TRAFFY_DIR / "photos.parquet"  # residents' photo links (scripts/fetch_traffy_photos.py)
+TRAFFY_PHOTOS_FROM = "2026-09-01"  # photos only for reports from this date on, to keep the fetch small
 TRAFFY_YEARS = range(2022, datetime.date.today().year + 1)  # reports start in 2022; TEST_YEARS_FROM on are tests
 TRAFFY_STORM_MIN_REPORTS = 15   # a storm day has >= this many flood reports...
 TRAFFY_STORM_SPIKE = 3.0        # ...and >= this x the typical daily count for the time of year...

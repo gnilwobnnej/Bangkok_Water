@@ -175,3 +175,44 @@ def test_report_popup_escapes_text_and_hides_the_rest_behind_read_more():
     assert shorten("one two three four", 10, "!") == "one two…!" and shorten("short", 10) == "short"
     r = pd.DataFrame({"description": ["ไทย", "ไทย2"], "description_en": ["English", None]})
     assert report_text(r).tolist() == ["English", "ไทย2"]
+
+
+def test_photo_links_are_checked_before_they_reach_the_map():
+    from src.traffy import safe_photo_url
+    good = "https://storage.googleapis.com/traffy_public_bucket/attachment/2026-10/thumb_abc.jpg"
+    assert safe_photo_url(good) == good
+    for bad in ("javascript:alert(1)", "https://example.com/x.jpg", good + "' onerror='x", good + " x",
+                "http://storage.googleapis.com/traffy_public_bucket/x.jpg", None, float("nan"), ""):
+        assert safe_photo_url(bad) is None
+
+
+def test_report_popup_shows_the_photo_only_when_there_is_a_safe_one():
+    from src.viz import report_popup_html
+    url = "https://storage.googleapis.com/traffy_public_bucket/attachment/2026-10/a.jpg"
+    pop = report_popup_html("t", "Prawet", "Flooding", photo=url)
+    assert f"<img src='{url}'" in pop and "target='_blank'" in pop and "click to enlarge" in pop
+    assert "<img" not in report_popup_html("t", "Prawet", "Flooding")
+    assert "<img" not in report_popup_html("t", "Prawet", "Flooding", photo="javascript:alert(1)")
+
+
+def test_photos_are_kept_for_flood_reports_only_and_joined_to_the_reports(tmp_path, monkeypatch):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import fetch_traffy_photos as fp
+    from src.traffy import load_reports
+    url = "https://storage.googleapis.com/traffy_public_bucket/attachment/2026-09/{}.jpg"
+    page = [{"ticket_id": "A", "photo_url": url.format("a")}, {"ticket_id": "B", "photo_url": ""},
+            {"ticket_id": "X", "photo_url": url.format("x")}, {"ticket_id": "C", "photo_url": "https://evil/c.jpg"}]
+    assert fp.flood_photos(page, {"A", "B", "C"}) == {"A": url.format("a")}  # X isn't a flood report
+    import datetime as dt
+    assert fp.days_to_do(dt.date(2026, 9, 1), dt.date(2026, 9, 6), {"2026-09-01", "2026-09-02", "2026-09-05"}) == \
+        ["2026-09-03", "2026-09-04", "2026-09-05", "2026-09-06"]  # the last 3 days always again
+    monkeypatch.setattr(C, "TRAFFY_REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(C, "TRAFFY_TRANSLATIONS_FILE", tmp_path / "translations.parquet")
+    monkeypatch.setattr(C, "TRAFFY_PHOTOS_FILE", tmp_path / "photos.parquet")
+    (tmp_path / "reports").mkdir()
+    pd.DataFrame({"ticket_id": ["A", "B"], "time": pd.to_datetime(["2026-09-26 18:00", "2026-09-26 19:00"]),
+                  "description": ["x", "y"]}).to_parquet(tmp_path / "reports" / "2026-09.parquet")
+    assert load_reports()["photo_url"].isna().all()
+    pd.DataFrame({"ticket_id": ["A"], "photo_url": [url.format("a")]}).to_parquet(tmp_path / "photos.parquet")
+    got = load_reports()["photo_url"].tolist()
+    assert got[0] == url.format("a") and pd.isna(got[1])

@@ -87,6 +87,12 @@ jobs:
           pip install transformers sentencepiece
           python scripts/translate_traffy.py
 
+      # Links to the residents' photos of new reports (September 2026 on; the photos stay on Traffy's servers)
+      - name: Find the photos of new Traffy reports
+        if: steps.traffy.outcome == 'success'
+        continue-on-error: true
+        run: python scripts/fetch_traffy_photos.py
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"

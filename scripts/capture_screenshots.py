@@ -99,20 +99,26 @@ class App:
         print("saved", name)
 
     def shot_report_popup(self, name):
-        """Click residents' report dots until one has a long report, open its "Read more" and screenshot it."""
+        """Click residents' report dots until one has a photo and a long report, open its "Read more" and
+        screenshot it."""
         box = self.map_box()
         frame = self.pg.frame_locator(MAP)
         dots = frame.locator('path.leaflet-interactive[fill="#00e5ff"]')
         for i in range(0, dots.count(), 7):
             bb = dots.nth(i).bounding_box()
-            # well inside the map, with room for the popup above the dot
+            # well inside the map, with room for the popup above the dot (Leaflet pans to fit the rest)
             if not (bb and box["x"] + 300 < bb["x"] < box["x"] + box["width"] - 300
                     and box["y"] + 380 < bb["y"] < box["y"] + box["height"] - 60):
                 continue
             self.pg.mouse.click(bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2)
             self.pg.wait_for_timeout(800)
             more = frame.locator(".leaflet-popup-content summary")
-            if more.count() and "Machine-translated" in frame.locator(".leaflet-popup-content").inner_text():
+            img = frame.locator(".leaflet-popup-content img")
+            if (more.count() and img.count()
+                    and "Machine-translated" in frame.locator(".leaflet-popup-content").inner_text()):
+                self.pg.wait_for_timeout(2500)  # the photo loads from Traffy
+                if not img.evaluate("i => i.complete && i.naturalWidth > 0"):
+                    continue
                 more.click()
                 self.pg.mouse.move(box["x"] + 5, box["y"] + 5)
                 self.pg.wait_for_timeout(800)

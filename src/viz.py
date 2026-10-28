@@ -20,7 +20,7 @@ from shapely.ops import unary_union
 from src import config as C
 from src.data_loader import StudyArea
 from src.ml import ML_2011, ML_ALL, ML_STREET
-from src.traffy import district_en
+from src.traffy import district_en, safe_photo_url
 
 MAX_DEPTH_M = 3.0
 WATER_CMAP = LinearSegmentedColormap.from_list("water", ["#8fd3ff", "#2b7bd6", "#0a2f6b"])
@@ -326,10 +326,14 @@ def build_map(
         district = r["district"].map(district_en)
         text = report_text(r)
         translated = r["description_en"].notna() if "description_en" in r else pd.Series(False, index=r.index)
+        photo = (r["photo_url"].map(safe_photo_url) if "photo_url" in r
+                 else pd.Series(None, index=r.index, dtype=object))
+        preview = text.map(lambda t: shorten(t, TOOLTIP_CHARS, " (click the dot to read more)"))
         pts = gpd.GeoDataFrame({
             "when": when, "district": district.map(html.escape),
-            "preview": text.map(lambda t: html.escape(shorten(t, TOOLTIP_CHARS, " (click the dot to read more)"))),
-            "popup": [report_popup_html(w, d, t, tr) for w, d, t, tr in zip(when, district, text, translated)],
+            "preview": [html.escape(("📷 " if p else "") + t) for t, p in zip(preview, photo)],
+            "popup": [report_popup_html(w, d, t, tr, photo=p)
+                      for w, d, t, tr, p in zip(when, district, text, translated, photo)],
         }, geometry=gpd.points_from_xy(r["lon"], r["lat"]), crs="EPSG:4326")
         m.get_root().header.add_child(folium.Element(REPORT_CSS))
         folium.GeoJson(
@@ -353,6 +357,8 @@ REPORT_CSS = """<style>
 .report-popup details[open] summary {display: none}
 .report-popup .more {color: #0b6fa4; text-decoration: underline; white-space: nowrap}
 .report-popup .note {color: #888; font-size: 11px; margin-top: 6px}
+.report-popup img {display: block; width: 100%; max-height: 260px; object-fit: cover; border-radius: 4px;
+                   margin: 4px 0 6px}
 </style>"""
 
 
@@ -374,10 +380,16 @@ def shorten(text: str, n: int, suffix: str = "") -> str:
 
 
 def report_popup_html(when: str, district: str, text: str, translated: bool = True,
-                      preview: int = POPUP_PREVIEW_CHARS) -> str:
-    """A report as popup HTML: the first part of the text, and the rest behind "Read more". The text comes from
-    the public, so everything in it is escaped."""
+                      preview: int = POPUP_PREVIEW_CHARS, photo: str | None = None) -> str:
+    """A report as popup HTML: the resident's photo if there is one (loaded from Traffy, opening full size in a
+    new tab), the first part of the text, and the rest behind "Read more". The text and the photo link come from
+    the public, so the link must pass safe_photo_url and everything is escaped."""
     head = f"<b>{html.escape(when)}</b>" + (f" · {html.escape(district)}" if district else "")
+    url = safe_photo_url(photo)
+    if url:
+        u = html.escape(url, quote=True)
+        head += (f"<a href='{u}' target='_blank' rel='noopener noreferrer'><img src='{u}' loading='lazy' "
+                 f"alt=\"Resident's photo\" onerror=\"this.style.display='none'\"></a>")
     if len(text) <= preview:
         body = f"<div>{html.escape(text)}</div>"
     else:
@@ -385,6 +397,8 @@ def report_popup_html(when: str, district: str, text: str, translated: bool = Tr
                 f"</summary>{html.escape(text)}</details>")
     note = ("Machine-translated from Thai (Traffy Fondue); place names may be wrong." if translated
             else "Not translated yet: the resident's original Thai text (Traffy Fondue).")
+    if url:
+        note += " Photo: the resident's, from Traffy Fondue (click to enlarge)."
     return f"<div class='report-popup'>{head}{body}<div class='note'>{note}</div></div>"
 
 
