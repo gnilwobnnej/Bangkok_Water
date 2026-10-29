@@ -43,7 +43,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prepare_data import PROFILE  # noqa: E402
 from src import config as C  # noqa: E402
-from src.traffy import FLOOD_TYPE, count_grid, report_files, report_row  # noqa: E402
+from src.traffy import (FLOOD_TYPE, count_grid, load_text_model, merge_photos, report_files, report_row,  # noqa: E402
+                        share_day, share_rows)
 
 API = "https://publicapi.traffy.in.th/teamchadchart-stat-api/geojson/v1"
 PAGE = 1000           # the API's maximum per call
@@ -258,6 +259,92 @@ def daily_months() -> list:
     return months_between(str(first), str(now))
 
 
+# ---------- fallback: the share API and the text model (the GeoJSON API has returned 404 since 14 Oct 2026) ----------
+
+def old_api_up() -> bool:
+    """False when the GeoJSON API answers 404 or can't be reached (one quick call, no retries)."""
+    try:
+        r = requests.get(API, params={"start": str(dt.date.today()), "end": str(dt.date.today()), "limit": 1},
+                         timeout=60)
+        return r.ok and "features" in r.json()
+    except (requests.RequestException, ValueError):
+        return False
+
+
+def merge_flood_reports(rows: list) -> int:
+    """Add flood reports to the month files. A ticket already saved is kept as it is, so a report with Traffy's own
+    category is never replaced by the text model's guess. Returns how many were added."""
+    if not rows:
+        return 0
+    new = pd.DataFrame(rows).drop(columns=["is_flood"])
+    new["time"] = pd.to_datetime(new["time"])
+    new["types"] = new["types"].map(lambda t: ",".join(t))
+    C.TRAFFY_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    added = 0
+    for m, part in new.groupby(new["time"].dt.to_period("M").astype(str)):
+        path = C.TRAFFY_REPORTS_DIR / f"{m}.parquet"
+        old = pd.read_parquet(path) if path.exists() else pd.DataFrame(columns=part.columns)
+        if "source" not in old:
+            old["source"], old["flood_prob"] = "category", np.nan
+        part = part[~part["ticket_id"].isin(old["ticket_id"])]
+        if part.empty:
+            continue
+        df = pd.concat([old, part], ignore_index=True).sort_values(["time", "ticket_id"]).reset_index(drop=True)
+        df.to_parquet(path, index=False)
+        added += len(part)
+    return added
+
+
+def daily_share() -> None:
+    """--daily without the GeoJSON API: every report of each UTC day since the newest saved flood report (and
+    the oldest sampled day still to count), from the share API; the text model picks out the flood reports.
+    Adds them to the month files, counts the others onto other_counts.tif, and saves the photo links."""
+    model = load_text_model()
+    if model is None:
+        raise SystemExit("No text model: run scripts/train_traffy_text.py first")
+    bands, through, every = read_other_counts()
+    count_days = days_to_add(through, every)
+    saved = pd.concat([pd.read_parquet(f) for f in report_files()], ignore_index=True) if report_files() else None
+    newest = saved["time"].max().date() if saved is not None else FIRST_DAY
+    # Model guesses are only added after the last report Traffy categorised itself
+    categorised = saved if saved is None or "source" not in saved else saved[saved["source"].fillna("category")
+                                                                               == "category"]
+    last_category = str(categorised["time"].max()) if categorised is not None else ""
+    # A Bangkok day starts at 17:00 UTC the day before
+    first = min([newest] + count_days) - dt.timedelta(days=1)
+    today = dt.datetime.now(dt.timezone.utc).date()
+    days = [first + dt.timedelta(days=n) for n in range((today - first).days + 1)]
+    print(f"Share API: every report on {len(days)} UTC days ({days[0]} to {days[-1]}), flood reports picked out "
+          f"by the text model (cut-off {model.cutoff})")
+    rows, photos = [], {}
+    for d in days:
+        t0 = time.time()
+        results = share_day(str(d))
+        day_rows = share_rows(results, model)
+        rows += day_rows
+        flood_ids = {r["ticket_id"] for r in day_rows if r["is_flood"]}
+        photos.update((r["ticket_id"], r.get("photo_url")) for r in results if r["ticket_id"] in flood_ids)
+        print(f"  {d}: {len(day_rows):,} reports, {len(flood_ids):,} flood ({time.time() - t0:.0f} s)", flush=True)
+
+    flood = [r for r in rows if r["is_flood"] and r["time"] > last_category]
+    print(f"Added {merge_flood_reports(flood):,} new flood reports to {C.TRAFFY_REPORTS_DIR}")
+    keep = {r["ticket_id"] for r in flood if r["time"] >= C.TRAFFY_PHOTOS_FROM}
+    print(f"Added {merge_photos({t: u for t, u in photos.items() if t in keep}):,} photo links to "
+          f"{C.TRAFFY_PHOTOS_FILE}")
+
+    by_day = {}
+    for r in rows:
+        if not r["is_flood"]:
+            by_day.setdefault(r["time"][:10], []).append(r)
+    for d in count_days:
+        other = by_day.get(str(d), [])
+        bands[d.year] = bands.get(d.year, 0) + count_grid([r["lon"] for r in other], [r["lat"] for r in other]) * every
+        through[d.year] = d
+        print(f"  counted {d}: {len(other):,} other reports")
+    if count_days:
+        save_other_counts(bands, through, every)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--all", action="store_true",
@@ -271,6 +358,10 @@ def main():
                     help="only what's new since the saved data (for the daily workflow; needs no download cache)")
     args = ap.parse_args()
 
+    if args.daily and not old_api_up():
+        print("The Traffy GeoJSON API is down (404 since 14 Oct 2026): using the share API and the text model")
+        daily_share()
+        return
     if args.daily:
         months = daily_months()
         update_flood_cache(months, refresh=True)

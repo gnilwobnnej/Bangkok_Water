@@ -601,7 +601,7 @@
     <li><b>Across all 9 radar passes:</b> ML beats the bathtub on all 9, every one clear of the 95% interval.</li>
     <li><b>Street flooding (Traffy Fondue):</b> 44,443 flood reports since 2022, 164 storm days. The street model scores 0.79 ROC-AUC in the dense city in 2026, a year it never saw (river ML 0.67, bathtub 0.56), and is the best method on all 25 storm days of 2026.</li>
     <li><b>Which model where:</b> city zone (27% of Bangkok): street model 0.78 vs river model 0.64 on 2026 reports. Outside it: river model 0.93 vs street model 0.44 on the radar floods (median of 10 passes).</li>
-    <li><b>Reports in English:</b> all 40,258 distinct report texts machine-translated (Helsinki-NLP opus-mt-th-en, run locally); new ones are translated in the daily update. The 15,707 reports from 1 Sep 2026 on also show the resident's photo.</li>
+    <li><b>Reports in English:</b> all 40,258 distinct report texts machine-translated (Helsinki-NLP opus-mt-th-en, run locally); new ones are translated in the daily update. The 17,354 reports from 1 Sep 2026 on also show the resident's photo.</li>
     <li><b>Biggest storm day:</b> 26 Sep 2026, 3,787 flood reports after about 126 mm of rain (wettest point in the city, ERA5).</li>
     <li><b>Tried and dropped:</b> FABDEM elevation (helps street floods, hurts all 19 river-flood tests); radar double bounce (median 0.52 ROC-AUC on 16 storm passes).</li>
     <li><b>Buildings:</b> 2,116,261 mapped. Affected at 1.0 / 1.5 / 2.0 m: 36,711 / 139,517 / 353,200. Critical facilities affected: 17 / 58 / 148 of 1,390.</li>
@@ -638,7 +638,7 @@
     <tr><td>Can satellites see flooded streets in the city?</td><td>Not well. Radar bounces off buildings, so water between them is mostly missed. We tested the one radar trick that should help (“double bounce”, streets getting brighter when flooded) and it barely beat a coin flip. That's why the street model learns from residents' reports instead.</td></tr>
     <tr><td>Aren't complaint-app reports biased?</td><td>Yes: they follow people and app use. The model only treats a place as dry if people there report other problems but never a flood, so both sides have the same reporting habits. It was then tested on a year it never saw, and it beat every satellite-based method on every storm day.</td></tr>
     <tr><td>Why not use a better elevation map with the buildings removed?</td><td>We tried FABDEM. It helped on street flooding but made the bathtub worse on every one of the 19 river-flood tests, so the app keeps the original elevation. The street model covers the dense city instead.</td></tr>
-    <tr><td>How current are the street reports?</td><td>They update daily from Traffy Fondue's public data service, which has been offline since 14 Oct 2026; until it's back, the reports stop at 13 Oct.</td></tr>
+    <tr><td>How current are the street reports?</td><td>Daily. Since 14 Oct 2026 Traffy no longer says which reports are floods, so a text model picks them out (about 85% right); their popups say so.</td></tr>
     <tr><td>Which model should I trust?</td><td>Depends on the place and the kind of flood. In the dense city, the street model (0.78 vs 0.64 for the river model on 2026's reports). On the riverlands and farmland, the river model (median 0.93 on this year's radar floods, where the street model scores 0.44, worse than a guess). The “Best model by area” layer shows exactly this split. The built-up suburbs just outside the line get both kinds of flood, so look at both layers there.</td></tr>
     <tr><td>Are the reports really in English?</td><td>Residents write them in Thai. The app shows a machine translation made with a free model run on our own computer, so expect the gist, not polished English, and don't trust the street or village names. A report not translated yet shows in Thai until the next daily update.</td></tr>
     <tr><td>Can I zoom in to my street?</td><td>You can zoom the map, but the model works on ~65 m cells, so it's meant for district-scale patterns, not individual buildings. The street-flood layer is the closest to street level, but it gives a chance of flooding in a storm, not a forecast for your street.</td></tr>
@@ -661,7 +661,7 @@
     <li><b>Radar flood maps:</b> under-count water between buildings, can mistake smooth surfaces or field flooding for floodwater, and are snapshots every 4–8 days.</li>
     <li><b>Street model:</b> learns from complaint-app reports, which follow people and app use; it gives the chance a street floods in a storm, not depth or duration, and covers only the 50 districts.</li>
     <li><b>Best model by area:</b> the city-zone line comes from smoothed land cover; the suburbs just outside it also get street floods.</li>
-    <li><b>Reports:</b> the translation gives the gist; Thai place names often come out wrong. Photos (Sep 2026 on) may show faces or number plates: choose which to show.</li>
+    <li><b>Reports:</b> since 14 Oct 2026 picked out by a text model (~85% right). Translations give the gist; place names are often wrong. Photos may show faces or number plates: choose which to show.</li>
     <li><b>Buildings:</b> AI-estimated footprints and heights; “affected” is judged per ~65 m cell, not per building; small sheds left out in the six largest districts.</li>
   </ul>
   <h3>Next steps</h3>
@@ -691,7 +691,7 @@
     <tr><td>Buildings</td><td>Google Open Buildings v3 footprints (confidence ≥ 0.7) and 2.5D Temporal heights, via Google Earth Engine</td><td>Per building; heights 4 m</td></tr>
     <tr><td>Critical facilities</td><td>OpenStreetMap (hospital, clinic, school, university, police, fire station)</td><td>Points</td></tr>
     <tr><td>Flood defences</td><td>Routes: Royal Development Projects Board and Think of Living (2011), traced on OpenStreetMap roads. Crests: BMA flood-wall figures, JICA (Rom Klao Road 2.47 m), Airports of Thailand (3.5 m)</td><td>Lines, ~65 m grid</td></tr>
-    <tr><td>Street flooding</td><td>Traffy Fondue public API (Bangkok's complaint app): flood reports, and every report on every third day; storm-day rain from the Open-Meteo archive (ERA5); English text by Helsinki-NLP opus-mt-th-en (machine translation, run locally)</td><td>Points, ~65 m grid</td></tr>
+    <tr><td>Street flooding</td><td>Traffy Fondue public API (Bangkok's complaint app): flood reports, and every report on every third day (since 14 Oct 2026 the share search API, with flood reports recognised by a text model); storm-day rain from the Open-Meteo archive (ERA5); English text by Helsinki-NLP opus-mt-th-en (machine translation, run locally)</td><td>Points, ~65 m grid</td></tr>
     <tr><td>Building-free elevation (tested, not used)</td><td>FABDEM V1-2 (Hawker et al. 2022), via the Google Earth Engine community catalog; CC BY-NC-SA 4.0</td><td>30 m</td></tr>
     <tr><td>Basemap</td><td>Esri World Gray Canvas tiles</td><td>Online tiles</td></tr>
   </table>

@@ -136,6 +136,18 @@ def load_photos() -> dict:
     return dict(zip(p["ticket_id"], p["photo_url"]))
 
 
+def merge_photos(new: dict) -> int:
+    """Add {ticket_id: URL} to photos.parquet (unsafe links dropped); returns how many were new."""
+    photos = load_photos()
+    add = {t: u for t, u in new.items() if t not in photos and safe_photo_url(u)}
+    if add:
+        photos.update(add)
+        C.TRAFFY_PHOTOS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame({"ticket_id": list(photos), "photo_url": list(photos.values())}).to_parquet(
+            C.TRAFFY_PHOTOS_FILE, index=False)
+    return len(add)
+
+
 def safe_photo_url(url) -> str | None:
     """The URL if it is a plain https link into Traffy's public photo bucket, else None. The links come from a
     public API, so anything else is never put into the map's HTML."""
@@ -294,3 +306,121 @@ def reports_in(reports: pd.DataFrame, period: str, storms=()) -> pd.DataFrame:
         return reports[(reports["time"].dt.year == int(period)) & day.isin(pd.to_datetime(list(storms)))]
     d = pd.Timestamp(period)
     return reports[day.isin([d, d + pd.Timedelta(days=1)])]
+
+
+# ---------- the share API, and recognising flood reports from their text ----------
+# Traffy's GeoJSON API (scripts/fetch_traffy.py) has returned 404 since 14 Oct 2026. The share search API still
+# works, a UTC day at a time, but leaves the category empty for 2026 reports and ignores every filter: so each
+# day's reports are all fetched, and TextModel decides which are flood reports.
+SHARE_API = "https://publicapi.traffy.in.th/share/teamchadchart/search"
+SHARE_PAGE = 1000  # the most it returns per call
+SHARE_RETRIES = (10, 30, 60, 120, 300)
+TEXT_MODEL = "text model"  # `source` of a flood report recognised by TextModel; "category" = Traffy's own
+# About flooding, but not a new flood: cases filed later by staff ("received the case on 27 Sep ...") and claims
+# for flood-relief payments. Rare among Traffy's own flood reports (189 of 44,443), but common after a storm.
+NOT_A_NEW_FLOOD = re.compile(r"(?:ได้)?รับแจ้งเคส|แจ้งเคส\s*เมื่อ|เยียวยา")
+
+
+def share_page(day: str, offset: int) -> list:
+    """One page of every report on a UTC day (YYYY-MM-DD), newest first."""
+    import time
+
+    import requests
+    params = {"start": day, "end": day, "limit": SHARE_PAGE, "offset": offset}
+    for wait in (*SHARE_RETRIES, None):
+        try:
+            r = requests.get(SHARE_API, params=params, timeout=180)
+            r.raise_for_status()
+            d = r.json()
+            if isinstance(d.get("results"), list):
+                return d["results"]
+            err = d.get("message") or "no results"
+        except (requests.RequestException, ValueError) as e:
+            err = str(e)[:200]
+        if wait is None:
+            raise RuntimeError(f"share API {day} offset {offset}: {err}")
+        print(f"    retry in {wait} s ({err})")
+        time.sleep(wait)
+
+
+def share_day(day: str) -> list:
+    """Every report on a UTC day from the share API (raw results, one per ticket)."""
+    rows, offset = {}, 0
+    while True:
+        page = share_page(day, offset)
+        rows.update((r["ticket_id"], r) for r in page if r.get("ticket_id"))
+        offset += SHARE_PAGE
+        if len(page) < SHARE_PAGE:
+            return list(rows.values())
+
+
+class TextModel:
+    """Chance that a report is about flooding, from its text: TF-IDF on character 2-4-grams (sublinear tf, L2
+    norm) and logistic regression, trained by scripts/train_traffy_text.py and kept as plain arrays."""
+
+    def __init__(self, terms, idf, coef, intercept: float, cutoff: float = 0.9):
+        self.terms, self.idf, self.coef = np.asarray(terms), np.asarray(idf), np.asarray(coef)
+        self.intercept, self.cutoff = float(intercept), float(cutoff)
+        self._counter = None
+
+    def predict_proba(self, texts) -> np.ndarray:
+        from sklearn.feature_extraction.text import CountVectorizer
+        from sklearn.preprocessing import normalize
+        if self._counter is None:
+            self._counter = CountVectorizer(analyzer="char_wb", ngram_range=(2, 4),
+                                            vocabulary={t: i for i, t in enumerate(self.terms)})
+        X = self._counter.transform(["" if t is None else str(t) for t in texts]).astype("float64")
+        X.data = np.log(X.data) + 1  # sublinear tf
+        X = normalize(X.multiply(self.idf).tocsr())
+        return 1 / (1 + np.exp(-(X @ self.coef + self.intercept)))
+
+    def save(self, path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(path, terms=self.terms, idf=self.idf, coef=self.coef,
+                            intercept=np.array(self.intercept))
+
+
+def load_text_model() -> TextModel | None:
+    """The trained TextModel with its cut-off, or None if scripts/train_traffy_text.py hasn't run."""
+    path = C.TRAFFY_TEXT_MODEL_FILE
+    if not path.exists():
+        return None
+    import json
+    d = np.load(path, allow_pickle=False)
+    meta = path.with_suffix(".json")
+    cutoff = json.loads(meta.read_text())["cutoff"] if meta.exists() else 0.9
+    return TextModel(d["terms"], d["idf"], d["coef"], float(d["intercept"]), cutoff)
+
+
+def share_row(result: dict, flood_prob: float, cutoff: float) -> dict | None:
+    """A share-API result as a report_row dict (time in Bangkok local), flagged a flood report when the text
+    model's chance is at least the cut-off and it isn't about an earlier flood (NOT_A_NEW_FLOOD). None without a
+    usable point."""
+    try:
+        lon, lat = (float(v) for v in result["coords"][:2])
+        when = pd.Timestamp(result["timestamp"]).tz_convert("Asia/Bangkok")
+    except (KeyError, TypeError, ValueError):
+        return None
+    m = re.search(r"เขต\s*([^\s,]+)", result.get("address") or "")
+    is_flood = flood_prob >= cutoff and not NOT_A_NEW_FLOOD.search(result.get("description") or "")
+    return {
+        "ticket_id": result.get("ticket_id"),
+        "lon": lon,
+        "lat": lat,
+        "time": when.strftime("%Y-%m-%d %H:%M:%S"),
+        "types": [FLOOD_TYPE] if is_flood else [],
+        "is_flood": bool(is_flood),
+        "state": result.get("state"),
+        "district": m[1] if m else None,
+        "has_photo": bool(result.get("photo_url")),
+        "description": (result.get("description") or "")[:300],
+        "source": TEXT_MODEL,
+        "flood_prob": round(float(flood_prob), 3),
+    }
+
+
+def share_rows(results: list, model: TextModel) -> list:
+    """report_row dicts for a day of share-API results, each classified by the text model."""
+    prob = model.predict_proba([r.get("description") for r in results]) if results else []
+    rows = [share_row(r, p, model.cutoff) for r, p in zip(results, prob)]
+    return [r for r in rows if r and r["ticket_id"]]

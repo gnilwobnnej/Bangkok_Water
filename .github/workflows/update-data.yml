@@ -59,6 +59,8 @@ jobs:
         run: python scripts/evaluate_current.py
 
       # Residents' flood reports (no key needed). Independent of the radar: a failure here doesn't stop the rest.
+      # If Traffy's GeoJSON API is down (404 since 14 Oct 2026), fetch_traffy.py falls back to the share API and
+      # recognises flood reports with the text model in models/traffy_flood_text.npz.
       - name: Fetch new Traffy Fondue reports and rebuild the street-flood labels
         id: traffy
         continue-on-error: true

@@ -28,12 +28,13 @@ from evaluate_current import score  # noqa: E402
 from src import config as C  # noqa: E402
 from src.data_loader import load_study_area  # noqa: E402
 from src.ml import ML_2011, ML_ALL, ML_STREET  # noqa: E402
-from src.traffy import count_grid, load_reports, reports_in  # noqa: E402
+from src.traffy import TEXT_MODEL, count_grid, load_reports, reports_in  # noqa: E402
 from src.validation import N_BOOT, block_bootstrap  # noqa: E402
 from src.zones import CITY_SCOPE, OUTSIDE_SCOPE, load_city_zone  # noqa: E402
 from train_model import BLOCK_M, baseline_methods, spatial_blocks  # noqa: E402
 
 MIN_CELLS = 20  # an event needs at least this many flooded and dry cells to be scored
+CATEGORIES_ONLY = "year, Traffy's categories only"
 
 
 def main():
@@ -71,6 +72,17 @@ def main():
             labels[count_grid(r["lon"], r["lat"]) > 0] = 1
             events.append((str(d.date()), "storm", labels))
 
+    # The same test with Traffy's own categories only, leaving out the reports the text model recognised since
+    # 14 Oct 2026: a check that the headline numbers don't depend on the model's guesses (not shown in the app)
+    if reports is not None and "source" in reports and (reports["source"] == TEXT_MODEL).any():
+        categorised = reports[reports["source"].fillna("category") != TEXT_MODEL]
+        for date, kind, labels in [e for e in events if e[1] == "year"]:
+            r = categorised[(categorised["time"].dt.year == int(date))
+                            & categorised["time"].dt.normalize().isin(storms)]
+            only = np.where(labels == 0, 0, C.LABEL_NODATA).astype("uint8")
+            only[count_grid(r["lon"], r["lat"]) > 0] = 1
+            events.append((date, CATEGORIES_ONLY, only))
+
     results = []
     for date, kind, labels in events:
         for scope, mask in scopes:
@@ -94,10 +106,12 @@ def main():
         "label_rule": summary["rules"],
         "dense_built_up_pct": C.DENSE_BUILT_UP_PCT,
         "bootstrap": {"block_m": BLOCK_M, "resamples": N_BOOT, "interval_pct": 95},
-        "results": results,
+        "results": [r for r in results if r["kind"] != CATEGORIES_ONLY],
+        "categories_only": [r for r in results if r["kind"] == CATEGORIES_ONLY],
     }, indent=2, ensure_ascii=False), encoding="utf-8")
-    for rec in [r for r in results if r["kind"] == "year"]:
-        print(f"\n{rec['date']}, {rec['scope']}: {rec['n_cells']:,} cells, {rec['flooded_share']:.1%} flooded")
+    for rec in [r for r in results if r["kind"] in ("year", CATEGORIES_ONLY)]:
+        print(f"\n{rec['date']} ({rec['kind']}), {rec['scope']}: {rec['n_cells']:,} cells, "
+              f"{rec['flooded_share']:.1%} flooded")
         for name, m in rec["methods"].items():
             lo, hi = m["roc_auc_ci"]
             print(f"  {name:30s} ROC-AUC {m['roc_auc']:.3f} ({lo:.3f}-{hi:.3f})   PR-AUC {m['pr_auc']:.3f}")

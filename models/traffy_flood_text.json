@@ -1,0 +1,85 @@
+{
+  "cutoff": 0.9,
+  "test": {
+    "trained_before": "2026-01-01",
+    "tested_on": [
+      "2026-01-01",
+      "2026-10-10"
+    ],
+    "n_reports": 108989,
+    "flood_share": 0.07536540384809476,
+    "scores": [
+      {
+        "cutoff": 0.5,
+        "precision": 0.6641573994867408,
+        "recall": 0.9452154857560263
+      },
+      {
+        "cutoff": 0.6,
+        "precision": 0.7092958787654777,
+        "recall": 0.9345020696372047
+      },
+      {
+        "cutoff": 0.7,
+        "precision": 0.7518124937928294,
+        "recall": 0.9215972729486243
+      },
+      {
+        "cutoff": 0.8,
+        "precision": 0.796744484900407,
+        "recall": 0.9057706355003652
+      },
+      {
+        "cutoff": 0.9,
+        "precision": 0.8510086115371004,
+        "recall": 0.8782566350133918
+      }
+    ],
+    "from_august": {
+      "n_reports": 35139,
+      "flood_share": 0.18884999573123878,
+      "scores": [
+        {
+          "cutoff": 0.5,
+          "precision": 0.7620590352771778,
+          "recall": 0.9570524412296564
+        },
+        {
+          "cutoff": 0.6,
+          "precision": 0.7871993987975952,
+          "recall": 0.9471066907775768
+        },
+        {
+          "cutoff": 0.7,
+          "precision": 0.8150774888363541,
+          "recall": 0.935201928872815
+        },
+        {
+          "cutoff": 0.8,
+          "precision": 0.8449515905947441,
+          "recall": 0.9205846895720313
+        },
+        {
+          "cutoff": 0.9,
+          "precision": 0.8791697553743514,
+          "recall": 0.8936106088004823
+        }
+      ]
+    }
+  },
+  "final_model": {
+    "days": [
+      "2022-01-16",
+      "2026-10-10"
+    ],
+    "n_reports": 497484,
+    "features": 60000,
+    "analyzer": "char_wb",
+    "ngram_range": [
+      2,
+      4
+    ],
+    "min_df": 5,
+    "sublinear_tf": true
+  }
+}

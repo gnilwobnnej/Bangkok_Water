@@ -74,6 +74,8 @@ TRAFFY_STORMS_FILE = TRAFFY_DIR / "summary.json"          # storm days and their
 TRAFFY_TRANSLATIONS_FILE = TRAFFY_DIR / "translations.parquet"  # report text in English (scripts/translate_traffy.py)
 TRAFFY_PHOTOS_FILE = TRAFFY_DIR / "photos.parquet"  # residents' photo links (scripts/fetch_traffy_photos.py)
 TRAFFY_PHOTOS_FROM = "2026-09-01"  # photos only for reports from this date on, to keep the fetch small
+# Recognises flood reports from their text, now that Traffy no longer publishes categories (scripts/train_traffy_text.py)
+TRAFFY_TEXT_MODEL_FILE = MODELS_DIR / "traffy_flood_text.npz"
 TRAFFY_YEARS = range(2022, datetime.date.today().year + 1)  # reports start in 2022; TEST_YEARS_FROM on are tests
 TRAFFY_STORM_MIN_REPORTS = 15   # a storm day has >= this many flood reports...
 TRAFFY_STORM_SPIKE = 3.0        # ...and >= this x the typical daily count for the time of year...

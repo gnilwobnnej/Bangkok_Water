@@ -208,6 +208,7 @@ python scripts/train_model.py --kind street # trains on 2022-2025
 python scripts/evaluate_street.py           # scores every method on 2026, by year and by storm
 python scripts/translate_traffy.py          # the reports in English for the map (~2 h first time; then only new ones)
 python scripts/fetch_traffy_photos.py       # links to residents' photos, Sep 2026 on (~40 min first time)
+python scripts/train_traffy_text.py         # text model for when Traffy doesn't say which reports are floods
 ```
 - **Storm days:** at least 15 flood reports, at least 3x the usual count for the time of year, and at least 10 mm
   of rain that day or the day before. 164 storm days hold 62% of all flood reports; the rest are mostly
@@ -251,6 +252,17 @@ polished translation: Thai place and street names often come out wrong. The floo
 depth, how long it has flooded), the commonest short reports and district names are translated exactly instead.
 The daily update translates new reports; any not yet translated show in Thai.
 
+**When Traffy stopped publishing categories:** since 14 Oct 2026 Traffy's GeoJSON API returns 404, and the
+sources that still work (the share search API and the CSV export) leave every 2026 report's category empty.
+`fetch_traffy.py --daily` then falls back to the share API: it fetches every report of each day and a text model
+(`train_traffy_text.py`: TF-IDF on character n-grams and logistic regression, trained on 2022-2025 reports with
+Traffy's own category) picks out the flood reports. Tested on 2026's categorised reports, 85% of the reports it
+flags are flood reports and it finds 88% of them (88% and 89% from August, in the wet season). Cases filed later by
+staff about an earlier flood, and flood-relief claims, are left out, so they can't make a quiet day look like a
+storm. Reports with Traffy's own category are never replaced; the model's are marked `source = "text model"`,
+say so in their popup, and `evaluate_street.py` also scores 2026 with Traffy's categories only
+(`categories_only` in `evaluation.json`). If the GeoJSON API comes back, it is used again automatically.
+
 **Residents' photos:** reports from September 2026 on show the resident's photo at the top of the popup (click
 it for the full size). `fetch_traffy_photos.py` finds the links through Traffy's public search API; only the
 links are saved, and the photos load from Traffy's servers when a report is opened. Earlier reports have no photo,
@@ -285,7 +297,7 @@ buildings).
 | River flow | GloFAS via the Open-Meteo Flood API, Chao Phraya at Nonthaburi, daily; normal = 1996-2025 median |
 | Buildings | Google Open Buildings v3 footprints + 2.5D Temporal heights* |
 | Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
-| Street-flood reports | Traffy Fondue public API (BMA), 2022 on; rain from Open-Meteo archive (ERA5) |
+| Street-flood reports | Traffy Fondue public API (BMA), 2022 on (share search API since 14 Oct 2026); rain from Open-Meteo archive (ERA5) |
 | Flood defences | Routes: Royal Development Projects Board, OpenStreetMap roads; crests: BMA, JICA, Airports of Thailand |
 
 ## Uncertainty
@@ -353,6 +365,7 @@ scripts/event_context.py        Rainfall and river peaks for each training flood
 scripts/fetch_traffy.py         Traffy Fondue reports (floods, and all reports on every 3rd day)
 scripts/build_traffy_labels.py  Storm days + street-flood labels from the reports
 scripts/fetch_traffy_photos.py  Links to residents' photos of the flood reports (Sep 2026 on)
+scripts/train_traffy_text.py    Text model that recognises flood reports (used when Traffy gives no category)
 scripts/evaluate_street.py      Score every method against 2026 street-flood reports
 scripts/capture_screenshots.py  Screenshots for the presenter guide (app on port 8599)
 scripts/build_guide_pdf.py      docs/presenter_guide.html -> PDF

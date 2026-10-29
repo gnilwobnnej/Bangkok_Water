@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prepare_data import PROFILE  # noqa: E402
 from src import config as C  # noqa: E402
-from src.traffy import count_grid, load_reports, storm_days, street_labels  # noqa: E402
+from src.traffy import TEXT_MODEL, count_grid, load_reports, storm_days, street_labels  # noqa: E402
 
 OPEN_METEO_ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 RAIN_LATS = (13.62, 13.76, 13.90)
@@ -97,7 +97,9 @@ def main():
         with rasterio.open(out, "w", dtype="uint8", nodata=C.LABEL_NODATA, **PROFILE) as dst:
             dst.write(labels, 1)
         n1, n0 = int((labels == 1).sum()), int((labels == 0).sum())
-        years.append({"year": y, "flood_reports": int(in_year.sum()), "storm_flood_reports": len(r_storm),
+        by_model = int((r_all["source"] == TEXT_MODEL).sum()) if "source" in r_all else 0
+        years.append({"year": y, "flood_reports": int(in_year.sum()), "flood_reports_text_model": by_model,
+                      "storm_flood_reports": len(r_storm),
                       "storm_days": int(sum(d.year == y for d in storms)), "other_reports": int(other[y].sum()),
                       "flooded_cells": n1, "dry_cells": n0, "test_year": y >= C.TEST_YEARS_FROM})
         print(f"  {y}: {years[-1]['storm_days']} storm days, {len(r_storm):,} storm flood reports -> "
@@ -106,7 +108,9 @@ def main():
 
     daily = day.value_counts()
     C.TRAFFY_STORMS_FILE.write_text(json.dumps({
-        "source": "Traffy Fondue public API (publicapi.traffy.in.th), category 'น้ำท่วม' (flood)",
+        "source": "Traffy Fondue public API (publicapi.traffy.in.th), category 'น้ำท่วม' (flood); since 14 Oct 2026, "
+                  "when Traffy stopped publishing categories, flood reports recognised from their text "
+                  "(scripts/train_traffy_text.py; flood_reports_text_model per year)",
         "rain_source": f"Open-Meteo historical weather archive (ERA5), daily, wettest of {len(RAIN_LATS) * len(RAIN_LONS)}"
                        f" points over Bangkok",
         "rules": {"storm_min_reports": C.TRAFFY_STORM_MIN_REPORTS, "storm_spike": C.TRAFFY_STORM_SPIKE,

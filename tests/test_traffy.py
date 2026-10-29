@@ -193,6 +193,8 @@ def test_report_popup_shows_the_photo_only_when_there_is_a_safe_one():
     assert f"<img src='{url}'" in pop and "target='_blank'" in pop and "click to enlarge" in pop
     assert "<img" not in report_popup_html("t", "Prawet", "Flooding")
     assert "<img" not in report_popup_html("t", "Prawet", "Flooding", photo="javascript:alert(1)")
+    assert "Recognised as a flood report from its text" in report_popup_html("t", "", "x", recognised=True)
+    assert "Recognised" not in report_popup_html("t", "", "x")
 
 
 def test_photos_are_kept_for_flood_reports_only_and_joined_to_the_reports(tmp_path, monkeypatch):
@@ -216,3 +218,85 @@ def test_photos_are_kept_for_flood_reports_only_and_joined_to_the_reports(tmp_pa
     pd.DataFrame({"ticket_id": ["A"], "photo_url": [url.format("a")]}).to_parquet(tmp_path / "photos.parquet")
     got = load_reports()["photo_url"].tolist()
     assert got[0] == url.format("a") and pd.isna(got[1])
+
+
+# ---------- fallback: share API + text model ----------
+PHOTO = "https://storage.googleapis.com/traffy_public_bucket/attachment/2026-10/{}.jpg"
+
+
+def share_result(ticket, text, utc="2026-10-20 01:30:00.123+00", lon=100.5, lat=13.7):
+    return {"ticket_id": ticket, "coords": [str(lon), str(lat)], "timestamp": utc, "description": text,
+            "address": "แขวงนวมินทร์ เขตบึงกุ่ม กรุงเทพมหานคร", "photo_url": PHOTO.format(ticket), "state": "เสร็จสิ้น"}
+
+
+class StubModel:
+    """Flood chance 1 for texts mentioning น้ำท่วม, else 0."""
+    cutoff = 0.9
+
+    def predict_proba(self, texts):
+        return np.array([1.0 if t and "น้ำท่วม" in t else 0.0 for t in texts])
+
+
+def test_share_rows_are_converted_like_report_rows():
+    from src.traffy import TEXT_MODEL, share_row
+    r = share_row(share_result("A", "น้ำท่วมถนน"), 0.95, 0.9)
+    assert r["time"] == "2026-10-20 08:30:00"  # UTC -> Bangkok local, the GeoJSON API's format
+    assert (r["district"], r["is_flood"], r["types"], r["source"]) == ("บึงกุ่ม", True, [FLOOD_TYPE], TEXT_MODEL)
+    assert not share_row(share_result("A", "x"), 0.89, 0.9)["is_flood"]
+    # about flooding, but not a new flood: a case filed later, a relief claim
+    assert not share_row(share_result("A", "ได้รับแจ้งเคส เมื่อวันที่ 27 ก.ย. น้ำท่วม"), 1.0, 0.9)["is_flood"]
+    assert not share_row(share_result("A", "ขอเงินเยียวยาน้ำท่วม"), 1.0, 0.9)["is_flood"]
+    assert share_row({"ticket_id": "A", "coords": None, "timestamp": "2026-10-20 01:30:00+00"}, 1, 0.9) is None
+
+
+def test_text_model_learns_and_survives_a_save(tmp_path, monkeypatch):
+    import train_traffy_text as tt
+    from src.traffy import load_text_model
+    texts = ["น้ำท่วมขังหน้าบ้าน", "น้ำท่วมถนนสูงมาก", "ขยะไม่มาเก็บ", "ไฟฟ้าดับทั้งซอย"] * 20
+    y = np.array([1, 1, 0, 0] * 20)
+    model = tt.fit(texts, y, max_features=500)
+    p = model.predict_proba(["น้ำท่วมหน้าบ้าน", "ขยะเต็มซอย", None])
+    assert p[0] > 0.5 > p[1]
+    monkeypatch.setattr(C, "TRAFFY_TEXT_MODEL_FILE", tmp_path / "m.npz")
+    model.save(C.TRAFFY_TEXT_MODEL_FILE)
+    (tmp_path / "m.json").write_text('{"cutoff": 0.7}')
+    loaded = load_text_model()
+    assert loaded.cutoff == 0.7 and np.allclose(loaded.predict_proba(["น้ำท่วมหน้าบ้าน"]), p[:1])
+
+
+def test_daily_fallback_adds_new_floods_without_touching_categorised_ones(tmp_path, monkeypatch):
+    import datetime as dt
+    from src.traffy import load_photos, load_reports
+    monkeypatch.setattr(C, "TRAFFY_REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(C, "TRAFFY_TRANSLATIONS_FILE", tmp_path / "translations.parquet")
+    monkeypatch.setattr(C, "TRAFFY_PHOTOS_FILE", tmp_path / "photos.parquet")
+    monkeypatch.setattr(C, "TRAFFY_OTHER_FILE", tmp_path / "other_counts.tif")
+    today = dt.date.today()  # sampled days run on the local date
+    yesterday, last = today - dt.timedelta(days=1), today - dt.timedelta(days=2)
+    (tmp_path / "reports").mkdir()
+    # one report with Traffy's category, 2 days ago (Bangkok time)
+    pd.DataFrame({"ticket_id": ["OLD"], "lon": [100.5], "lat": [13.7],
+                  "time": [pd.Timestamp(f"{last} 09:00")], "types": [FLOOD_TYPE], "state": ["x"],
+                  "district": ["บึงกุ่ม"], "has_photo": [True], "description": ["น้ำท่วม"]}).to_parquet(
+        tmp_path / "reports" / f"{last:%Y-%m}.parquet")
+    ft.save_other_counts({today.year: np.zeros((C.HEIGHT, C.WIDTH))},
+                         {today.year: today - dt.timedelta(days=3)}, every=1)
+
+    def share_day(day):  # the share API, canned: the old ticket again, and a new flood and a non-flood report
+        if day != str(yesterday):
+            return []
+        utc = f"{day} 05:00:00+00"
+        return [share_result("OLD", "น้ำท่วม", f"{last} 02:00:00+00"), share_result("NEW", "น้ำท่วมซอย", utc),
+                share_result("DRY", "ขยะ", utc, lon=C.WEST + 3.5 * C.RES, lat=C.NORTH - 2.5 * C.RES)]
+    monkeypatch.setattr(ft, "share_day", share_day)
+    monkeypatch.setattr(ft, "load_text_model", lambda: StubModel())
+    monkeypatch.setattr(C, "TRAFFY_PHOTOS_FROM", "2000-01-01")
+    ft.daily_share()
+    df = load_reports().set_index("ticket_id")
+    assert list(df.index) == ["OLD", "NEW"] and df.loc["OLD", "source"] == "category"
+    assert df.loc["NEW", "source"] == "text model" and df.loc["NEW", "types"] == FLOOD_TYPE
+    assert set(load_photos()) == {"NEW"}
+    bands, through, _ = ft.read_other_counts()
+    assert bands[today.year][2, 3] == 1 and through[today.year] == yesterday
+    ft.daily_share()  # a second run adds nothing
+    assert len(load_reports()) == 2

@@ -22,40 +22,16 @@ import argparse
 import datetime as dt
 import json
 import sys
-import time
 from pathlib import Path
 
 import pandas as pd
-import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import config as C  # noqa: E402
-from src.traffy import load_photos, load_reports, safe_photo_url  # noqa: E402
+from src.traffy import load_photos, load_reports, safe_photo_url, share_day  # noqa: E402
 
-API = "https://publicapi.traffy.in.th/share/teamchadchart/search"
-PAGE = 1000
-RETRIES = (10, 30, 60, 120, 300)
 REFETCH_DAYS = 3  # the latest days are searched again on every run
 DAYS_FILE = C.TRAFFY_PHOTOS_FILE.with_name("photos_days.json")
-
-
-def get_page(day: str, offset: int) -> list:
-    """One page of every report on a UTC day."""
-    params = {"start": day, "end": day, "limit": PAGE, "offset": offset}
-    for wait in (*RETRIES, None):
-        try:
-            r = requests.get(API, params=params, timeout=180)
-            r.raise_for_status()
-            d = r.json()
-            if isinstance(d.get("results"), list):
-                return d["results"]
-            err = d.get("message") or "no results"
-        except (requests.RequestException, ValueError) as e:
-            err = str(e)[:200]
-        if wait is None:
-            raise RuntimeError(f"{day} offset {offset}: {err}")
-        print(f"    retry in {wait} s ({err})")
-        time.sleep(wait)
 
 
 def flood_photos(results: list, flood_ids: set) -> dict:
@@ -66,16 +42,6 @@ def flood_photos(results: list, flood_ids: set) -> dict:
         if r.get("ticket_id") in flood_ids and url:
             out[r["ticket_id"]] = url
     return out
-
-
-def fetch_day(day: str, flood_ids: set) -> dict:
-    photos, offset = {}, 0
-    while True:
-        results = get_page(day, offset)
-        photos.update(flood_photos(results, flood_ids))
-        offset += PAGE
-        if len(results) < PAGE:
-            return photos
 
 
 def days_to_do(first: dt.date, today: dt.date, done: set) -> list:
@@ -111,7 +77,7 @@ def main():
     print(f"{len(flood_ids):,} flood reports since {C.TRAFFY_PHOTOS_FROM}, {len(photos):,} photos found so far; "
           f"{len(todo)} days to search")
     for day in todo:
-        new = fetch_day(day, flood_ids)
+        new = flood_photos(share_day(day), flood_ids)
         photos.update(new)
         done.add(day)
         save(photos, done)
