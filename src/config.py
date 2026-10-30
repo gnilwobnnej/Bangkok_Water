@@ -80,6 +80,8 @@ TRAFFY_YEARS = range(2022, datetime.date.today().year + 1)  # reports start in 2
 TRAFFY_STORM_MIN_REPORTS = 15   # a storm day has >= this many flood reports...
 TRAFFY_STORM_SPIKE = 3.0        # ...and >= this x the typical daily count for the time of year...
 TRAFFY_STORM_MIN_RAIN_MM = 10   # ...and >= this much rain (wettest point in the city) that day or the day before
+# Rainy days shown in the app's "Reports from" list although they miss the storm rule (not used for the labels)
+TRAFFY_EXTRA_DAYS = ("2026-10-14", "2026-10-15", "2026-10-18", "2026-10-28")
 TRAFFY_MIN_STORM_REPORTS = 1    # label flooded: >= this many flood reports on storm days in the year
 TRAFFY_MIN_OTHER_REPORTS = 5    # label dry: no flood report, and >= this many reports of other problems
 TRAFFY_EVAL_FILE = TRAFFY_DIR / "evaluation.json"  # every method scored on the test years' reports

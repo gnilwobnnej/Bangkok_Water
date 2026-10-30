@@ -244,10 +244,14 @@ with st.sidebar:
         storm_dates = [s["date"] for s in traffy[1]["storms"]]
         years = sorted({d[:4] for d in storm_dates}, reverse=True)
         n_storm = {d: s["flood_reports"] for d, s in zip(storm_dates, traffy[1]["storms"])}
+        # Extra rainy days (config): listed with the storms, but not part of a year's storm days
+        daily = traffy[0]["time"].dt.strftime("%Y-%m-%d").value_counts()
+        extra = [d for d in C.TRAFFY_EXTRA_DAYS if d not in n_storm and d in daily]
+        n_storm.update({d: int(daily[d]) for d in extra})
         report_period = st.selectbox(
-            "Reports from", years + storm_dates[::-1],
+            "Reports from", years + sorted(storm_dates + extra, reverse=True),
             format_func=lambda v: (f"{v}: every storm day" if len(v) == 4
-                                   else f"Storm {v} ({n_storm[v]:,} flood reports)"),
+                                   else f"{'Rain' if v in extra else 'Storm'} {v} ({n_storm[v]:,} flood reports)"),
             disabled=not show_reports,
             help="A year shows the flood reports of all its storm days; a storm shows that day's and the next "
                  "day's reports.")
