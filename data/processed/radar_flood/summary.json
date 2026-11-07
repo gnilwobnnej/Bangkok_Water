@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-25T07:47:39Z",
+  "generated": "2026-11-07T02:25:42Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -151,6 +151,45 @@
       "flooded_km2_bangkok": 33.54798889160156,
       "coverage_pct": 100.0,
       "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-10-25",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-10-04",
+      "baseline_to": "2025-11-16",
+      "baseline_scenes": 10,
+      "flooded_km2": 80.9696044921875,
+      "flooded_km2_bangkok": 26.081314086914062,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-10-31",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-10-10",
+      "baseline_to": "2025-11-22",
+      "baseline_scenes": 8,
+      "flooded_km2": 85.69588470458984,
+      "flooded_km2_bangkok": 25.527856826782227,
+      "coverage_pct": 83.9801653103803,
+      "coverage_pct_bangkok": 97.49321026394328
+    },
+    {
+      "date": "2026-11-02",
+      "direction": "ASCENDING",
+      "orbit": 172,
+      "baseline": "seasonal",
+      "baseline_from": "2025-10-12",
+      "baseline_to": "2025-11-24",
+      "baseline_scenes": 6,
+      "flooded_km2": 94.7083511352539,
+      "flooded_km2_bangkok": 30.252668380737305,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
     }
   ],
   "rainfall": [
@@ -260,15 +299,15 @@
     },
     {
       "date": "2026-09-08",
-      "mm": 14.6
-    },
-    {
-      "date": "2026-09-09",
       "mm": 4.7
     },
     {
+      "date": "2026-09-09",
+      "mm": 5.0
+    },
+    {
       "date": "2026-09-10",
-      "mm": 13.1
+      "mm": 6.6
     },
     {
       "date": "2026-09-11",
@@ -448,7 +487,59 @@
     },
     {
       "date": "2026-10-25",
-      "mm": 2.1
+      "mm": 0.8
+    },
+    {
+      "date": "2026-10-26",
+      "mm": 1.4
+    },
+    {
+      "date": "2026-10-27",
+      "mm": 1.5
+    },
+    {
+      "date": "2026-10-28",
+      "mm": 22.9
+    },
+    {
+      "date": "2026-10-29",
+      "mm": 3.7
+    },
+    {
+      "date": "2026-10-30",
+      "mm": 2.3
+    },
+    {
+      "date": "2026-10-31",
+      "mm": 2.3
+    },
+    {
+      "date": "2026-11-01",
+      "mm": 11.1
+    },
+    {
+      "date": "2026-11-02",
+      "mm": 5.3
+    },
+    {
+      "date": "2026-11-03",
+      "mm": 2.9
+    },
+    {
+      "date": "2026-11-04",
+      "mm": 9.0
+    },
+    {
+      "date": "2026-11-05",
+      "mm": 2.2
+    },
+    {
+      "date": "2026-11-06",
+      "mm": 8.5
+    },
+    {
+      "date": "2026-11-07",
+      "mm": 3.8
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
@@ -822,6 +913,71 @@
       "date": "2026-10-25",
       "m3s": 3242.4,
       "normal_m3s": 3405.8
+    },
+    {
+      "date": "2026-10-26",
+      "m3s": 3161.28,
+      "normal_m3s": 3381.4
+    },
+    {
+      "date": "2026-10-27",
+      "m3s": 3053.92,
+      "normal_m3s": 3345.4
+    },
+    {
+      "date": "2026-10-28",
+      "m3s": 2970.67,
+      "normal_m3s": 3292.4
+    },
+    {
+      "date": "2026-10-29",
+      "m3s": 2929.89,
+      "normal_m3s": 3262.0
+    },
+    {
+      "date": "2026-10-30",
+      "m3s": 2850.02,
+      "normal_m3s": 3235.5
+    },
+    {
+      "date": "2026-10-31",
+      "m3s": 2817.38,
+      "normal_m3s": 3193.6
+    },
+    {
+      "date": "2026-11-01",
+      "m3s": 2727.98,
+      "normal_m3s": 3132.8
+    },
+    {
+      "date": "2026-11-02",
+      "m3s": 2672.01,
+      "normal_m3s": 3065.5
+    },
+    {
+      "date": "2026-11-03",
+      "m3s": 2551.7,
+      "normal_m3s": 2980.1
+    },
+    {
+      "date": "2026-11-04",
+      "m3s": 2470.72,
+      "normal_m3s": 2895.5
+    },
+    {
+      "date": "2026-11-05",
+      "m3s": 2420.03,
+      "normal_m3s": 2782.8
+    },
+    {
+      "date": "2026-11-06",
+      "m3s": 2381.32,
+      "normal_m3s": 2691.7
+    },
+    {
+      "date": "2026-11-07",
+      "m3s": 2381.32,
+      "normal_m3s": 2600.8
     }
   ],
   "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E); normal = 1996-2025 median for the date"
