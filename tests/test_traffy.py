@@ -220,6 +220,70 @@ def test_photos_are_kept_for_flood_reports_only_and_joined_to_the_reports(tmp_pa
     assert got[0] == url.format("a") and pd.isna(got[1])
 
 
+def test_full_windows_are_split_until_nothing_is_cut_off(monkeypatch):
+    import datetime as dt
+    calls = []
+
+    def get_page(start, end):  # the API, canned: 3 reports a minute, cut off at PAGE
+        calls.append((start, end))
+        t, out = start, []
+        while t <= end and len(out) < ft.PAGE:
+            out += [feature(100.5, 13.7, ["x"], ticket=f"{t:%H%M}-{k}") for k in range(3)]
+            t += dt.timedelta(minutes=1)
+        return out[:ft.PAGE]
+    monkeypatch.setattr(ft, "get_page", get_page)
+    feats = ft.fetch_features("2026-11-05", "2026-11-05")
+    assert len(feats) == 24 * 60 * 3  # every report, none cut off
+    assert calls[0] == (dt.datetime(2026, 11, 5, 0, 0), dt.datetime(2026, 11, 5, 1, 59, 59))
+    assert len(calls) > 12  # the full 2-hour windows were split
+
+
+def test_daily_replaces_text_model_guesses_with_traffys_category(tmp_path, monkeypatch):
+    import datetime as dt
+    from src.traffy import TEXT_MODEL, load_photos, load_reports
+    monkeypatch.setattr(C, "TRAFFY_REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(C, "TRAFFY_TRANSLATIONS_FILE", tmp_path / "translations.parquet")
+    monkeypatch.setattr(C, "TRAFFY_PHOTOS_FILE", tmp_path / "photos.parquet")
+    monkeypatch.setattr(C, "TRAFFY_OTHER_FILE", tmp_path / "other_counts.tif")
+    monkeypatch.setattr(C, "TRAFFY_PHOTOS_FROM", "2000-01-01")
+    monkeypatch.setattr(ft, "RAW_DIR", tmp_path / "raw")
+    today = ft.bangkok_today()
+    old_day, guess_day = today - dt.timedelta(days=20), today - dt.timedelta(days=10)
+    (tmp_path / "reports").mkdir()
+    rows = {"ticket_id": ["OLD", "GUESS", "WRONG"], "lon": [100.5] * 3, "lat": [13.7] * 3,
+            "time": pd.to_datetime([f"{old_day} 09:00", f"{guess_day} 09:00", f"{guess_day} 10:00"]),
+            "types": [FLOOD_TYPE, "", ""], "state": ["x"] * 3, "district": ["d"] * 3, "has_photo": [False] * 3,
+            "description": ["a", "b", "c"], "source": ["category", TEXT_MODEL, TEXT_MODEL],
+            "flood_prob": [np.nan, 0.95, 0.95]}
+    for m, part in pd.DataFrame(rows).groupby(lambda i: f"{rows['time'][i]:%Y-%m}"):
+        part.to_parquet(tmp_path / "reports" / f"{m}.parquet", index=False)
+    local = dt.date.today()  # sampled days run on the local date
+    ft.save_other_counts({today.year: np.zeros((C.HEIGHT, C.WIDTH))}, {today.year: local - dt.timedelta(days=2)},
+                         every=1)
+
+    def fetch_features(start, end):  # the API, canned: on guess_day GUESS is a flood and WRONG isn't
+        day = dt.date.fromisoformat(start)
+        t = f"{day} 09:00:00"
+        feats = [feature(100.5, 13.7, ["ขยะ"], ticket=f"DRY{day}", timestamp=t,
+                         **{"photo_url": PHOTO.format("dry")})]
+        if day == guess_day:
+            feats += [feature(100.5, 13.7, [FLOOD_TYPE], ticket="GUESS", timestamp=t, photo_url=PHOTO.format("g")),
+                      feature(100.5, 13.7, ["ถนน"], ticket="WRONG", timestamp=t)]
+        if day == local - dt.timedelta(days=1):
+            feats += [feature(C.WEST + 3.5 * C.RES, C.NORTH - 2.5 * C.RES, [FLOOD_TYPE], ticket="NEW", timestamp=t)]
+        return {f["properties"]["ticket_id"]: f for f in feats}
+    monkeypatch.setattr(ft, "fetch_features", fetch_features)
+    ft.daily_feed()
+    df = load_reports().set_index("ticket_id")
+    assert list(df.index) == ["OLD", "GUESS", "NEW"] and (df["source"] == "category").all()
+    assert df.loc["GUESS", "types"] == FLOOD_TYPE
+    assert set(load_photos()) == {"GUESS"}  # NEW's photo link isn't a safe one
+    bands, through, _ = ft.read_other_counts()
+    assert through[today.year] == local - dt.timedelta(days=1) and bands[today.year].sum() == 1  # DRY of yesterday
+    ft.daily_feed()  # a second run changes nothing
+    assert list(load_reports()["ticket_id"]) == ["OLD", "GUESS", "NEW"]
+
+
 # ---------- fallback: share API + text model ----------
 PHOTO = "https://storage.googleapis.com/traffy_public_bucket/attachment/2026-10/{}.jpg"
 

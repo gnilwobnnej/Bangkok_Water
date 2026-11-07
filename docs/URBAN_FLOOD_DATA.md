@@ -19,9 +19,10 @@ population and built-up land are left out of it. This note ranks the free data t
 
 ## What was built: street-flood labels from Traffy Fondue
 
-1. **Download** (`scripts/fetch_traffy.py`). Every flood report (the API's `problem_type=น้ำท่วม` filter), and
-   every report of any kind on every third day, which gives where people report problems at all. Times are
-   Bangkok local. One-day pages avoid the API's failures on deep paging.
+1. **Download** (`scripts/fetch_traffy.py`). Every flood report (category น้ำท่วม), and every report of any kind
+   on every third day, which gives where people report problems at all. Times are Bangkok local. Since Traffy's
+   API moved (30 Oct 2026), every report is fetched two hours at a time and the flood reports picked out locally:
+   the new API returns at most 300 reports per call, can't page, and its category filter misses older days.
 2. **Storm days** (`src/traffy.storm_days`). A day with at least 15 flood reports, at least 3× the usual daily
    count for the time of year, and at least 10 mm of rain at the wettest of 12 points over Bangkok (ERA5) that
    day or the day before. 164 storm days from 2022 to 2026 hold 62% of all flood reports. The rain rule drops
@@ -96,7 +97,8 @@ water that drains in hours. **Not added** to the radar pipeline or the app.
 
 ## Sources
 - Traffy Fondue: [overview](https://www.thailand.go.th/issue-focus-detail/001_05_025),
-  [one million complaints](https://pr-bangkok.com/?p=583017); API: `publicapi.traffy.in.th/teamchadchart-stat-api/geojson/v1`.
+  [one million complaints](https://pr-bangkok.com/?p=583017); API: `api.traffy.in.th/postgrest/rpc/get_bkk_geojson_feed` (until 30 Oct 2026
+  `publicapi.traffy.in.th/teamchadchart-stat-api/geojson/v1`).
 - FABDEM V1-2: Earth Engine `projects/sat-io/open-datasets/FABDEM`
   ([community catalog](https://gee-community-catalog.org/projects/fabdem/)); CC BY-NC-SA 4.0.
 - BMA flood risk platform: [CivicDataLab](https://civicdatalab.in/work/climateaction/bma-flood-risk-data-platform/);

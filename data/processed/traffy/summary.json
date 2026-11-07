@@ -923,81 +923,63 @@
     },
     {
       "date": "2026-09-10",
-      "flood_reports": 90,
+      "flood_reports": 187,
       "rain_mm": 35.8,
       "rain_day_before_mm": 7.9
     },
     {
-      "date": "2026-09-11",
-      "flood_reports": 69,
-      "rain_mm": 13.8,
-      "rain_day_before_mm": 35.8
-    },
-    {
       "date": "2026-09-15",
-      "flood_reports": 159,
+      "flood_reports": 263,
       "rain_mm": 37.3,
       "rain_day_before_mm": 15.5
     },
     {
-      "date": "2026-09-16",
-      "flood_reports": 141,
-      "rain_mm": 22.2,
-      "rain_day_before_mm": 37.3
-    },
-    {
       "date": "2026-09-25",
-      "flood_reports": 1500,
+      "flood_reports": 1908,
       "rain_mm": 137.8,
       "rain_day_before_mm": 21.3
     },
     {
       "date": "2026-09-26",
-      "flood_reports": 3787,
+      "flood_reports": 4853,
       "rain_mm": 139.6,
       "rain_day_before_mm": 137.8
     },
     {
       "date": "2026-09-27",
-      "flood_reports": 2252,
+      "flood_reports": 2879,
       "rain_mm": 66.2,
       "rain_day_before_mm": 139.6
     },
     {
       "date": "2026-09-28",
-      "flood_reports": 2025,
+      "flood_reports": 2537,
       "rain_mm": 46.1,
       "rain_day_before_mm": 66.2
     },
     {
       "date": "2026-09-29",
-      "flood_reports": 1020,
+      "flood_reports": 1332,
       "rain_mm": 4.2,
       "rain_day_before_mm": 46.1
     },
     {
       "date": "2026-10-03",
-      "flood_reports": 456,
+      "flood_reports": 573,
       "rain_mm": 10.0,
       "rain_day_before_mm": 4.1
     },
     {
       "date": "2026-10-04",
-      "flood_reports": 311,
+      "flood_reports": 422,
       "rain_mm": 5.6,
       "rain_day_before_mm": 10.0
     },
     {
       "date": "2026-10-06",
-      "flood_reports": 385,
+      "flood_reports": 535,
       "rain_mm": 24.6,
       "rain_day_before_mm": 7.0
-    },
-    {
-      "date": "2026-10-07",
-      "flood_reports": 293,
-      "rain_mm": 12.0,
-      "rain_day_before_mm": 24.6
     }
   ],
   "years": [
@@ -1047,13 +1029,13 @@
     },
     {
       "year": 2026,
-      "flood_reports": 20682,
-      "flood_reports_text_model": 1647,
-      "storm_flood_reports": 13143,
-      "storm_days": 25,
-      "other_reports": 323091,
-      "flooded_cells": 9347,
-      "dry_cells": 17554,
+      "flood_reports": 28501,
+      "flood_reports_text_model": 0,
+      "storm_flood_reports": 16144,
+      "storm_days": 22,
+      "other_reports": 336744,
+      "flooded_cells": 11145,
+      "dry_cells": 17469,
       "test_year": true
     }
   ]

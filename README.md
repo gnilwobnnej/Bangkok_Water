@@ -252,16 +252,23 @@ polished translation: Thai place and street names often come out wrong. The floo
 depth, how long it has flooded), the commonest short reports and district names are translated exactly instead.
 The daily update translates new reports; any not yet translated show in Thai.
 
-**When Traffy stopped publishing categories:** since 14 Oct 2026 Traffy's GeoJSON API returns 404, and the
+**When Traffy stopped publishing categories:** from 14 to 30 Oct 2026 Traffy's GeoJSON API returned 404, and the
 sources that still work (the share search API and the CSV export) leave every 2026 report's category empty.
-`fetch_traffy.py --daily` then falls back to the share API: it fetches every report of each day and a text model
+`fetch_traffy.py --daily` then fell back to the share API: it fetches every report of each day and a text model
 (`train_traffy_text.py`: TF-IDF on character n-grams and logistic regression, trained on 2022-2025 reports with
 Traffy's own category) picks out the flood reports. Tested on 2026's categorised reports, 85% of the reports it
 flags are flood reports and it finds 88% of them (88% and 89% from August, in the wet season). Cases filed later by
 staff about an earlier flood, and flood-relief claims, are left out, so they can't make a quiet day look like a
 storm. Reports with Traffy's own category are never replaced; the model's are marked `source = "text model"`,
 say so in their popup, and `evaluate_street.py` also scores 2026 with Traffy's categories only
-(`categories_only` in `evaluation.json`). If the GeoJSON API comes back, it is used again automatically.
+(`categories_only` in `evaluation.json`). If the GeoJSON API is down again, the fallback is used automatically.
+
+**Traffy's new API (30 Oct 2026):** the GeoJSON feed moved to `api.traffy.in.th/postgrest/rpc/get_bkk_geojson_feed`
+and has Traffy's categories again, back to 14 Oct. It returns at most 300 reports per call and can't page, and its
+flood filter misses all but the last day or two, so `fetch_traffy.py` fetches every report two hours at a time
+(splitting busy windows) and picks out the flood reports itself, about 75 s a day. `--daily` fetches from a few days
+before the newest saved report, and from the oldest text-model report while there is one, so Traffy's categories
+replaced the model's guesses for 14-30 Oct (the model had found only about half of 14 Oct's flood reports).
 
 **Residents' photos:** reports from September 2026 on show the resident's photo at the top of the popup (click
 it for the full size). `fetch_traffy_photos.py` finds the links through Traffy's public search API; only the
