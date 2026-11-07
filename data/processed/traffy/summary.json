@@ -1029,13 +1029,13 @@
     },
     {
       "year": 2026,
-      "flood_reports": 28515,
+      "flood_reports": 28590,
       "flood_reports_text_model": 0,
       "storm_flood_reports": 16144,
       "storm_days": 22,
       "other_reports": 341172,
       "flooded_cells": 11145,
-      "dry_cells": 17689,
+      "dry_cells": 17679,
       "test_year": true
     }
   ]

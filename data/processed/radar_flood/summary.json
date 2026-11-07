@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-07T04:19:14Z",
+  "generated": "2026-11-07T20:46:27Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -190,6 +190,19 @@
       "flooded_km2_bangkok": 30.252668380737305,
       "coverage_pct": 100.0,
       "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-11-06",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-10-16",
+      "baseline_to": "2025-11-28",
+      "baseline_scenes": 8,
+      "flooded_km2": 85.16500854492188,
+      "flooded_km2_bangkok": 23.507869720458984,
+      "coverage_pct": 100.0,
+      "coverage_pct_bangkok": 100.0
     }
   ],
   "rainfall": [
@@ -211,19 +224,19 @@
     },
     {
       "date": "2026-08-17",
-      "mm": 12.0
+      "mm": 10.3
     },
     {
       "date": "2026-08-18",
-      "mm": 13.0
+      "mm": 7.5
     },
     {
       "date": "2026-08-19",
-      "mm": 5.0
+      "mm": 3.3
     },
     {
       "date": "2026-08-20",
-      "mm": 13.1
+      "mm": 12.2
     },
     {
       "date": "2026-08-21",
@@ -299,15 +312,15 @@
     },
     {
       "date": "2026-09-08",
-      "mm": 4.7
+      "mm": 14.6
     },
     {
       "date": "2026-09-09",
-      "mm": 5.0
+      "mm": 4.7
     },
     {
       "date": "2026-09-10",
-      "mm": 6.6
+      "mm": 13.1
     },
     {
       "date": "2026-09-11",
@@ -539,7 +552,11 @@
     },
     {
       "date": "2026-11-07",
-      "mm": 3.8
+      "mm": 10.9
+    },
+    {
+      "date": "2026-11-08",
+      "mm": 0.7
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
