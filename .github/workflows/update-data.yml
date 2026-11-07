@@ -18,7 +18,8 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    # ubuntu-latest (26.04) has no Python 3.9 builds; 24.04 does
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
