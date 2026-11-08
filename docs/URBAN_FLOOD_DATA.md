@@ -9,7 +9,7 @@ population and built-up land are left out of it. This note ranks the free data t
 
 | # | Source | What it gives | Strength | Weakness | Status |
 |---|---|---|---|---|---|
-| 1 | **Traffy Fondue** (BMA's citizen-report app), public API, no key | 44,442 flood reports since 2022, each with a point, time (to the second), photo and text; plus ~1.5 M reports of other problems | Densest exactly where satellites are blind; catches floods that drain within hours | Reports follow people and app use; some "flood" reports are chronic drain complaints | **Built** (below) |
+| 1 | **Traffy Fondue** (BMA's citizen-report app), public API, no key | About 54,000 flood reports since 2022, each with a point, time (to the second), photo and text; plus ~1.5 M reports of other problems | Densest exactly where satellites are blind; catches floods that drain within hours | Reports follow people and app use; some "flood" reports are chronic drain complaints | **Built** (below) |
 | 2 | **FABDEM** (Copernicus DEM with buildings and trees removed; Hawker et al. 2022) | A better ground surface in the dense city | Fixes the DEM's building bias (~1.6 m in built-up areas) | A better input, not flood observations; non-commercial licence | Tested: helps street floods, hurts river floods; not the default |
 | 3 | **BMA Drainage and Sewerage Dept** flood points and rain gauges | ~737 known flood-prone points; rain and street-water sensors behind floodmanagement.bangkok.go.th | Official, long record | No bulk download found; may need a data request | Next |
 | 4 | **Sentinel-1 "double bounce"** in the existing radar pipeline | Flooded streets make radar *brighter* (water + wall reflection) | Same data and code already used | A pass every few days misses most cloudbursts; depends on wall orientation | Tested: too weak to use |
@@ -25,7 +25,7 @@ population and built-up land are left out of it. This note ranks the free data t
    the new API returns at most 300 reports per call, can't page, and its category filter misses older days.
 2. **Storm days** (`src/traffy.storm_days`). A day with at least 15 flood reports, at least 3× the usual daily
    count for the time of year, and at least 10 mm of rain at the wettest of 12 points over Bangkok (ERA5) that
-   day or the day before. 164 storm days from 2022 to 2026 hold 62% of all flood reports. The rain rule drops
+   day or the day before. 162 storm days from 2022 to 2026 hold 57% of all flood reports. The rain rule drops
    16 bursts of complaints on dry days.
 3. **Labels by case-control** (`scripts/build_traffy_labels.py`), one map per year on the 65 m grid:
    - **flooded:** a flood report on a storm day;
@@ -47,10 +47,10 @@ population and built-up land are left out of it. This note ranks the free data t
 | Test (ROC-AUC) | ML street | ML, all floods (radar) | Bathtub + defences | Risk index |
 |---|---|---|---|---|
 | 2022-2025, each year left out | **0.71-0.74** | | 0.52-0.56 | |
-| 2026, Bangkok | **0.783** | 0.671 | 0.596 | 0.591 |
-| 2026, dense city | **0.792** (0.752-0.821) | 0.669 | 0.562 | 0.576 |
-| 2026 storm days, dense city: best method | **25 of 25** | | | |
-| 25-29 Sep 2026 storm, dense city | **0.81-0.82** | 0.66-0.75 | 0.54-0.61 | 0.58-0.61 |
+| 2026, Bangkok | **0.770** | 0.657 | 0.585 | 0.586 |
+| 2026, dense city | **0.780** (0.738-0.808) | 0.659 | 0.557 | 0.575 |
+| 2026 storm days, dense city: best method | **22 of 22** | | | |
+| 25-29 Sep 2026 storm, dense city | **0.79-0.81** | 0.65-0.73 | 0.54-0.60 | 0.58-0.60 |
 
 The labels pass a sanity check: flooded cells turn up within 300 m of known flood roads (Ratchadaphisek,
 Pattanakarn, Sukhumvit 101/1, Chan Road, Lat Phrao 101, Ngam Wong Wan) in most years. The street model's top

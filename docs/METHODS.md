@@ -59,15 +59,15 @@ everything; this file explains what the numbers mean. All results below are as o
   - **Result:** 2.2–5.1% of about 755,000 labelled cells flooded per season.
 - **Current passes (2026):** the same rule applied to each pass on its own.
 - **Street flooding, Traffy Fondue 2022–2026** (`scripts/fetch_traffy.py`, `scripts/build_traffy_labels.py`):
-  - **Reports:** every report in BMA's complaint app tagged flood (น้ำท่วม), 44,442 to 14 Oct 2026, with point,
+  - **Reports:** every report in BMA's complaint app tagged flood (น้ำท่วม), about 54,000 to early November 2026, with point,
     Bangkok-local time and photo; plus every report of any kind on every third day (about 475,000 reports
     on 582 days, scaled ×3) to measure where people use the app at all.
   - **Storm days:** at least 15 flood reports, at least 3× the 61-day rolling median, and at least 10 mm of rain
-    (ERA5, wettest of 12 points over Bangkok) that day or the day before. 164 days hold 62% of flood reports.
+    (ERA5, wettest of 12 points over Bangkok) that day or the day before. 162 days hold 57% of flood reports.
   - **Labels (case-control):** *flooded* = a flood report on a storm day in the year; *dry* = no flood report
     all year and at least 5 (estimated) reports of other problems; anything else unknown. Taking dry cells where
     people do report puts both classes in the same busy, built-up places, so reporting density alone can't
-    separate them. 6–36% of 14,600–26,000 labelled cells flooded per year.
+    separate them. 6–39% of 14,700–28,800 labelled cells flooded per year.
   - **Bias:** reports still follow population and app use; a flood nobody reports is unknown, never dry.
 
 ## 6. ML susceptibility model (`scripts/train_model.py`)
@@ -127,9 +127,9 @@ Each method is scored on cells it has not seen:
 | 2011, spatial CV | 0.853 | **0.872** | 0.721 | 0.667 | 0.449 |
 | 2017–2025, spatial CV (mean) | **0.975** | 0.918 | 0.795 | 0.749 | 0.421 |
 | Each season left out | **0.972–0.987** | 0.901–0.931 | 0.769–0.807 | | |
-| 9 passes, 2026 (greater Bangkok) | **0.91–0.96** | 0.82–0.91 | 0.74–0.86 | 0.69–0.85 | 0.37–0.57 |
+| 15 passes, 2026 (greater Bangkok) | **0.91–0.96** | 0.82–0.91 | 0.72–0.86 | 0.66–0.85 | 0.37–0.57 |
 
-- **Against the bathtub:** the all-floods model is clearly better on all 9 passes in both areas.
+- **Against the bathtub:** the all-floods model is clearly better on all 15 passes in both areas.
 - **Against the 2011-only model on 27 Sep 2026:** 0.955–0.968 vs 0.892–0.923; the intervals don't overlap.
 - **Trade-off:** the all-floods model is slightly weaker on the extreme 2011 flood. Nine of its ten events are
   ordinary seasons.
@@ -141,10 +141,10 @@ Each method is scored on cells it has not seen:
 
 ### Street flooding (`scripts/evaluate_street.py`)
 Every method is scored on the 2026 Traffy labels, which no model was trained on: the year as a whole, and each of
-its 25 storm days (that day's and the next day's reports against the year's dry cells; at least 20 cells of each
+its 22 storm days (that day's and the next day's reports against the year's dry cells; at least 20 cells of each
 class). Two areas: Bangkok's 50 districts, and the **dense city** (WorldCover built-up ≥ 90%), which radar can't
-test. Same 4 km block bootstrap. 2026, dense city: street model 0.792 (0.752–0.821), all-floods ML 0.669, bathtub
-+ defences 0.562, risk index 0.576; the street model scores best on all 25 storm days there.
+test. Same 4 km block bootstrap. 2026, dense city: street model 0.780 (0.738–0.808), all-floods ML 0.659, bathtub
++ defences 0.557, risk index 0.575; the street model scores best on all 22 storm days there.
 
 ## 8. Uncertainty
 ### Elevation error (`scripts/dem_uncertainty.py`, `src/uncertainty.py`)
