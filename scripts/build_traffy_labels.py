@@ -108,9 +108,9 @@ def main():
 
     daily = day.value_counts()
     C.TRAFFY_STORMS_FILE.write_text(json.dumps({
-        "source": "Traffy Fondue public API (publicapi.traffy.in.th), category 'น้ำท่วม' (flood); since 14 Oct 2026, "
-                  "when Traffy stopped publishing categories, flood reports recognised from their text "
-                  "(scripts/train_traffy_text.py; flood_reports_text_model per year)",
+        "source": "Traffy Fondue public API (api.traffy.in.th since 30 Oct 2026, publicapi.traffy.in.th before), "
+                  "category 'น้ำท่วม' (flood). When the GeoJSON API is down, flood reports are recognised from their "
+                  "text instead (scripts/train_traffy_text.py; flood_reports_text_model per year)",
         "rain_source": f"Open-Meteo historical weather archive (ERA5), daily, wettest of {len(RAIN_LATS) * len(RAIN_LONS)}"
                        f" points over Bangkok",
         "rules": {"storm_min_reports": C.TRAFFY_STORM_MIN_REPORTS, "storm_spike": C.TRAFFY_STORM_SPIKE,

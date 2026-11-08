@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/project_hooks.py\" protect",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/project_hooks.py\" push",
+            "timeout": 900,
+            "statusMessage": "Running pytest before push..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/project_hooks.py\" tests",
+            "timeout": 600,
+            "statusMessage": "Running related tests..."
+          }
+        ]
+      }
+    ]
+  }
+}

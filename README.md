@@ -27,7 +27,7 @@ prepare scripts locally, then commit and push `data/processed/`.
 If Earth Engine fails, it still updates rain and river flow, then marks the run as failed so GitHub emails you.
 
 - **History is kept:** new passes are merged into `summary.json` instead of replacing it (use `--replace` to
-  start over). Each pass adds about 0.45 MB to the repo, roughly 30 MB a year.
+  start over). Each pass adds about 0.6 MB to the repo (up to 0.8 MB when much is flooded), roughly 40 MB a year.
 - **Banner:** the app shows an "Unusual conditions" banner when any of these hold (thresholds in
   `src/config.py`):
   - the latest pass (within 14 days) has at least 2× the typical flooded area;
