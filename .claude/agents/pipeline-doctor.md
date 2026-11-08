@@ -30,7 +30,7 @@ You fix the daily data pipeline of the Bangkok Flood Simulator. Read `CLAUDE.md`
 - Add or adjust a test in `tests/` when the fix is in parsing logic (e.g. `tests/test_fetch.py`,
   `tests/test_traffy.py`).
 - Run `pytest`. Locally, failures caused only by old pyarrow ("Repetition level histogram size mismatch") are a
-  known local issue, not your change. Say so if you see them.
+  sign that local pyarrow is too old (see CLAUDE.md), not your change. Say so if you see them.
 - Don't commit, push or re-run workflows unless the main conversation tells you to.
 
 ## 4. Report
