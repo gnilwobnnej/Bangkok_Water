@@ -129,7 +129,7 @@ out** (train on the other nine, test on all of the tenth). Both get 95% block-bo
 | 2011 flood, spatial CV | 0.853 (0.58) | **0.872 (0.68)** | 0.721 (0.33) | 0.667 (0.29) | 0.449 (0.18) |
 | 2017-2025 seasons, spatial CV (mean) | **0.975 (0.58)** | 0.918 (0.27) | 0.795 (0.09) | 0.749 (0.07) | 0.421 (0.03) |
 | Each season left out (range) | **0.972-0.987** | 0.901-0.931 | 0.769-0.807 | | |
-| 2026 radar passes, never trained on (9) | **0.91-0.96** | 0.82-0.91 | 0.74-0.86 | 0.69-0.85 | 0.37-0.57 |
+| 2026 radar passes, never trained on (15) | **0.91-0.96** | 0.82-0.91 | 0.72-0.86 | 0.66-0.85 | 0.37-0.57 |
 
 On the 27 September 2026 pass the 95% intervals don't overlap: 0.955-0.968 for the new model against
 0.892-0.923 for the 2011-only model. **The trade-off:** the new model is slightly worse on the extreme 2011 flood
@@ -211,7 +211,7 @@ python scripts/fetch_traffy_photos.py       # links to residents' photos, Sep 20
 python scripts/train_traffy_text.py         # text model for when Traffy doesn't say which reports are floods
 ```
 - **Storm days:** at least 15 flood reports, at least 3x the usual count for the time of year, and at least 10 mm
-  of rain that day or the day before. 164 storm days hold 62% of all flood reports; the rest are mostly
+  of rain that day or the day before. 162 storm days hold 57% of all flood reports; the rest are mostly
   long-running drain complaints.
 - **Labels (case-control):** *flooded* = a flood report on a storm day; *dry* = no flood report all year but at
   least 5 reports of other problems, so people there use the app; everything else unknown. Both classes come
@@ -224,12 +224,12 @@ python scripts/train_traffy_text.py         # text model for when Traffy doesn't
 |---|---|---|---|---|---|
 | 2022-2025, spatial CV (mean) | **0.676 (0.27)** | | | 0.538 (0.17) | 0.519 (0.16) |
 | Each year left out (range) | **0.713-0.741** | | | 0.522-0.561 | |
-| 2026, never trained on: Bangkok | **0.783 (0.65)** | 0.671 (0.49) | 0.667 (0.49) | 0.596 (0.43) | 0.591 (0.41) |
-| 2026, never trained on: dense city (>= 90% built-up) | **0.792 (0.63)** | 0.669 (0.45) | 0.667 (0.44) | 0.562 (0.36) | 0.576 (0.36) |
+| 2026, never trained on: Bangkok | **0.770 (0.65)** | 0.657 (0.50) | 0.654 (0.49) | 0.585 (0.44) | 0.586 (0.43) |
+| 2026, never trained on: dense city (>= 90% built-up) | **0.780 (0.64)** | 0.659 (0.46) | 0.658 (0.46) | 0.557 (0.38) | 0.575 (0.38) |
 
-In the dense city the street model's 95% interval (0.752-0.821) is clear of every other method's. It scores
-best on all 25 storm days of 2026 in the dense city (24 of 25 across Bangkok), and best of all in the 25-29
-September storm (0.81-0.82, against 0.54-0.61 for the bathtub). Adding population and built-up land changes
+In the dense city the street model's 95% interval (0.738-0.808) is clear of every other method's. It scores
+best on all 22 storm days of 2026 in the dense city (21 of 22 across Bangkok), and best of all in the 25-29
+September storm (0.79-0.81, against 0.54-0.60 for the bathtub). Adding population and built-up land changes
 its scores by under 0.01; its top factors are distance to the Chao Phraya, building count, ground elevation and
 local dips.
 
@@ -240,10 +240,10 @@ counts as unknown, not dry; the scores measure *where* streets flood in a storm,
 
 **Best model by area:** one map layer showing each model where it scores best. Inside the *city zone* (the dense
 city, at least 90% built-up, smoothed over ~1 km into 8 areas covering 27% of Bangkok; `src/zones.py`) it shows the
-street model, which scores 0.78 there on 2026's reports against 0.64 for the river model. Outside it shows the river
-model, which scores a median 0.93 on the radar passes there against 0.44 for the street model. The two keep separate
+street model, which scores 0.77 there on 2026's reports against 0.63 for the river model. Outside it shows the river
+model, which scores a median 0.95 on the radar passes there against 0.42 for the street model. The two keep separate
 colour scales: they are different measures. Radar sees too little water inside the city zone to score it. Outside
-it, the street model still beats the river model on *street* floods (0.71 vs 0.58), so the suburbs outside the line
+it, the street model still beats the river model on *street* floods (0.70 vs 0.56), so the suburbs outside the line
 get both kinds of flooding. The Validation tab has the table.
 
 **Reports in English:** `translate_traffy.py` translates the Thai reports with Helsinki-NLP/opus-mt-th-en, a free
@@ -304,7 +304,7 @@ buildings).
 | River flow | GloFAS via the Open-Meteo Flood API, Chao Phraya at Nonthaburi, daily; normal = 1996-2025 median |
 | Buildings | Google Open Buildings v3 footprints + 2.5D Temporal heights* |
 | Critical facilities | OpenStreetMap (hospitals, clinics, schools, universities, police, fire stations) |
-| Street-flood reports | Traffy Fondue public API (BMA), 2022 on (share search API since 14 Oct 2026); rain from Open-Meteo archive (ERA5) |
+| Street-flood reports | Traffy Fondue public API (BMA), 2022 on (new GeoJSON feed since 30 Oct 2026; share search API as fallback); rain from Open-Meteo archive (ERA5) |
 | Flood defences | Routes: Royal Development Projects Board, OpenStreetMap roads; crests: BMA, JICA, Airports of Thailand |
 
 ## Uncertainty
