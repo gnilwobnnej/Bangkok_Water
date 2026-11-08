@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-07T20:46:27Z",
+  "generated": "2026-11-08T12:34:38Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -312,15 +312,15 @@
     },
     {
       "date": "2026-09-08",
-      "mm": 14.6
-    },
-    {
-      "date": "2026-09-09",
       "mm": 4.7
     },
     {
+      "date": "2026-09-09",
+      "mm": 5.0
+    },
+    {
       "date": "2026-09-10",
-      "mm": 13.1
+      "mm": 6.6
     },
     {
       "date": "2026-09-11",
@@ -556,7 +556,7 @@
     },
     {
       "date": "2026-11-08",
-      "mm": 0.7
+      "mm": 1.8
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
@@ -995,6 +995,11 @@
       "date": "2026-11-07",
       "m3s": 2381.32,
       "normal_m3s": 2600.8
+    },
+    {
+      "date": "2026-11-08",
+      "m3s": 2392.32,
+      "normal_m3s": 2504.8
     }
   ],
   "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E); normal = 1996-2025 median for the date"
