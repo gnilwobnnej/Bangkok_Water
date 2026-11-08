@@ -19,14 +19,17 @@ Streamlit app (`app.py`) and data pipeline for Bangkok flood risk. The README co
   `tests/test_app_smoke.py` runs the whole app on the real processed data.
 
 ## Local environment
-- `python` is Anaconda Python 3.9. Its pyarrow 19 can't read parquet files that CI writes ("Repetition level
-  histogram size mismatch"), so Traffy tests and the smoke test fail locally until pyarrow is upgraded.
+- `python` is Anaconda Python 3.9 (pyarrow 21). pyarrow 19 or older can't read the parquet files CI writes
+  ("Repetition level histogram size mismatch"); if that error comes back, `pip install -U pyarrow`.
 - `gh` is installed and logged in. Use `gh run list --workflow update-data.yml` and `gh run view <id> --log-failed`
   to look at failed data updates.
 
 ## Project agents and hooks
 - Subagents in `.claude/agents/`: `pipeline-doctor` (diagnose and fix a failed Update data run), `data-auditor`
-  (read-only sanity check of `data/processed/`).
+  (read-only sanity check of `data/processed/`), `docs-consistency` (read-only: do the docs' numbers match the
+  code and data?), `test-writer` (pytest tests in the suite's style).
+- Skills in `.claude/skills/`: `/ci-status` (latest runs of both workflows), `/refresh-guide` (screenshots and the
+  presenter guide PDF), `/retrain [river|street|both]` (retrain, re-score and compare with the committed metrics).
 - Hooks in `.claude/settings.json` (script `.claude/hooks/project_hooks.py`):
   - block writes to `data/raw/`, `.streamlit/secrets.toml` and key-like `*.json` files;
   - run the tests that import a `src/`/`scripts/` file after it is edited;

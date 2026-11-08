@@ -8,7 +8,7 @@ re-fetch anything. Read `CLAUDE.md` first. Write checks as short Python run thro
 reading files with the project's own loaders where they exist (`src/current_flood.py`, `src/traffy.py`,
 `src/config.py` for paths and thresholds).
 
-If parquet reads fail with "Repetition level histogram size mismatch", that's the known local pyarrow problem.
+If parquet reads fail with "Repetition level histogram size mismatch", local pyarrow is too old (see CLAUDE.md).
 Report it once and carry on with the JSON and raster checks.
 
 ## Checks
