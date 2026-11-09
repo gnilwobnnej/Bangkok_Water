@@ -1,5 +1,5 @@
 {
-  "source": "Traffy Fondue public API (publicapi.traffy.in.th), category 'น้ำท่วม' (flood); since 14 Oct 2026, when Traffy stopped publishing categories, flood reports recognised from their text (scripts/train_traffy_text.py; flood_reports_text_model per year)",
+  "source": "Traffy Fondue public API (api.traffy.in.th since 30 Oct 2026, publicapi.traffy.in.th before), category 'น้ำท่วม' (flood). When the GeoJSON API is down, flood reports are recognised from their text instead (scripts/train_traffy_text.py; flood_reports_text_model per year)",
   "rain_source": "Open-Meteo historical weather archive (ERA5), daily, wettest of 12 points over Bangkok",
   "rules": {
     "storm_min_reports": 15,
@@ -1029,13 +1029,13 @@
     },
     {
       "year": 2026,
-      "flood_reports": 28590,
+      "flood_reports": 28743,
       "flood_reports_text_model": 0,
       "storm_flood_reports": 16144,
       "storm_days": 22,
       "other_reports": 341172,
       "flooded_cells": 11145,
-      "dry_cells": 17679,
+      "dry_cells": 17664,
       "test_year": true
     }
   ]
