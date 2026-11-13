@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T10:04:43Z",
+  "generated": "2026-11-13T09:52:17Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -203,6 +203,19 @@
       "flooded_km2_bangkok": 23.507869720458984,
       "coverage_pct": 100.0,
       "coverage_pct_bangkok": 100.0
+    },
+    {
+      "date": "2026-11-12",
+      "direction": "DESCENDING",
+      "orbit": 62,
+      "baseline": "seasonal",
+      "baseline_from": "2025-10-22",
+      "baseline_to": "2025-12-04",
+      "baseline_scenes": 10,
+      "flooded_km2": 62.41077423095703,
+      "flooded_km2_bangkok": 20.451210021972656,
+      "coverage_pct": 84.01680154979813,
+      "coverage_pct_bangkok": 97.50362438988294
     }
   ],
   "rainfall": [
@@ -572,7 +585,11 @@
     },
     {
       "date": "2026-11-12",
-      "mm": 0.0
+      "mm": 1.8
+    },
+    {
+      "date": "2026-11-13",
+      "mm": 1.5
     }
   ],
   "rainfall_source": "Open-Meteo weather-model estimate at 13.8N 100.75E",
@@ -1036,6 +1053,11 @@
       "date": "2026-11-12",
       "m3s": 2207.01,
       "normal_m3s": 2286.0
+    },
+    {
+      "date": "2026-11-13",
+      "m3s": 2122.24,
+      "normal_m3s": 2224.1
     }
   ],
   "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E); normal = 1996-2025 median for the date"
