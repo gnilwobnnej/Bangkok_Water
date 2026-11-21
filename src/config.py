@@ -71,6 +71,8 @@ TRAFFY_REPORTS_DIR = TRAFFY_DIR / "flood_reports"       # every flood report (po
                                                         # one YYYY-MM.parquet per month so daily updates stay small
 TRAFFY_OTHER_FILE = TRAFFY_DIR / "other_counts.tif"       # reports of anything else per cell, one band per year
 TRAFFY_STORMS_FILE = TRAFFY_DIR / "summary.json"          # storm days and their rain, label counts per year
+TRAFFY_RAIN_FILE = TRAFFY_DIR / "city_rain.csv"           # daily city rain kept between runs (build_traffy_labels.py)
+TRAFFY_RAIN_REFETCH_DAYS = 30  # each run re-downloads this many days before the kept rain ends (the archive revises them)
 TRAFFY_TRANSLATIONS_FILE = TRAFFY_DIR / "translations.parquet"  # report text in English (scripts/translate_traffy.py)
 TRAFFY_PHOTOS_FILE = TRAFFY_DIR / "photos.parquet"  # residents' photo links (scripts/fetch_traffy_photos.py)
 TRAFFY_PHOTOS_FROM = "2026-09-01"  # photos only for reports from this date on, to keep the fetch small
