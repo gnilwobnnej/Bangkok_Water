@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-22T10:05:20Z",
+  "generated": "2026-11-23T11:02:20Z",
   "method": {
     "water_db": -18.0,
     "change_db": -3.0,
@@ -1165,6 +1165,11 @@
       "date": "2026-11-22",
       "m3s": 1681.67,
       "normal_m3s": 1713.8
+    },
+    {
+      "date": "2026-11-23",
+      "m3s": 1632.05,
+      "normal_m3s": 1677.5
     }
   ],
   "river_source": "GloFAS river model via the Open-Meteo Flood API, Chao Phraya at Nonthaburi (13.825N 100.475E); normal = 1996-2025 median for the date"
