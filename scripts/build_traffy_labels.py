@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -43,20 +44,69 @@ from src.traffy import TEXT_MODEL, count_grid, load_reports, storm_days, street_
 OPEN_METEO_ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 RAIN_LATS = (13.62, 13.76, 13.90)
 RAIN_LONS = (100.40, 100.55, 100.70, 100.85)
+RETRIES = (60, 120, 240)  # seconds to wait after a rate limit (429), server error or dropped connection
 
 
-def city_rain(start: str, end: str) -> pd.Series:
-    """Daily rain (mm) at the wettest of the RAIN_LATS x RAIN_LONS points, Bangkok dates (to yesterday at most:
-    the archive ends there)."""
+def get_archive(params: dict, retries=RETRIES):
+    """The Open-Meteo archive's JSON answer to params. Retries a 429 (its free tier's rate limit), a 5xx and a
+    dropped connection; any other HTTP error is raised at once."""
+    for wait in (*retries, None):
+        try:
+            r = requests.get(OPEN_METEO_ARCHIVE, timeout=180, params=params)
+            if r.status_code != 429 and r.status_code < 500:
+                r.raise_for_status()
+                return r.json()
+            err = f"HTTP {r.status_code}"
+        except (requests.ConnectionError, requests.Timeout) as e:
+            err = str(e)[:200]
+        if wait is None:
+            raise RuntimeError(f"Open-Meteo archive: {err} after {len(retries) + 1} tries")
+        print(f"    Open-Meteo archive: {err}, retry in {wait} s")
+        time.sleep(wait)
+
+
+def read_kept_rain(path: Path = None) -> pd.Series:
+    """The daily city rain saved by earlier runs (empty if none)."""
+    path = path or C.TRAFFY_RAIN_FILE
+    if not path.exists():
+        return pd.Series(dtype="float64")
+    df = pd.read_csv(path, parse_dates=["date"])
+    return pd.Series(df["rain_mm"].to_numpy(dtype="float64"), index=pd.DatetimeIndex(df["date"]))
+
+
+def save_kept_rain(rain: pd.Series, path: Path = None) -> None:
+    path = path or C.TRAFFY_RAIN_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({"date": rain.index.strftime("%Y-%m-%d"), "rain_mm": rain.to_numpy()}).to_csv(
+        path, index=False)
+
+
+def city_rain(start: str, end: str, path: Path = None) -> pd.Series:
+    """Daily rain (mm) at the wettest of the RAIN_LATS x RAIN_LONS points, Bangkok dates, start to end (to
+    yesterday at most: the archive ends there). Rain from earlier runs is kept in TRAFFY_RAIN_FILE, so only its
+    last TRAFFY_RAIN_REFETCH_DAYS days and anything newer are downloaded (all of it when the file is missing or
+    starts after start)."""
+    start = pd.Timestamp(start)
     end = min(pd.Timestamp(end), pd.Timestamp.now(tz="UTC").tz_localize(None).normalize() - pd.Timedelta(days=1))
-    end = f"{end:%Y-%m-%d}"
+    kept = read_kept_rain(path)
+    fetch_from = start
+    if len(kept) and kept.index.min() <= start:
+        fetch_from = max(start, kept.index.max() - pd.Timedelta(days=C.TRAFFY_RAIN_REFETCH_DAYS))
+    if fetch_from <= end:
+        new = download_rain(f"{fetch_from:%Y-%m-%d}", f"{end:%Y-%m-%d}")
+        kept = new.combine_first(kept) if len(kept) else new
+        save_kept_rain(kept.sort_index(), path)
+        print(f"Rain: downloaded {fetch_from:%Y-%m-%d} to {end:%Y-%m-%d}, {len(kept):,} days kept")
+    return kept[(kept.index >= start) & (kept.index <= end)]
+
+
+def download_rain(start: str, end: str) -> pd.Series:
+    """Daily rain from the Open-Meteo archive, wettest point per day (NaN where no point has a value)."""
     lats = [la for la in RAIN_LATS for _ in RAIN_LONS]
     lons = [lo for _ in RAIN_LATS for lo in RAIN_LONS]
-    r = requests.get(OPEN_METEO_ARCHIVE, timeout=180, params={
+    points = get_archive({
         "latitude": ",".join(map(str, lats)), "longitude": ",".join(map(str, lons)),
         "daily": "precipitation_sum", "timezone": "Asia/Bangkok", "start_date": start, "end_date": end})
-    r.raise_for_status()
-    points = r.json()
     points = points if isinstance(points, list) else [points]
     df = pd.DataFrame({i: pd.Series(p["daily"]["precipitation_sum"], index=pd.to_datetime(p["daily"]["time"]),
                                     dtype="float64") for i, p in enumerate(points)})
